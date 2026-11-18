@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgroFi Protocol - Painel Visual Web3 & DeFi</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .gauge-fill {
+      transition: width 0.5s ease-in-out, background-color 0.5s ease-in-out;
+    }
+    .pulse-danger {
+      animation: pulse-red 1.5s infinite;
+    }
+    @keyframes pulse-red {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.85; transform: scale(1.02); }
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 antialiased p-4 md:p-6 min-h-screen">
+
+  <div class="max-w-6xl mx-auto space-y-6">
+
+    <!-- HEADER -->
+    <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/80 backdrop-blur border border-slate-800 rounded-2xl p-5 shadow-lg">
+      <div class="flex items-center space-x-3">
+        <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold text-2xl">
+          🌾
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-xl font-bold tracking-tight text-white">AgroFi Protocol</h1>
+            <span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Web3 Infrastructure</span>
+          </div>
+          <p class="text-xs text-slate-400">Crédito Descentralizado Paramétrico com Colateral Agrícola Tokenizado</p>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <a href="/" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-700 transition-colors flex items-center gap-1.5">
+          <span>🏠</span> Portal Principal
+        </a>
+        <a href="http://localhost:8501" target="_blank" class="px-3 py-1.5 rounded-xl bg-emerald-600/30 hover:bg-emerald-600/40 text-xs font-semibold text-emerald-300 border border-emerald-500/40 transition-colors flex items-center gap-1.5">
+          <span>🌾</span> Mapa & Risco (8501) ↗
+        </a>
+        <div class="px-3 py-1.5 rounded-xl bg-purple-500/10 border border-purple-500/30 text-xs flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></span>
+          <span class="text-slate-400">Sepolia:</span>
+          <a href="https://sepolia.etherscan.io/address/0x020c06c4d1410B2131e9815c5D25F7Ee90D37a26" target="_blank" class="font-mono font-medium text-purple-300 hover:underline">
+            11155111 ↗
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- KEY STATS METRICS -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow">
+        <span class="text-xs text-slate-400 font-medium">Liquidez da Pool (MockUSDC)</span>
+        <div class="text-2xl font-bold mt-1 text-white" id="metric-liquidity">$300,000.00</div>
+        <div class="text-xs text-emerald-400 mt-1 flex items-center gap-1">
+          <span>●</span> 100% Solvente & Ativa
+        </div>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow">
+        <span class="text-xs text-slate-400 font-medium">Dívida Ativa Tomada</span>
+        <div class="text-2xl font-bold mt-1 text-white" id="metric-debt">$50,000.00</div>
+        <div class="text-xs text-slate-400 mt-1" id="metric-borrower">
+          Tomador: Fazenda Santa Fé
+        </div>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow">
+        <span class="text-xs text-slate-400 font-medium">Avaliação da Safra (AgroNFT #1)</span>
+        <div class="text-2xl font-bold mt-1 text-emerald-400" id="metric-appraisal">$100,000.00</div>
+        <div class="text-xs text-slate-400 mt-1">
+          500 ha de Soja (IPFS bafy...)
+        </div>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow">
+        <span class="text-xs text-slate-400 font-medium">Fator de Saúde (Health Factor)</span>
+        <div class="text-2xl font-bold mt-1 flex items-baseline gap-2" id="metric-hf-container">
+          <span id="metric-hf" class="text-emerald-400">1.50x</span>
+          <span id="metric-hf-status" class="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">SEGURO</span>
+        </div>
+        <div class="text-xs text-slate-400 mt-1">
+          Limite de Liquidação: &lt; 1.00x
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN TWO COLUMN WORKBENCH -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- LEFT: ORACLE & SENSOR SIMULATOR (7 COLS) -->
+      <div class="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow space-y-5">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div>
+            <h2 class="text-base font-semibold text-white flex items-center gap-2">
+              <span>🛰️</span> Oráculo Agronômico & Injeção de Risco (Web3.py)
+            </h2>
+            <p class="text-xs text-slate-400">Simule condições de satélite e clima para atualizar o contrato inteligente em tempo real</p>
+          </div>
+          <span class="text-xs px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">
+            updateLTVAndHealthFactor()
+          </span>
+        </div>
+
+        <!-- Presets -->
+        <div class="space-y-2">
+          <label class="text-xs font-medium text-slate-400">Cenários Prontos para Teste:</label>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <button onclick="setScenario('optimal')" class="px-3 py-2 text-xs font-medium rounded-lg bg-slate-800/80 hover:bg-emerald-500/10 hover:text-emerald-400 hover:border-emerald-500/30 border border-slate-700/60 transition-all text-slate-300">
+              ☀️ Clima Ideal
+            </button>
+            <button onclick="setScenario('moderate')" class="px-3 py-2 text-xs font-medium rounded-lg bg-slate-800/80 hover:bg-amber-500/10 hover:text-amber-400 hover:border-amber-500/30 border border-slate-700/60 transition-all text-slate-300">
+              ⛅ Estresse Médio
+            </button>
+            <button onclick="setScenario('drought')" class="px-3 py-2 text-xs font-medium rounded-lg bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500/20 transition-all font-semibold">
+              🔥 Seca Severa
+            </button>
+            <button onclick="setScenario('frost')" class="px-3 py-2 text-xs font-medium rounded-lg bg-slate-800/80 hover:bg-blue-500/10 hover:text-blue-400 hover:border-blue-500/30 border border-slate-700/60 transition-all text-slate-300">
+              ❄️ Geada
+            </button>
+          </div>
+        </div>
+
+        <!-- Sliders -->
+        <div class="space-y-4 pt-2">
+          <!-- NDVI -->
+          <div class="space-y-1">
+            <div class="flex justify-between text-xs">
+              <span class="text-slate-200 font-medium">Vigor Vegetativo de Satélite (NDVI):</span>
+              <span class="font-mono font-bold text-emerald-400" id="val-ndvi">0.80</span>
+            </div>
+            <input type="range" id="input-ndvi" min="0.10" max="0.95" step="0.01" value="0.80" oninput="recalculateRisk()" class="w-full accent-emerald-500 cursor-pointer">
+            <div class="flex justify-between text-[11px] text-slate-400">
+              <span>0.10 (Quebra Crítica)</span>
+              <span>0.50 (Estresse)</span>
+              <span>0.95 (Vigor Máximo)</span>
+            </div>
+          </div>
+
+          <!-- Rainfall Deficit -->
+          <div class="space-y-1">
+            <div class="flex justify-between text-xs">
+              <span class="text-slate-200 font-medium">Desvio Pluviométrico (Precipitação):</span>
+              <span class="font-mono font-bold" id="val-rain">+5.0%</span>
+            </div>
+            <input type="range" id="input-rain" min="-80" max="40" step="5" value="5" oninput="recalculateRisk()" class="w-full accent-blue-500 cursor-pointer">
+            <div class="flex justify-between text-[11px] text-slate-400">
+              <span>-80% (Seca Extrema)</span>
+              <span>0% (Esperado)</span>
+              <span>+40% (Excesso)</span>
+            </div>
+          </div>
+
+          <!-- Soil Moisture -->
+          <div class="space-y-1">
+            <div class="flex justify-between text-xs">
+              <span class="text-slate-200 font-medium">Umidade do Solo:</span>
+              <span class="font-mono font-bold" id="val-soil">65.0%</span>
+            </div>
+            <input type="range" id="input-soil" min="10" max="90" step="1" value="65" oninput="recalculateRisk()" class="w-full accent-amber-500 cursor-pointer">
+          </div>
+        </div>
+
+        <!-- Calculated Live Metrics -->
+        <div class="bg-slate-950/60 border border-slate-800 rounded-xl p-4 space-y-3">
+          <div class="text-xs font-semibold uppercase tracking-wider text-slate-400">
+            Cálculo On-Chain do Oráculo
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <span class="text-xs text-slate-400">LTV Máximo Calculado:</span>
+              <div class="text-lg font-mono font-bold text-white" id="calc-ltv">65.0%</div>
+            </div>
+            <div>
+              <span class="text-xs text-slate-400">Health Factor Resultante:</span>
+              <div class="text-lg font-mono font-bold" id="calc-hf">1.50x</div>
+            </div>
+          </div>
+
+          <!-- Health Factor Visual Bar -->
+          <div class="space-y-1">
+            <div class="flex justify-between text-[11px] text-slate-400">
+              <span>0.0x (Insolvente)</span>
+              <span class="text-red-400 font-bold">1.0x (Limite de Liquidação)</span>
+              <span>2.0x+ (Saudável)</span>
+            </div>
+            <div class="w-full bg-slate-900 h-3 rounded-full overflow-hidden border border-slate-700">
+              <div id="hf-bar" class="gauge-fill h-full bg-emerald-500 w-[75%]"></div>
+            </div>
+          </div>
+        </div>
+
+        <button onclick="broadcastOracleUpdate()" class="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs rounded-xl shadow transition-colors flex items-center justify-center gap-2">
+          <span>⚡</span> Transmitir Atualização ao Nó Anvil (updateLTVAndHealthFactor)
+        </button>
+      </div>
+
+      <!-- RIGHT: PROTOCOL INTERFACE & ACTIONS (5 COLS) -->
+      <div class="lg:col-span-5 space-y-5">
+
+        <!-- DEFI ACTION CARD -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow space-y-4">
+          <div class="border-b border-slate-800 pb-3">
+            <h2 class="text-base font-semibold text-white flex items-center gap-2">
+              <span>🏦</span> Gestão de Crédito & Liquidação
+            </h2>
+            <p class="text-xs text-slate-400">Operações diretas da LendingPool</p>
+          </div>
+
+          <!-- Collateral Status -->
+          <div class="p-3.5 rounded-xl border border-slate-800 bg-slate-950/60 space-y-2">
+            <div class="flex justify-between items-center">
+              <span class="text-xs font-medium text-white">AgroNFT #1 (Soja)</span>
+              <span id="badge-collateral" class="text-[11px] px-2 py-0.5 rounded font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                Colateralizado na Pool
+              </span>
+            </div>
+            <div class="text-xs text-slate-400 space-y-1 font-mono">
+              <div class="flex justify-between">
+                <span>Dívida Atual:</span>
+                <span class="text-white font-bold" id="card-debt">$50,000.00 USDC</span>
+              </div>
+              <div class="flex justify-between">
+                <span>Capacidade Restante:</span>
+                <span class="text-emerald-400 font-bold" id="card-capacity">$15,000.00 USDC</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Liquidation Alert / Button -->
+          <div id="liquidation-box" class="p-4 rounded-xl border border-red-500/30 bg-red-500/10 hidden space-y-3">
+            <div class="flex items-center gap-2 text-red-400 font-semibold text-xs">
+              <span class="text-base">⚠️</span> COLATERAL INSOLVENTE (HF &lt; 1.00x)
+            </div>
+            <p class="text-[11px] text-red-300">
+              O risco agroclimático excedeu a margem de segurança. A execução paramétrica permite quitar a dívida e liquidar o ativo instantaneamente sem processo judicial.
+            </p>
+            <button onclick="triggerParametricLiquidation()" class="w-full py-2 px-3 bg-red-600 hover:bg-red-500 text-white font-semibold text-xs rounded-lg shadow pulse-danger transition-all">
+              ⚡ Executar Liquidação Paramétrica (Sem Juiz)
+            </button>
+          </div>
+
+          <!-- Standard Actions -->
+          <div class="grid grid-cols-2 gap-2" id="standard-actions">
+            <button onclick="simulateBorrow()" class="py-2.5 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-medium text-xs rounded-xl transition-all">
+              📥 Tomar Empréstimo (+ $10k)
+            </button>
+            <button onclick="simulateRepay()" class="py-2.5 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-medium text-xs rounded-xl transition-all">
+              📤 Quitar Dívida (- $10k)
+            </button>
+          </div>
+
+          <button onclick="resetDemo()" class="w-full py-2 text-[11px] text-slate-400 hover:text-white text-center transition-colors">
+            ↻ Reiniciar Simulação da Demonstração
+          </button>
+        </div>
+
+        <!-- CONTRACT ADDRESSES -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+            <h3 class="text-xs font-semibold text-purple-400 uppercase tracking-wider flex items-center gap-1.5">
+              <span>🌐</span> Contratos na Ethereum Sepolia
+            </h3>
+            <span class="text-[10px] px-2 py-0.5 rounded bg-purple-500/10 text-purple-300 border border-purple-500/20">Testnet Pública</span>
+          </div>
+          <div class="space-y-2 text-xs font-mono">
+            <div class="flex items-center justify-between p-2 rounded-lg bg-slate-950/60 border border-slate-800">
+              <span class="text-slate-400">MockUSDC:</span>
+              <a href="https://sepolia.etherscan.io/address/0x178B9bFA3E86a9Ed3F67963e28afBe49BCf45ED2" target="_blank" class="text-emerald-400 hover:text-emerald-300 font-bold text-[11px] flex items-center gap-1">
+                0x178B...5ED2 ↗
+              </a>
+            </div>
+            <div class="flex items-center justify-between p-2 rounded-lg bg-slate-950/60 border border-slate-800">
+              <span class="text-slate-400">AgroNFT:</span>
+              <a href="https://sepolia.etherscan.io/address/0xb89Cd470755AD1E25052b57D97af6Fc98b00Dfb2" target="_blank" class="text-emerald-400 hover:text-emerald-300 font-bold text-[11px] flex items-center gap-1">
+                0xb89C...Dfb2 ↗
+              </a>
+            </div>
+            <div class="flex items-center justify-between p-2 rounded-lg bg-slate-950/60 border border-slate-800">
+              <span class="text-slate-400">LendingPool:</span>
+              <a href="https://sepolia.etherscan.io/address/0x020c06c4d1410B2131e9815c5D25F7Ee90D37a26" target="_blank" class="text-purple-300 hover:text-purple-200 font-bold text-[11px] flex items-center gap-1">
+                0x020c...7a26 ↗
+              </a>
+            </div>
+            <div class="flex items-center justify-between p-2 rounded-lg bg-slate-950/60 border border-slate-800">
+              <span class="text-slate-400">Deployer:</span>
+              <a href="https://sepolia.etherscan.io/address/0xa449e7838fF89EE956174B682449870597e93C71" target="_blank" class="text-slate-300 hover:text-white font-bold text-[11px] flex items-center gap-1">
+                0xa449...3C71 ↗
+              </a>
+            </div>
+          </div>
+          <p class="text-[10px] text-slate-500 pt-1">
+            * Clique em qualquer endereço para abrir o comprovante oficial no Etherscan.
+          </p>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- LIVE EVENT & AUDIT LOG -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow space-y-3">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+        <h3 class="text-sm font-semibold text-white flex items-center gap-2">
+          <span>📜</span> Log de Transações & Eventos On-Chain
+        </h3>
+        <span class="text-xs text-slate-400 font-mono" id="log-count">3 eventos registrados</span>
+      </div>
+      <div id="event-log" class="space-y-2 max-h-48 overflow-y-auto text-xs font-mono">
+        <div class="p-2 rounded bg-slate-950/60 border border-slate-800 flex justify-between items-center">
+          <span class="text-emerald-400">[CollateralMinted]</span>
+          <span class="text-slate-300">TokenId: 1 | Valor: $100,000.00 USDC | Dono: Fazenda Santa Fé</span>
+          <span class="text-[11px] text-slate-400">Bloco #2</span>
+        </div>
+        <div class="p-2 rounded bg-slate-950/60 border border-slate-800 flex justify-between items-center">
+          <span class="text-blue-400">[CollateralDeposited]</span>
+          <span class="text-slate-300">AgroNFT #1 transferido em custódia para LendingPool</span>
+          <span class="text-[11px] text-slate-400">Bloco #3</span>
+        </div>
+        <div class="p-2 rounded bg-slate-950/60 border border-slate-800 flex justify-between items-center">
+          <span class="text-amber-400">[Borrowed]</span>
+          <span class="text-slate-300">Saque de $50,000.00 USDC liberado para o produtor</span>
+          <span class="text-[11px] text-slate-400">Bloco #4</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // State
+    let state = {
+      appraisal: 100000,
+      debt: 50000,
+      ltv: 60,
+      healthFactor: 1.50,
+      isCollateralized: true,
+      isLiquidated: false,
+      blockNumber: 5
+    };
+
+    function recalculateRisk() {
+      const ndvi = parseFloat(document.getElementById('input-ndvi').value);
+      const rain = parseFloat(document.getElementById('input-rain').value);
+      const soil = parseFloat(document.getElementById('input-soil').value);
+
+      document.getElementById('val-ndvi').innerText = ndvi.toFixed(2);
+      document.getElementById('val-rain').innerText = (rain > 0 ? '+' : '') + rain.toFixed(1) + '%';
+      document.getElementById('val-soil').innerText = soil.toFixed(1) + '%';
+
+      // Vigor score
+      let vigor = Math.min(100, (ndvi / 0.80) * 100);
+
+      // Climate penalty
+      let penalty = 0;
+      if (rain < -20) penalty += Math.abs(rain) * 0.5;
+      if (soil < 30) penalty += (30 - soil) * 1.5;
+
+      let healthScore = Math.max(5, Math.min(100, vigor - penalty));
+
+      // Dynamic LTV
+      let calculatedLtv = Math.max(20, Math.min(75, 65 * (healthScore / 100)));
+
+      // Health Factor = (Adjusted Collateral * LTV) / Debt
+      let adjustedCollateral = state.appraisal * (healthScore / 100);
+      let maxBorrowCapacity = adjustedCollateral * (calculatedLtv / 100);
+      let calculatedHf = state.debt > 0 ? (maxBorrowCapacity / state.debt) : 2.5;
+
+      document.getElementById('calc-ltv').innerText = calculatedLtv.toFixed(1) + '%';
+      document.getElementById('calc-hf').innerText = calculatedHf.toFixed(2) + 'x';
+
+      // Update Bar
+      const hfBar = document.getElementById('hf-bar');
+      const barPercent = Math.min(100, (calculatedHf / 2.0) * 100);
+      hfBar.style.width = Math.max(5, barPercent) + '%';
+
+      if (calculatedHf < 1.0) {
+        hfBar.className = 'gauge-fill h-full bg-red-500';
+        document.getElementById('calc-hf').className = 'text-lg font-mono font-bold text-red-500';
+      } else if (calculatedHf < 1.25) {
+        hfBar.className = 'gauge-fill h-full bg-amber-500';
+        document.getElementById('calc-hf').className = 'text-lg font-mono font-bold text-amber-500';
+      } else {
+        hfBar.className = 'gauge-fill h-full bg-emerald-500';
+        document.getElementById('calc-hf').className = 'text-lg font-mono font-bold text-emerald-400';
+      }
+    }
+
+    function setScenario(type) {
+      if (type === 'optimal') {
+        document.getElementById('input-ndvi').value = 0.82;
+        document.getElementById('input-rain').value = 5;
+        document.getElementById('input-soil').value = 65;
+      } else if (type === 'moderate') {
+        document.getElementById('input-ndvi').value = 0.62;
+        document.getElementById('input-rain').value = -25;
+        document.getElementById('input-soil').value = 38;
+      } else if (type === 'drought') {
+        document.getElementById('input-ndvi').value = 0.28;
+        document.getElementById('input-rain').value = -70;
+        document.getElementById('input-soil').value = 12;
+      } else if (type === 'frost') {
+        document.getElementById('input-ndvi').value = 0.45;
+        document.getElementById('input-rain').value = -10;
+        document.getElementById('input-soil').value = 45;
+      }
+      recalculateRisk();
+    }
+
+    function broadcastOracleUpdate() {
+      const calcHf = parseFloat(document.getElementById('calc-hf').innerText);
+      const calcLtv = parseFloat(document.getElementById('calc-ltv').innerText);
+
+      state.healthFactor = calcHf;
+      state.ltv = calcLtv;
+
+      updateDashboardUI();
+      addLogEntry('RiskParametersUpdated', `TokenId: 1 | Novo LTV: ${calcLtv.toFixed(1)}% | Health Factor: ${calcHf.toFixed(2)}x`, 'purple');
+    }
+
+    function updateDashboardUI() {
+      const hfEl = document.getElementById('metric-hf');
+      const hfStatus = document.getElementById('metric-hf-status');
+      const liqBox = document.getElementById('liquidation-box');
+      const standardActions = document.getElementById('standard-actions');
+
+      hfEl.innerText = state.healthFactor.toFixed(2) + 'x';
+
+      if (state.healthFactor < 1.0 && !state.isLiquidated && state.debt > 0) {
+        hfEl.className = 'text-2xl font-bold mt-1 text-red-500';
+        hfStatus.className = 'text-xs font-semibold px-2 py-0.5 rounded bg-red-500/10 text-red-500 border border-red-500/20';
+        hfStatus.innerText = 'CRÍTICO / INSOLVENTE';
+        liqBox.classList.remove('hidden');
+      } else if (state.healthFactor < 1.25 && !state.isLiquidated) {
+        hfEl.className = 'text-2xl font-bold mt-1 text-amber-500';
+        hfStatus.className = 'text-xs font-semibold px-2 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/20';
+        hfStatus.innerText = 'ATENÇÃO';
+        liqBox.classList.add('hidden');
+      } else {
+        hfEl.className = 'text-2xl font-bold mt-1 text-emerald-400';
+        hfStatus.className = 'text-xs font-semibold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
+        hfStatus.innerText = state.isLiquidated ? 'LIQUIDADO' : 'SEGURO';
+        liqBox.classList.add('hidden');
+      }
+
+      document.getElementById('metric-debt').innerText = '$' + state.debt.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' USDC';
+      document.getElementById('card-debt').innerText = '$' + state.debt.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' USDC';
+
+      const maxBorrow = (state.appraisal * (state.ltv / 100));
+      const capacity = Math.max(0, maxBorrow - state.debt);
+      document.getElementById('card-capacity').innerText = '$' + capacity.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' USDC';
+    }
+
+    function triggerParametricLiquidation() {
+      state.isLiquidated = true;
+      const debtCovered = state.debt;
+      state.debt = 0;
+      state.healthFactor = 2.0;
+
+      document.getElementById('badge-collateral').className = 'text-[11px] px-2 py-0.5 rounded font-medium bg-red-500/10 text-red-400 border border-red-500/20';
+      document.getElementById('badge-collateral').innerText = 'Liquidado (Propriedade: Liquidador)';
+
+      updateDashboardUI();
+      addLogEntry('ParametricLiquidationExecuted', `TokenId: 1 | Dívida Liquidada: $${debtCovered.toLocaleString()} USDC | Colateral transferido sem atraso judicial`, 'red');
+    }
+
+    function simulateBorrow() {
+      if (state.healthFactor < 1.0) {
+        alert('Operação Rejeitada pelo Smart Contract: Colateral insolvente (Health Factor < 1.00x).');
+        return;
+      }
+      state.debt += 10000;
+      recalculateRisk();
+      updateDashboardUI();
+      addLogEntry('Borrowed', `Saque adicional de $10,000.00 USDC liberado | Nova dívida: $${state.debt.toLocaleString()} USDC`, 'amber');
+    }
+
+    function simulateRepay() {
+      if (state.debt <= 0) return;
+      state.debt = Math.max(0, state.debt - 10000);
+      recalculateRisk();
+      updateDashboardUI();
+      addLogEntry('Repaid', `Pagamento de $10,000.00 USDC confirmado | Dívida restante: $${state.debt.toLocaleString()} USDC`, 'blue');
+    }
+
+    function resetDemo() {
+      state = {
+        appraisal: 100000,
+        debt: 50000,
+        ltv: 60,
+        healthFactor: 1.50,
+        isCollateralized: true,
+        isLiquidated: false,
+        blockNumber: 1
+      };
+      setScenario('optimal');
+      document.getElementById('badge-collateral').className = 'text-[11px] px-2 py-0.5 rounded font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
+      document.getElementById('badge-collateral').innerText = 'Colateralizado na Pool';
+      updateDashboardUI();
+      addLogEntry('SimulationReset', 'Ambiente de teste e colateral redefinidos para o estado inicial.', 'emerald');
+    }
+
+    function addLogEntry(event, msg, color) {
+      state.blockNumber++;
+      const logContainer = document.getElementById('event-log');
+      const div = document.createElement('div');
+      div.className = 'p-2 rounded bg-slate-950/60 border border-slate-800 flex justify-between items-center text-xs animate-fadeIn';
+      
+      let badgeColor = 'text-emerald-400';
+      if (color === 'red') badgeColor = 'text-red-400 font-bold';
+      if (color === 'amber') badgeColor = 'text-amber-400';
+      if (color === 'blue') badgeColor = 'text-blue-400';
+      if (color === 'purple') badgeColor = 'text-purple-400';
+
+      div.innerHTML = `
+        <span class="${badgeColor}">[${event}]</span>
+        <span class="text-slate-300">${msg}</span>
+        <span class="text-[11px] text-slate-400">Bloco #${state.blockNumber}</span>
+      `;
+      logContainer.insertBefore(div, logContainer.firstChild);
+    }
+
+    // Init
+    recalculateRisk();
+  </script>
+</body>
+</html>

@@ -1,0 +1,69 @@
+{
+  "admin_wallet": "0xa449e7838fF89EE956174B682449870597e93C71",
+  "farms": [
+    {
+      "land_id": "TALHAO-MT-001",
+      "farm_name": "Fazenda Santa Helena",
+      "car_code": "MT-5107925-8A4F1D9C3E2B4A1F8C2D3E4F5A6B7C8D",
+      "municipality": "Sorriso",
+      "state": "MT",
+      "biome": "Amazônia",
+      "wallet_address": "0xfdb2A29d047A8f10E0BC354b2E45C7Af386D112E",
+      "nft_token_id": 1,
+      "main_crop": "Soja & Milho",
+      "productive_area_ha": 1420.0,
+      "total_area_ha": 1850.0,
+      "owner_name": "Produtor Fazenda Santa Helena",
+      "credit_limit_usd": 250000.0,
+      "current_loan_usd": 150000.0
+    },
+    {
+      "land_id": "TALHAO-GO-002",
+      "farm_name": "Fazenda Boa Esperança",
+      "car_code": "GO-5218805-4B8C1D2E3F4A5B6C7D8E9F0A1B2C3D4E",
+      "municipality": "Rio Verde",
+      "state": "GO",
+      "biome": "Cerrado",
+      "wallet_address": "0xC7C8931F662D9064ff495508AeA2AfA15E446D80",
+      "nft_token_id": 2,
+      "main_crop": "Grãos & Sorgo",
+      "productive_area_ha": 1040.0,
+      "total_area_ha": 1320.0,
+      "owner_name": "Produtor Fazenda Boa Esperança",
+      "credit_limit_usd": 180000.0,
+      "current_loan_usd": 80000.0
+    },
+    {
+      "land_id": "TALHAO-MT-003",
+      "farm_name": "Agropecuária Chapadão",
+      "car_code": "MT-5107875-9C0D1E2F3A4B5C6D7E8F9A0B1C2D3E4F",
+      "municipality": "Sapezal",
+      "state": "MT",
+      "biome": "Cerrado",
+      "wallet_address": "0xFf3b53ca866BCfEC18F1DD3cDff0A03776ab49b5",
+      "nft_token_id": 3,
+      "main_crop": "Algodão & Soja",
+      "productive_area_ha": 1520.0,
+      "total_area_ha": 2400.0,
+      "owner_name": "Produtor Agropecuária Chapadão",
+      "credit_limit_usd": 320000.0,
+      "current_loan_usd": 200000.0
+    },
+    {
+      "land_id": "TALHAO-BA-004",
+      "farm_name": "Fazenda Ouro Verde",
+      "car_code": "BA-2919553-7A1B2C3D4E5F6A7B8C9D0E1F2A3B4C5D",
+      "municipality": "Luís Eduardo Magalhães",
+      "state": "BA",
+      "biome": "Cerrado",
+      "wallet_address": "0x35474822f1A45c0D2C0ddeb4D8Ff53fD8BD29ef7",
+      "nft_token_id": 4,
+      "main_crop": "Soja Irrigada",
+      "productive_area_ha": 1220.0,
+      "total_area_ha": 1600.0,
+      "owner_name": "Produtor Fazenda Ouro Verde",
+      "credit_limit_usd": 210000.0,
+      "current_loan_usd": 95000.0
+    }
+  ]
+}

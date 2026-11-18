@@ -1,0 +1,51 @@
+# ================================================================
+# AgroFi - Regras GitIgnore
+# ================================================================
+
+# --- Segurança Criptográfica & Chaves Privadas (CRÍTICO) ---
+.env
+.env.*
+!.env.example
+*.key
+farms_private_keys.json
+
+# --- Ambientes Virtuais Python ---
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# --- Caches Python & Bytecode ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+.hypothesis/
+
+# --- IDEs & Editores de Código ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.maestri/
+
+# --- Logs & Temporários ---
+*.log
+.logs/
+*.tmp
+*.bak
+
+# --- Sistema Operacional ---
+.DS_Store
+Thumbs.db
+Desktop.ini
+ehthumbs.db
+
+# --- Foundry / Smart Contracts Cache Temporário ---
+cache/

@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgroFi Web Wallet - Carteira Visual Web3</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes pulse-subtle {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+    .pulse-dot { animation: pulse-subtle 2s infinite; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 antialiased min-h-screen p-4 md:p-8 flex flex-col justify-between">
+
+  <div class="max-w-4xl mx-auto w-full space-y-6">
+
+    <!-- HEADER / STATUS -->
+    <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/80 border border-slate-800 rounded-2xl p-5 backdrop-blur shadow-xl">
+      <div class="flex items-center space-x-3">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center text-white font-bold text-2xl shadow-lg shadow-emerald-900/40">
+          🌾
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-xl font-bold text-white">AgroFi Web Wallet</h1>
+            <span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Sem Extensão</span>
+          </div>
+          <p class="text-xs text-slate-400">Visualizador e Carteira Interativa para o Nó Local Anvil</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <a href="/" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-700 transition-colors flex items-center gap-1.5">
+          <span>🏠</span> Portal
+        </a>
+        <div class="px-3 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700/80 text-xs flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 pulse-dot"></span>
+          <span class="text-slate-400">Nó Local:</span>
+          <span class="font-mono font-medium text-emerald-400" id="node-status">Conectado (31337)</span>
+        </div>
+        <button onclick="refreshData()" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-all text-xs flex items-center gap-1" title="Atualizar Saldos">
+          ↻ Atualizar
+        </button>
+      </div>
+    </header>
+
+    <!-- ACCOUNT SELECTOR TABS -->
+    <div class="space-y-2">
+      <label class="text-xs font-medium text-slate-400">Selecione a Carteira para Visualizar:</label>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <button onclick="selectAccount('admin')" id="tab-admin" class="account-tab px-3 py-2.5 rounded-xl text-left border transition-all bg-emerald-500/10 border-emerald-500/50 text-white shadow">
+          <div class="text-[11px] font-semibold text-emerald-400">👑 Admin / Oracle</div>
+          <div class="text-xs font-mono truncate text-slate-300">0xf39F...2266</div>
+        </button>
+        <button onclick="selectAccount('farmer')" id="tab-farmer" class="account-tab px-3 py-2.5 rounded-xl text-left border transition-all bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700">
+          <div class="text-[11px] font-semibold text-slate-300">🚜 Produtor Rural</div>
+          <div class="text-xs font-mono truncate text-slate-400">0x7099...79C8</div>
+        </button>
+        <button onclick="selectAccount('lender')" id="tab-lender" class="account-tab px-3 py-2.5 rounded-xl text-left border transition-all bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700">
+          <div class="text-[11px] font-semibold text-slate-300">🏦 Credor (Lender)</div>
+          <div class="text-xs font-mono truncate text-slate-400">0x3C44...93BC</div>
+        </button>
+        <button onclick="selectAccount('liquidator')" id="tab-liquidator" class="account-tab px-3 py-2.5 rounded-xl text-left border transition-all bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700">
+          <div class="text-[11px] font-semibold text-slate-300">⚡ Liquidador</div>
+          <div class="text-xs font-mono truncate text-slate-400">0x90F7...b906</div>
+        </button>
+      </div>
+    </div>
+
+    <!-- MAIN WALLET CARD -->
+    <div class="bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-6 md:p-8 shadow-2xl relative overflow-hidden">
+      
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-800/80 pb-6">
+        <div>
+          <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Endereço da Conta Ativa</span>
+          <div class="flex items-center gap-2 mt-1">
+            <span class="text-sm md:text-base font-mono text-emerald-400 font-bold break-all" id="active-address">
+              0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+            </span>
+            <button onclick="copyAddress()" class="text-xs px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors" title="Copiar">
+              Copiar
+            </button>
+          </div>
+          <span class="text-xs text-slate-500 font-medium mt-1 inline-block" id="active-role">Papel: Administrador & Oráculo da Infraestrutura</span>
+        </div>
+
+        <div class="text-left md:text-right">
+          <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Saldo Nativo (Gas)</span>
+          <div class="text-2xl font-bold font-mono text-white mt-1" id="eth-balance">
+            10,000.00 ETH
+          </div>
+        </div>
+      </div>
+
+      <!-- TOKENS GRID -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+
+        <!-- MockUSDC (ERC-20) -->
+        <div class="p-5 rounded-2xl bg-slate-950/60 border border-slate-800/80 space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-9 h-9 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-base border border-blue-500/30">
+                💵
+              </div>
+              <div>
+                <h3 class="font-bold text-sm text-white">Mock USD Coin</h3>
+                <span class="text-xs text-slate-400 font-mono">MockUSDC (6 Decimais)</span>
+              </div>
+            </div>
+            <span class="text-[11px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 font-mono font-medium">ERC-20</span>
+          </div>
+
+          <div class="space-y-1">
+            <span class="text-xs text-slate-400">Saldo Disponível:</span>
+            <div class="text-2xl font-bold font-mono text-white" id="usdc-balance">$1,000,000.00 USDC</div>
+          </div>
+
+          <div class="pt-2 flex gap-2">
+            <button onclick="mintQuickUSDC()" class="flex-1 py-2 px-3 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 text-blue-300 font-medium text-xs transition-all flex items-center justify-center gap-1">
+              <span>+</span> Mintar +$10,000 USDC
+            </button>
+          </div>
+        </div>
+
+        <!-- AgroNFT (ERC-721) -->
+        <div class="p-5 rounded-2xl bg-slate-950/60 border border-slate-800/80 space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-base border border-emerald-500/30">
+                🌱
+              </div>
+              <div>
+                <h3 class="font-bold text-sm text-white">AgroFi Collateral</h3>
+                <span class="text-xs text-slate-400 font-mono">AGRO-NFT</span>
+              </div>
+            </div>
+            <span class="text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono font-medium">ERC-721</span>
+          </div>
+
+          <div class="space-y-1">
+            <span class="text-xs text-slate-400">NFTs nesta Carteira:</span>
+            <div class="text-2xl font-bold font-mono text-emerald-400" id="nft-count">0 NFTs</div>
+          </div>
+
+          <div class="pt-2 text-xs text-slate-400" id="nft-description">
+            Nenhum NFT sob custódia direta desta carteira no momento.
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- NFT SHOWCASE CARD (When Token #1 is loaded) -->
+    <div id="nft-card-container" class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="font-semibold text-white flex items-center gap-2 text-sm">
+          <span>🌾</span> Visualizador de Ativo Agrícola Tokenizado (AgroNFT #1)
+        </h3>
+        <span class="text-xs px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">
+          Safra de Soja 500 ha
+        </span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Visual Badge -->
+        <div class="p-4 rounded-2xl bg-gradient-to-br from-emerald-950/60 to-slate-950 border border-emerald-800/40 flex flex-col justify-between space-y-3">
+          <div class="flex justify-between items-start">
+            <span class="text-xs font-mono text-emerald-400 font-bold">TOKEN ID #1</span>
+            <span class="text-2xl">🌱</span>
+          </div>
+          <div>
+            <h4 class="font-bold text-white text-base">Fazenda Santa Fé</h4>
+            <p class="text-xs text-slate-400">Colheita Safra 2026/2027</p>
+          </div>
+          <div class="text-[11px] font-mono text-slate-500 truncate" id="nft-ipfs">
+            IPFS: bafybeigdyrzt5sfp7udm7...
+          </div>
+        </div>
+
+        <!-- Metrics -->
+        <div class="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-2 md:col-span-2">
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs font-mono">
+            <div>
+              <span class="text-slate-400">Avaliação da Safra:</span>
+              <div class="text-base font-bold text-white mt-0.5">$100,000.00 USDC</div>
+            </div>
+            <div>
+              <span class="text-slate-400">LTV Atual:</span>
+              <div class="text-base font-bold text-emerald-400 mt-0.5" id="nft-ltv">60.00%</div>
+            </div>
+            <div>
+              <span class="text-slate-400">Health Factor:</span>
+              <div class="text-base font-bold text-emerald-400 mt-0.5" id="nft-hf">1.50x</div>
+            </div>
+          </div>
+          <div class="border-t border-slate-800/80 pt-2 text-xs text-slate-400 flex flex-col sm:flex-row justify-between gap-1">
+            <span>Dono On-Chain Atual:</span>
+            <span class="font-mono text-slate-200 font-bold" id="nft-owner">0x90F79bf6EB2c4f870365E785982E1f101E93b906</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUICK ACTIONS & CONTRACT DETAILS -->
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-4">
+      <h3 class="font-semibold text-white text-sm">Contratos do Protocolo AgroFi Conectados</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs font-mono">
+        <div class="p-3 rounded-xl bg-slate-950/60 border border-slate-800">
+          <span class="text-slate-400 block">MockUSDC (ERC-20):</span>
+          <span class="text-emerald-400 font-bold break-all">0x5FbDB2315678afecb367f032d93F642f64180aa3</span>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-950/60 border border-slate-800">
+          <span class="text-slate-400 block">AgroNFT (ERC-721):</span>
+          <span class="text-emerald-400 font-bold break-all">0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512</span>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-950/60 border border-slate-800">
+          <span class="text-slate-400 block">LendingPool:</span>
+          <span class="text-emerald-400 font-bold break-all">0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer class="mt-8 text-center text-xs text-slate-500">
+    AgroFi Protocol • Local Web3 Environment • RPC: http://127.0.0.1:8545
+  </footer>
+
+  <script>
+    const RPC_URL = "http://127.0.0.1:8545";
+    const CONTRACTS = {
+      usdc: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+      agroNFT: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+      pool: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
+    };
+
+    const ACCOUNTS = {
+      admin: {
+        address: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        role: "Administrador & Oráculo da Infraestrutura"
+      },
+      farmer: {
+        address: "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        role: "Produtor Rural / Tomador de Crédito"
+      },
+      lender: {
+        address: "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+        role: "Credor / Provedor de Liquidez na Pool"
+      },
+      liquidator: {
+        address: "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
+        role: "Agente Liquidador Paramétrico"
+      }
+    };
+
+    let currentAccount = "admin";
+
+    async function rpcCall(method, params = []) {
+      const res = await fetch(RPC_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          id: 1,
+          method: method,
+          params: params
+        })
+      });
+      const data = await res.json();
+      return data.result;
+    }
+
+    async function getEthBalance(address) {
+      try {
+        const hex = await rpcCall("eth_getBalance", [address, "latest"]);
+        const wei = BigInt(hex);
+        return (Number(wei) / 1e18).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+      } catch (e) {
+        return "10,000.00";
+      }
+    }
+
+    async function getUsdcBalance(address) {
+      try {
+        // balanceOf(address) selector: 0x70a08231
+        const cleanAddr = address.toLowerCase().replace("0x", "").padStart(64, "0");
+        const data = "0x70a08231" + cleanAddr;
+        const hex = await rpcCall("eth_call", [{ to: CONTRACTS.usdc, data: data }, "latest"]);
+        const raw = BigInt(hex);
+        return (Number(raw) / 1e6).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      } catch (e) {
+        return "0.00";
+      }
+    }
+
+    async function getNftOwner(tokenId = 1) {
+      try {
+        // ownerOf(uint256) selector: 0x6352211e
+        const hexToken = BigInt(tokenId).toString(16).padStart(64, "0");
+        const data = "0x6352211e" + hexToken;
+        const hex = await rpcCall("eth_call", [{ to: CONTRACTS.agroNFT, data: data }, "latest"]);
+        if (!hex || hex === "0x") return null;
+        return "0x" + hex.slice(26);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    async function selectAccount(key) {
+      currentAccount = key;
+      const acc = ACCOUNTS[key];
+
+      // Update tabs styling
+      document.querySelectorAll(".account-tab").forEach(el => {
+        el.className = "account-tab px-3 py-2.5 rounded-xl text-left border transition-all bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700";
+      });
+      document.getElementById("tab-" + key).className = "account-tab px-3 py-2.5 rounded-xl text-left border transition-all bg-emerald-500/10 border-emerald-500/50 text-white shadow";
+
+      document.getElementById("active-address").innerText = acc.address;
+      document.getElementById("active-role").innerText = "Papel: " + acc.role;
+
+      await refreshData();
+    }
+
+    async function refreshData() {
+      const acc = ACCOUNTS[currentAccount];
+
+      // ETH Balance
+      const eth = await getEthBalance(acc.address);
+      document.getElementById("eth-balance").innerText = eth + " ETH";
+
+      // USDC Balance
+      const usdc = await getUsdcBalance(acc.address);
+      document.getElementById("usdc-balance").innerText = "$" + usdc + " USDC";
+
+      // NFT Ownership
+      const owner = await getNftOwner(1);
+      if (owner) {
+        document.getElementById("nft-owner").innerText = owner;
+        if (owner.toLowerCase() === acc.address.toLowerCase()) {
+          document.getElementById("nft-count").innerText = "1 NFT (Token #1)";
+          document.getElementById("nft-description").innerText = "Esta carteira possui a posse direta do AgroNFT #1!";
+        } else {
+          document.getElementById("nft-count").innerText = "0 NFTs";
+          document.getElementById("nft-description").innerText = "O AgroNFT #1 está atualmente com a carteira " + owner.slice(0, 6) + "..." + owner.slice(-4);
+        }
+      }
+    }
+
+    async function mintQuickUSDC() {
+      const acc = ACCOUNTS[currentAccount];
+      alert(`Para mintar USDC para a carteira ${acc.address.slice(0,8)}..., execute no terminal:\ncast send ${CONTRACTS.usdc} "mint(address,uint256)" ${acc.address} 10000000000 --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80`);
+    }
+
+    function copyAddress() {
+      const addr = document.getElementById("active-address").innerText.trim();
+      navigator.clipboard.writeText(addr);
+      alert("Endereço copiado: " + addr);
+    }
+
+    // Initialize
+    refreshData();
+  </script>
+</body>
+</html>

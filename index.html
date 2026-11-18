@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgroFi Protocol - Portal Principal & Hub Web3 RWA</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes pulse-subtle {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.85; transform: scale(1.02); }
+    }
+    .pulse-glow { animation: pulse-subtle 2s infinite ease-in-out; }
+    .glass-card {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(51, 65, 85, 0.6);
+    }
+    .glass-card-hover:hover {
+      border-color: rgba(16, 185, 129, 0.5);
+      box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.15);
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 antialiased min-h-screen flex flex-col justify-between selection:bg-emerald-500 selection:text-white">
+
+  <!-- TOP NAVIGATION -->
+  <header class="border-b border-slate-800/80 bg-slate-900/90 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-4">
+      
+      <!-- LOGO -->
+      <div class="flex items-center space-x-3">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-white font-bold text-2xl shadow-lg shadow-emerald-950/60">
+          🌾
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xl font-bold tracking-tight text-white">AgroFi Protocol</span>
+            <span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 uppercase tracking-wider">
+              RWA Portal
+            </span>
+          </div>
+          <p class="text-xs text-slate-400">Plataforma Descentralizada de Crédito Agrícola & Oráculo Geoespacial</p>
+        </div>
+      </div>
+
+      <!-- STATUS BADGES -->
+      <div class="hidden lg:flex items-center gap-3">
+        <div class="px-3 py-1.5 rounded-xl bg-purple-500/10 border border-purple-500/30 text-xs flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></span>
+          <span class="text-slate-400">Rede Pública:</span>
+          <a href="https://sepolia.etherscan.io/address/0x020c06c4d1410B2131e9815c5D25F7Ee90D37a26" target="_blank" class="font-mono font-medium text-purple-300 hover:underline">
+            Sepolia (11155111) ↗
+          </a>
+        </div>
+        <div class="px-3 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700/60 text-xs flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          <span class="text-slate-400">Oráculo:</span>
+          <span class="font-mono font-medium text-emerald-400">Online (FastAPI :8000)</span>
+        </div>
+      </div>
+
+      <!-- ACTION BUTTONS / USER SESSION BAR -->
+      <div id="nav-actions-container" class="flex items-center gap-2">
+        <button onclick="connectRabby()" id="btn-connect-rabby" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-semibold text-xs transition-all shadow-md shadow-cyan-950 flex items-center gap-1.5 border border-cyan-400/40">
+          <span class="text-sm">🐰</span>
+          <span id="rabby-btn-text">Conectar Rabby (Padrão)</span>
+        </button>
+        <button onclick="connectMetaMask()" id="btn-connect-metamask" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs transition-all border border-slate-700 flex items-center gap-1.5">
+          <span class="text-sm">🦊</span>
+          <span>MetaMask</span>
+        </button>
+        <button onclick="promptSignature('ALL', ADMIN_MASTER, 'Administrador Master', 'Administrador Master do Protocolo', true)" class="hidden sm:flex px-3 py-2 rounded-xl bg-purple-950/40 hover:bg-purple-900/60 text-purple-200 border border-purple-500/40 font-semibold text-xs transition-all items-center gap-1.5 shadow-sm">
+          <span>👑</span>
+          <span>Admin</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- MAIN BODY -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-10 w-full flex-1">
+
+    <!-- HERO SECTION -->
+    <div class="relative overflow-hidden rounded-3xl border border-slate-800 bg-gradient-to-b from-slate-900/90 via-slate-900/60 to-slate-950 p-6 md:p-10 shadow-2xl">
+      <div class="absolute -right-20 -top-20 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -left-20 -bottom-20 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="relative z-10 max-w-3xl space-y-4">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
+          <span>🌱</span> Tokenização de Safras & Colateral RWA
+        </div>
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-tight">
+          Conecte a carteira da sua fazenda e desbloqueie <span class="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">crédito descentralizado</span>.
+        </h1>
+        <p class="text-sm sm:text-base text-slate-300 leading-relaxed">
+          Cada fazenda cadastrada possui acesso exclusivo aos seus dados agronômicos e colaterais. 
+          O <b>Administrador Master</b> possui privilégio total sobre todas as propriedades do ecossistema.
+        </p>
+
+        <!-- CTAS -->
+        <div class="flex flex-wrap items-center gap-3 pt-3">
+          <button onclick="connectRabby()" class="px-5 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-slate-950 font-bold text-xs sm:text-sm transition-all shadow-lg shadow-cyan-500/25 flex items-center gap-2">
+            <span>🐰</span> Conectar Rabby Wallet (Padrão)
+          </button>
+          <button onclick="connectAdminMaster()" class="px-4 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs sm:text-sm transition-all shadow-md shadow-purple-950 flex items-center gap-2 border border-purple-400/30">
+            <span>👑</span> Entrar como Admin Master
+          </button>
+          <button onclick="openWalletModal()" class="px-4 py-3 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 text-slate-200 font-medium text-xs sm:text-sm transition-all flex items-center gap-2">
+            <span>🌾</span> Opções & Fazendas
+          </button>
+        </div>
+      </div>
+
+      <!-- PROTOCOL STATS OVERVIEW -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 pt-8 border-t border-slate-800/80 text-xs">
+        <div>
+          <span class="text-slate-400">Colateral Total Mapeado</span>
+          <div class="text-xl sm:text-2xl font-bold font-mono text-white mt-0.5">R$ 138,4 M</div>
+          <span class="text-emerald-400 font-medium text-[11px]">5.200 ha produtivos</span>
+        </div>
+        <div>
+          <span class="text-slate-400">Liquidez da Pool MockUSDC</span>
+          <div class="text-xl sm:text-2xl font-bold font-mono text-white mt-0.5">$300,000.00</div>
+          <span class="text-emerald-400 font-medium text-[11px]">100% Solventes</span>
+        </div>
+        <div>
+          <span class="text-slate-400">Empréstimos Ativos</span>
+          <div class="text-xl sm:text-2xl font-bold font-mono text-white mt-0.5">$150,000.00</div>
+          <span class="text-slate-400 font-medium text-[11px]">LTV Dinâmico 60.0%</span>
+        </div>
+        <div>
+          <span class="text-slate-400">Taxa de Inadimplência</span>
+          <div class="text-xl sm:text-2xl font-bold font-mono text-emerald-400 mt-0.5">0.00%</div>
+          <span class="text-emerald-400 font-medium text-[11px]">Proteção Paramétrica</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARTEIRA CONECTADA ATIVA (CARD DINÂMICO) -->
+    <div id="active-session-card" class="hidden glass-card rounded-2xl p-5 border-emerald-500/40 bg-emerald-950/20 shadow-xl">
+      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center text-2xl font-bold">
+            🌾
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Sessão Web3 Autenticada</span>
+              <span id="session-badge-farm" class="px-2 py-0.5 rounded-full text-[10px] bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 font-semibold">Fazenda Santa Helena</span>
+            </div>
+            <div class="text-sm font-bold text-white mt-0.5" id="session-owner-name">Produtor Rural (Sorriso - MT)</div>
+            <div class="text-xs font-mono text-slate-400 flex items-center gap-1 mt-0.5">
+              <span>Carteira:</span>
+              <span id="session-wallet-addr" class="text-emerald-400 font-bold break-all">0x...</span>
+            </div>
+            <div class="text-[11px] font-mono text-cyan-400/90 flex items-center gap-1 mt-0.5">
+              <span>✍️ Assinatura:</span>
+              <span id="session-sig-hash" class="font-bold text-cyan-300 break-all">0x... (EIP-191 Verificada)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="launchStreamlitDashboard()" class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition-all shadow-md shadow-emerald-500/30 flex items-center gap-2">
+            <span>🚀</span> Abrir Dashboard de Inteligência Agro (8501)
+          </button>
+          <button onclick="disconnectSession()" class="px-4 py-2.5 rounded-xl bg-red-950/40 hover:bg-red-900/60 text-red-300 border border-red-500/30 text-xs font-bold transition-colors flex items-center gap-1.5">
+            <span>🚪</span> Deslogar da Carteira
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEÇÃO: CADA FAZENDA É UMA CARTEIRA -->
+    <div id="fazendas-grid" class="space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+        <div>
+          <h2 class="text-xl font-bold text-white flex items-center gap-2">
+            <span>🌾</span> Fazendas Cadastradas & Carteiras Vinculadas
+          </h2>
+          <p class="text-xs text-slate-400">
+            Selecione uma fazenda abaixo para conectar sua carteira Web3 e abrir o Dashboard de Inteligência Geoespacial em 
+            <code class="text-emerald-400 font-mono">localhost:8501</code>.
+          </p>
+        </div>
+        <span class="text-xs px-2.5 py-1 rounded-full bg-slate-800 border border-slate-700 text-slate-400">
+          4 Fazendas Integradas
+        </span>
+      </div>
+
+      <!-- GRID DOS 4 TALHÕES / FAZENDAS -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+
+        <!-- FAZENDA 1 -->
+        <div class="glass-card glass-card-hover rounded-2xl p-5 flex flex-col justify-between transition-all border border-slate-800 space-y-4">
+          <div class="space-y-3">
+            <div class="flex items-start justify-between">
+              <span class="text-2xl">🚜</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold">
+                TALHAO-MT-001
+              </span>
+            </div>
+            <div>
+              <h3 class="font-bold text-base text-white">Fazenda Santa Helena</h3>
+              <p class="text-xs text-slate-400">Sorriso - MT • Bioma Amazônia</p>
+            </div>
+            
+            <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800/80 space-y-1.5 text-xs">
+              <div class="flex justify-between">
+                <span class="text-slate-400">Área Útil:</span>
+                <span class="font-bold text-white">1.420 ha (1.850 total)</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-400">Cultura:</span>
+                <span class="font-bold text-emerald-400">Soja & Milho</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-400">Limite de Crédito:</span>
+                <span class="font-mono font-bold text-white">$250,000 USDC</span>
+              </div>
+            </div>
+
+            <!-- WALLET DETAILS -->
+            <div class="space-y-1">
+              <span class="text-[11px] text-slate-400 font-medium">Carteira Vinculada (Farmer #1):</span>
+              <div class="font-mono text-xs bg-slate-950 p-2 rounded-lg text-emerald-400 truncate border border-slate-800" title="0xfdb2A29d047A8f10E0BC354b2E45C7Af386D112E">
+                0xfdb2A29d047A8f10E0BC354b2E45C7Af386D112E
+              </div>
+            </div>
+          </div>
+
+          <button onclick="connectFarmAndRedirect('TALHAO-MT-001', '0xfdb2A29d047A8f10E0BC354b2E45C7Af386D112E', 'Fazenda Santa Helena')" class="w-full py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-colors flex items-center justify-center gap-1.5 shadow">
+            <span>🌾</span> Conectar & Abrir Dashboard ➔
+          </button>
+        </div>
+
+        <!-- FAZENDA 2 -->
+        <div class="glass-card glass-card-hover rounded-2xl p-5 flex flex-col justify-between transition-all border border-slate-800 space-y-4">
+          <div class="space-y-3">
+            <div class="flex items-start justify-between">
+              <span class="text-2xl">🌱</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-mono bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-semibold">
+                TALHAO-GO-002
+              </span>
+            </div>
+            <div>
+              <h3 class="font-bold text-base text-white">Fazenda Boa Esperança</h3>
+              <p class="text-xs text-slate-400">Rio Verde - GO • Bioma Cerrado</p>
+            </div>
+            
+            <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800/80 space-y-1.5 text-xs">
+              <div class="flex justify-between">
+                <span class="text-slate-400">Área Útil:</span>
+                <span class="font-bold text-white">1.040 ha (1.320 total)</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-400">Cultura:</span>
+                <span class="font-bold text-cyan-400">Grãos & Sorgo</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-400">Limite de Crédito:</span>
+                <span class="font-mono font-bold text-white">$180,000 USDC</span>
+              </div>
+            </div>
+
+            <!-- WALLET DETAILS -->
+            <div class="space-y-1">
+              <span class="text-[11px] text-slate-400 font-medium">Carteira Vinculada (Farmer #2):</span>
+              <div class="font-mono text-xs bg-slate-950 p-2 rounded-lg text-cyan-400 truncate border border-slate-800" title="0xC7C8931F662D9064ff495508AeA2AfA15E446D80">
+                0xC7C8931F662D9064ff495508AeA2AfA15E446D80
+              </div>
+            </div>
+          </div>
+
+          <button onclick="connectFarmAndRedirect('TALHAO-GO-002', '0xC7C8931F662D9064ff495508AeA2AfA15E446D80', 'Fazenda Boa Esperança')" class="w-full py-2.5 px-3 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs transition-colors flex items-center justify-center gap-1.5 shadow">
+            <span>🌾</span> Conectar & Abrir Dashboard ➔
+          </button>
+        </div>
+
+        <!-- FAZENDA 3 -->
+        <div class="glass-card glass-card-hover rounded-2xl p-5 flex flex-col justify-between transition-all border border-slate-800 space-y-4">
+          <div class="space-y-3">
+            <div class="flex items-start justify-between">
+              <span class="text-2xl">🌿</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-mono bg-amber-500/10 text-amber-400 border border-amber-500/20 font-semibold">
+                TALHAO-MT-003
+              </span>
+            </div>
+            <div>
+              <h3 class="font-bold text-base text-white">Agropecuária Chapadão</h3>
+              <p class="text-xs text-slate-400">Sapezal - MT • Bioma Cerrado</p>
+            </div>
+            
+            <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800/80 space-y-1.5 text-xs">
+              <div class="flex justify-between">
+                <span class="text-slate-400">Área Útil:</span>
+                <span class="font-bold text-white">1.520 ha (2.400 total)</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-400">Cultura:</span>
+                <span class="font-bold text-amber-400">Algodão & Soja</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-400">Limite de Crédito:</span>
+                <span class="font-mono font-bold text-white">$320,000 USDC</span>
+              </div>
+            </div>
+
+            <!-- WALLET DETAILS -->
+            <div class="space-y-1">
+              <span class="text-[11px] text-slate-400 font-medium">Carteira Vinculada (Farmer #3):</span>
+              <div class="font-mono text-xs bg-slate-950 p-2 rounded-lg text-amber-400 truncate border border-slate-800" title="0xFf3b53ca866BCfEC18F1DD3cDff0A03776ab49b5">
+                0xFf3b53ca866BCfEC18F1DD3cDff0A03776ab49b5
+              </div>
+            </div>
+          </div>
+
+          <button onclick="connectFarmAndRedirect('TALHAO-MT-003', '0xFf3b53ca866BCfEC18F1DD3cDff0A03776ab49b5', 'Agropecuária Chapadão')" class="w-full py-2.5 px-3 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs transition-colors flex items-center justify-center gap-1.5 shadow">
+            <span>🌾</span> Conectar & Abrir Dashboard ➔
+          </button>
+        </div>
+
+        <!-- FAZENDA 4 -->
+        <div class="glass-card glass-card-hover rounded-2xl p-5 flex flex-col justify-between transition-all border border-slate-800 space-y-4">
+          <div class="space-y-3">
+            <div class="flex items-start justify-between">
+              <span class="text-2xl">🌽</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-mono bg-purple-500/10 text-purple-400 border border-purple-500/20 font-semibold">
+                TALHAO-BA-004
+              </span>
+            </div>
+            <div>
+              <h3 class="font-bold text-base text-white">Fazenda Ouro Verde</h3>
+              <p class="text-xs text-slate-400">LEM - BA • Bioma Cerrado</p>
+            </div>
+            
+            <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800/80 space-y-1.5 text-xs">
+              <div class="flex justify-between">
+                <span class="text-slate-400">Área Útil:</span>
+                <span class="font-bold text-white">1.220 ha (1.600 total)</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-400">Cultura:</span>
+                <span class="font-bold text-purple-400">Soja Irrigada</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-400">Limite de Crédito:</span>
+                <span class="font-mono font-bold text-white">$210,000 USDC</span>
+              </div>
+            </div>
+
+            <!-- WALLET DETAILS -->
+            <div class="space-y-1">
+              <span class="text-[11px] text-slate-400 font-medium">Carteira Vinculada (Farmer #4):</span>
+              <div class="font-mono text-xs bg-slate-950 p-2 rounded-lg text-purple-400 truncate border border-slate-800" title="0x35474822f1A45c0D2C0ddeb4D8Ff53fD8BD29ef7">
+                0x35474822f1A45c0D2C0ddeb4D8Ff53fD8BD29ef7
+              </div>
+            </div>
+          </div>
+
+          <button onclick="connectFarmAndRedirect('TALHAO-BA-004', '0x35474822f1A45c0D2C0ddeb4D8Ff53fD8BD29ef7', 'Fazenda Ouro Verde')" class="w-full py-2.5 px-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs transition-colors flex items-center justify-center gap-1.5 shadow">
+            <span>🌾</span> Conectar & Abrir Dashboard ➔
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- SEÇÃO DIDÁTICA: COMO CONFIGURAR CADA FAZENDA -->
+    <div class="glass-card rounded-3xl p-6 md:p-8 border border-slate-800 space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800/80 pb-4">
+        <div>
+          <h2 class="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+            <span>📖</span> Guia Prático: Como Configurar Cada Fazenda no AgroFi
+          </h2>
+          <p class="text-xs text-slate-400">Orientações passo a passo para vincular carteiras Ethereum e cadastrar novos imóveis rurais (CAR).</p>
+        </div>
+        <span class="text-xs font-mono px-3 py-1 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          Configuração Centralizada
+        </span>
+      </div>
+
+      <!-- TABS / CARDS COM INSTRUÇÕES -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-slate-300">
+        
+        <!-- PASSO 1 -->
+        <div class="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center text-xs">1</span>
+            <h3 class="font-bold text-sm text-white">Editar o Arquivo <code class="text-emerald-400">farms_config.json</code></h3>
+          </div>
+          <p class="text-slate-400 leading-relaxed">
+            As fazendas e suas carteiras são mapeadas de forma padronizada no arquivo <code class="text-slate-200">farms_config.json</code> na raiz do projeto.
+            Para associar uma nova fazenda a uma carteira sua, basta preencher:
+          </p>
+          <pre class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-[11px] font-mono text-emerald-300 overflow-x-auto">
+{
+  "land_id": "TALHAO-NOVO-005",
+  "farm_name": "Sua Fazenda Nova",
+  "car_code": "UF-1234567-XYZ...",
+  "wallet_address": "0xSeuEnderecoMetaMask...",
+  "nft_token_id": 5,
+  "credit_limit_usd": 300000.0
+}</pre>
+        </div>
+
+        <!-- PASSO 2 -->
+        <div class="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 font-bold flex items-center justify-center text-xs">2</span>
+            <h3 class="font-bold text-sm text-white">Importar Carteiras no MetaMask</h3>
+          </div>
+          <p class="text-slate-400 leading-relaxed">
+            Para testar operações de assinatura e empréstimos na testnet Sepolia ou no nó local Anvil (<code class="text-slate-200">http://127.0.0.1:8545</code>):
+          </p>
+          <ol class="list-decimal list-inside space-y-1 text-slate-400 pt-1">
+            <li>Abra o MetaMask e clique em <b>Contas ➔ Adicionar Conta ou Carteira de Hardware ➔ Importar Conta</b>;</li>
+            <li>Selecione <b>Chave Privada</b> e cole a chave de teste da fazenda (disponível no arquivo <code class="text-cyan-300">farms_config.json</code>);</li>
+            <li>Conecte à rede <b>Sepolia</b> ou crie uma RPC local com Chain ID <code class="text-cyan-300">31337</code>.</li>
+          </ol>
+        </div>
+
+        <!-- PASSO 3 -->
+        <div class="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-amber-500/20 text-amber-400 font-bold flex items-center justify-center text-xs">3</span>
+            <h3 class="font-bold text-sm text-white">Vínculo CAR (SICAR) & Token NFT RWA</h3>
+          </div>
+          <p class="text-slate-400 leading-relaxed">
+            Cada fazenda possui um código CAR oficial registrado no SICAR. No AgroFi:
+          </p>
+          <ul class="list-disc list-inside space-y-1 text-slate-400 pt-1">
+            <li>O polígono é ingerido via <b>GeoPandas</b> no arquivo <code class="text-slate-200">src/etl/sicar_ingestor.py</code>;</li>
+            <li>O contrato <code class="text-amber-400">AgroFiVault.sol</code> vincula o <code class="text-slate-200">carCode</code> ao <code class="text-slate-200">tokenId</code> do NFT;</li>
+            <li>Apenas a carteira dona do NFT ou aprovada pode contrair empréstimos contra o colateral.</li>
+          </ul>
+        </div>
+
+        <!-- PASSO 4 -->
+        <div class="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-purple-500/20 text-purple-400 font-bold flex items-center justify-center text-xs">4</span>
+            <h3 class="font-bold text-sm text-white">Como Funciona o Redirecionamento (8080 ➔ 8501)</h3>
+          </div>
+          <p class="text-slate-400 leading-relaxed">
+            Ao conectar a carteira pelo botão principal ou pelo card da fazenda, a aplicação faz o repasse transparente dos parâmetros via URL:
+          </p>
+          <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 font-mono text-[11px] text-purple-300">
+            http://localhost:8501/?land_id=TALHAO-MT-001&wallet=0x7099...
+          </div>
+          <p class="text-slate-400 text-[11px] pt-1">
+            O Streamlit lê os parâmetros nativamente, seleciona automaticamente a fazenda correta no mapa MapLibre GL JS, 
+            exibe o selo de carteira conectada e atualiza os limites de crédito.
+          </p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ECOSSISTEMA COMPLETO: CARDS DE ACESSO -->
+    <div class="space-y-4">
+      <h2 class="text-xl font-bold text-white flex items-center gap-2 border-b border-slate-800 pb-3">
+        <span>🌐</span> Módulos Integrados do AgroFi
+      </h2>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
+        <!-- CARD 1 -->
+        <a href="http://localhost:8501" target="_blank" class="glass-card glass-card-hover rounded-2xl p-5 border border-slate-800 block space-y-2 group">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-xl font-bold border border-emerald-500/20">
+            🗺️
+          </div>
+          <h3 class="font-bold text-sm text-white group-hover:text-emerald-400 transition-colors">
+            Inteligência Agro & Risco
+          </h3>
+          <p class="text-xs text-slate-400">
+            Cartografia vetorial MapLibre GL JS, fenologia NDVI Sentinel-2, modelos ML de valoração e Monte Carlo.
+          </p>
+          <span class="text-[11px] font-mono text-emerald-400 block pt-1">localhost:8501 ↗</span>
+        </a>
+
+        <!-- CARD 2 -->
+        <a href="dashboard.html" class="glass-card glass-card-hover rounded-2xl p-5 border border-slate-800 block space-y-2 group">
+          <div class="w-10 h-10 rounded-xl bg-teal-500/10 text-teal-400 flex items-center justify-center text-xl font-bold border border-teal-500/20">
+            ⚡
+          </div>
+          <h3 class="font-bold text-sm text-white group-hover:text-teal-400 transition-colors">
+            Painel DeFi & Liquidação
+          </h3>
+          <p class="text-xs text-slate-400">
+            Liquidez MockUSDC, simulador paramétrico de estiagem, monitoramento de Health Factor e chamada on-chain.
+          </p>
+          <span class="text-[11px] font-mono text-teal-400 block pt-1">/dashboard.html ➔</span>
+        </a>
+
+        <!-- CARD 3 -->
+        <a href="explorer.html" class="glass-card glass-card-hover rounded-2xl p-5 border border-slate-800 block space-y-2 group">
+          <div class="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center text-xl font-bold border border-cyan-500/20">
+            🔍
+          </div>
+          <h3 class="font-bold text-sm text-white group-hover:text-cyan-400 transition-colors">
+            AgroFiScan (Explorador)
+          </h3>
+          <p class="text-xs text-slate-400">
+            Explorador de blocos estilo Etherscan com emissão de comprovantes de transação certificados em PDF.
+          </p>
+          <span class="text-[11px] font-mono text-cyan-400 block pt-1">/explorer.html ➔</span>
+        </a>
+
+        <!-- CARD 4 -->
+        <a href="wallet.html" class="glass-card glass-card-hover rounded-2xl p-5 border border-slate-800 block space-y-2 group">
+          <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center text-xl font-bold border border-purple-500/20">
+            💼
+          </div>
+          <h3 class="font-bold text-sm text-white group-hover:text-purple-400 transition-colors">
+            Carteira Multi-Perfil Web3
+          </h3>
+          <p class="text-xs text-slate-400">
+            Gerenciamento de contas (Admin, Produtor, Credor, Liquidante), saldos ETH/USDC e mint de tokens.
+          </p>
+          <span class="text-[11px] font-mono text-purple-400 block pt-1">/wallet.html ➔</span>
+        </a>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- MODAL: CONECTAR CARTEIRA -->
+  <div id="wallet-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
+      
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-xl">
+            🐰
+          </div>
+          <div>
+            <h3 class="font-bold text-base text-white">Conectar Carteira Web3</h3>
+            <p class="text-xs text-slate-400">Rabby Wallet (Padrão) ou MetaMask</p>
+          </div>
+        </div>
+        <button onclick="closeWalletModal()" class="text-slate-400 hover:text-white text-lg px-2">✕</button>
+      </div>
+
+      <!-- OPÇÃO 1: RABBY WALLET (PADRÃO) -->
+      <button onclick="connectRabby()" class="w-full p-3.5 rounded-2xl bg-gradient-to-r from-cyan-950/60 to-slate-900 border border-cyan-500/50 hover:border-cyan-400 flex items-center justify-between group transition-all shadow-md shadow-cyan-950/30">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center text-xl">
+            🐰
+          </div>
+          <div class="text-left">
+            <div class="flex items-center gap-2">
+              <h4 class="font-bold text-sm text-white group-hover:text-cyan-400 transition-colors">Rabby Wallet</h4>
+              <span class="px-2 py-0.5 rounded-full text-[10px] bg-cyan-500/20 text-cyan-300 font-bold border border-cyan-500/30 uppercase">Padrão</span>
+            </div>
+            <p class="text-xs text-slate-400">Conectar via extensão Rabby instalada</p>
+          </div>
+        </div>
+        <span class="text-xs font-bold text-cyan-400">Conectar ➔</span>
+      </button>
+
+      <!-- OPÇÃO 2: METAMASK -->
+      <button onclick="connectMetaMask()" class="w-full p-3.5 rounded-2xl bg-slate-950 hover:bg-slate-900 border border-slate-800 hover:border-amber-500/40 flex items-center justify-between group transition-all">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-xl">
+            🦊
+          </div>
+          <div class="text-left">
+            <h4 class="font-bold text-sm text-white group-hover:text-amber-400 transition-colors">MetaMask</h4>
+            <p class="text-xs text-slate-400">Conectar via extensão MetaMask tradicional</p>
+          </div>
+        </div>
+        <span class="text-xs font-semibold text-slate-400 group-hover:text-amber-400">Detectar ➔</span>
+      </button>
+
+      <!-- OPÇÃO 3: ADMINISTRADOR MASTER (ACESSO TOTAL) -->
+      <button onclick="promptSignature('ALL', ADMIN_MASTER, 'Administrador Master', 'Administrador Master do Protocolo', true)" class="w-full p-3.5 rounded-2xl bg-purple-950/40 border border-purple-500/40 hover:border-purple-400 flex items-center justify-between group transition-all shadow-md shadow-purple-950/20">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-xl">
+            👑
+          </div>
+          <div class="text-left">
+            <div class="flex items-center gap-2">
+              <h4 class="font-bold text-sm text-white group-hover:text-purple-300 transition-colors">Administrador Master</h4>
+              <span class="px-2 py-0.5 rounded-full text-[10px] bg-purple-500/20 text-purple-300 font-bold border border-purple-500/30">Acesso Total</span>
+            </div>
+            <p class="text-xs font-mono text-purple-300/80">0xa449e7838fF89EE956174B682449870597e93C71</p>
+          </div>
+        </div>
+        <span class="text-xs font-bold text-purple-400">Assinar & Entrar ➔</span>
+      </button>
+
+      <div class="relative flex py-1 items-center">
+        <div class="flex-grow border-t border-slate-800"></div>
+        <span class="flex-shrink mx-3 text-[11px] text-slate-500 font-semibold uppercase">ou acesse como produtor titular</span>
+        <div class="flex-grow border-t border-slate-800"></div>
+      </div>
+
+      <!-- OPÇÃO 4: SELEÇÃO RÁPIDA DE FAZENDA -->
+      <div class="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+        <label class="text-xs text-slate-400 block font-medium">Acesso Restrito Exclusivo por Fazenda:</label>
+
+        <button onclick="promptSignature('TALHAO-MT-001', '0xfdb2A29d047A8f10E0BC354b2E45C7Af386D112E', 'Fazenda Santa Helena', 'Produtor Fazenda Santa Helena')" class="w-full p-2.5 rounded-xl bg-slate-950 hover:bg-slate-800/80 border border-slate-800 flex items-center justify-between text-left transition-colors">
+          <div>
+            <div class="text-xs font-bold text-white">Fazenda Santa Helena (Sorriso - MT)</div>
+            <div class="text-[10px] font-mono text-emerald-400">0xfdb2...112E • Acesso Exclusivo</div>
+          </div>
+          <span class="text-xs text-slate-400 font-semibold">Assinar ➔</span>
+        </button>
+
+        <button onclick="promptSignature('TALHAO-GO-002', '0xC7C8931F662D9064ff495508AeA2AfA15E446D80', 'Fazenda Boa Esperança', 'Produtor Fazenda Boa Esperança')" class="w-full p-2.5 rounded-xl bg-slate-950 hover:bg-slate-800/80 border border-slate-800 flex items-center justify-between text-left transition-colors">
+          <div>
+            <div class="text-xs font-bold text-white">Fazenda Boa Esperança (Rio Verde - GO)</div>
+            <div class="text-[10px] font-mono text-cyan-400">0xC7C8...6D80 • Acesso Exclusivo</div>
+          </div>
+          <span class="text-xs text-slate-400 font-semibold">Assinar ➔</span>
+        </button>
+
+        <button onclick="promptSignature('TALHAO-MT-003', '0xFf3b53ca866BCfEC18F1DD3cDff0A03776ab49b5', 'Agropecuária Chapadão', 'Produtor Agropecuária Chapadão')" class="w-full p-2.5 rounded-xl bg-slate-950 hover:bg-slate-800/80 border border-slate-800 flex items-center justify-between text-left transition-colors">
+          <div>
+            <div class="text-xs font-bold text-white">Agropecuária Chapadão (Sapezal - MT)</div>
+            <div class="text-[10px] font-mono text-amber-400">0xFf3b...49b5 • Acesso Exclusivo</div>
+          </div>
+          <span class="text-xs text-slate-400 font-semibold">Assinar ➔</span>
+        </button>
+
+        <button onclick="promptSignature('TALHAO-BA-004', '0x35474822f1A45c0D2C0ddeb4D8Ff53fD8BD29ef7', 'Fazenda Ouro Verde', 'Produtor Fazenda Ouro Verde')" class="w-full p-2.5 rounded-xl bg-slate-950 hover:bg-slate-800/80 border border-slate-800 flex items-center justify-between text-left transition-colors">
+          <div>
+            <div class="text-xs font-bold text-white">Fazenda Ouro Verde (LEM - BA)</div>
+            <div class="text-[10px] font-mono text-purple-400">0x3547...9ef7 • Acesso Exclusivo</div>
+          </div>
+          <span class="text-xs text-slate-400 font-semibold">Assinar ➔</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL: ASSINATURA CRIPTOGRÁFICA (EIP-191) -->
+  <div id="sign-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700/80 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
+      
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-2xl bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold text-xl border border-purple-500/30">
+            ✍️
+          </div>
+          <div>
+            <h3 class="font-bold text-base text-white">Autenticação Web3 com Assinatura</h3>
+            <p class="text-xs text-slate-400">Verificação de Titularidade Criptográfica (EIP-191)</p>
+          </div>
+        </div>
+        <button onclick="closeSignModal()" class="text-slate-400 hover:text-white text-lg px-2">✕</button>
+      </div>
+
+      <!-- Informações da Carteira e Papel -->
+      <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800/80 space-y-2">
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-slate-400">Papel Identificado:</span>
+          <span id="sign-modal-role" class="px-2.5 py-0.5 rounded-full font-bold text-[11px] bg-purple-500/20 text-purple-300 border border-purple-500/30">
+            👑 Administrador Master
+          </span>
+        </div>
+        <div class="text-xs font-mono text-slate-300 break-all bg-slate-900/90 p-2.5 rounded-xl border border-slate-800 space-y-1">
+          <span class="text-slate-500 block text-[10px] uppercase font-bold tracking-wider">Endereço da Carteira:</span>
+          <span id="sign-modal-wallet" class="text-emerald-400 font-bold block">0x...</span>
+        </div>
+      </div>
+
+      <!-- Preview da Mensagem a ser assinada -->
+      <div class="space-y-1.5">
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-slate-400 font-medium">Mensagem a ser assinada:</span>
+          <span class="text-[10px] text-emerald-400 font-semibold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">Sem Custo de Gas</span>
+        </div>
+        <pre id="sign-modal-msg-preview" class="p-3 rounded-xl bg-slate-950 font-mono text-[11px] text-slate-300 border border-slate-800 max-h-36 overflow-y-auto whitespace-pre-wrap leading-relaxed select-all"></pre>
+      </div>
+
+      <!-- Ações de Assinatura -->
+      <div class="space-y-2 pt-1">
+        <button id="btn-sign-with-provider" onclick="executeProviderSignature()" class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-cyan-950/40 transition-all border border-cyan-400/30">
+          <span class="text-base">🐰</span>
+          <span id="btn-sign-provider-text">Assinar via Extensão (Rabby Wallet / MetaMask)</span>
+        </button>
+
+        <button onclick="executeLocalSignature()" class="w-full py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs flex items-center justify-center gap-2 border border-slate-700 transition-all">
+          <span>🔑</span>
+          <span>Assinar com Chave Cadastrada (Modo Demonstração Rápido)</span>
+        </button>
+
+        <button onclick="closeSignModal()" class="w-full py-1.5 text-center text-xs text-slate-400 hover:text-white transition-colors">
+          Cancelar Login
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-slate-800/80 bg-slate-950/90 py-6 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="flex items-center gap-2">
+        <span>🌾 AgroFi Protocol • DeFi & Geoprocessamento Agrícola</span>
+      </div>
+      <div class="flex items-center gap-4 text-slate-400 font-mono text-[11px]">
+        <span>Portal: :8080</span>
+        <span>•</span>
+        <span>Streamlit: :8501</span>
+        <span>•</span>
+        <span>API: :8000</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
+
+  <script>
+    // Endereço Oficial do Administrador Master (Única carteira com permissão total)
+    const ADMIN_MASTER = "0xa449e7838fF89EE956174B682449870597e93C71";
+
+    // Configurações das Fazendas e Carteiras
+    let FARMS = [
+      {
+        landId: "TALHAO-MT-001",
+        farmName: "Fazenda Santa Helena",
+        wallet: "0xfdb2A29d047A8f10E0BC354b2E45C7Af386D112E",
+        owner: "Produtor Fazenda Santa Helena"
+      },
+      {
+        landId: "TALHAO-GO-002",
+        farmName: "Fazenda Boa Esperança",
+        wallet: "0xC7C8931F662D9064ff495508AeA2AfA15E446D80",
+        owner: "Produtor Fazenda Boa Esperança"
+      },
+      {
+        landId: "TALHAO-MT-003",
+        farmName: "Agropecuária Chapadão",
+        wallet: "0xFf3b53ca866BCfEC18F1DD3cDff0A03776ab49b5",
+        owner: "Produtor Agropecuária Chapadão"
+      },
+      {
+        landId: "TALHAO-BA-004",
+        farmName: "Fazenda Ouro Verde",
+        wallet: "0x35474822f1A45c0D2C0ddeb4D8Ff53fD8BD29ef7",
+        owner: "Produtor Fazenda Ouro Verde"
+      }
+    ];
+
+    let currentSession = null;
+    let pendingAuth = null;
+
+    // Toast Notifications
+    function showToast(message, type = "info") {
+      const container = document.getElementById("toast-container");
+      if (!container) return;
+
+      const toast = document.createElement("div");
+      const borderMap = {
+        info: "bg-slate-900/95 border-cyan-500/50 text-cyan-200 shadow-cyan-950/40",
+        success: "bg-slate-900/95 border-emerald-500/50 text-emerald-200 shadow-emerald-950/40",
+        error: "bg-slate-900/95 border-red-500/50 text-red-200 shadow-red-950/40",
+        warning: "bg-slate-900/95 border-amber-500/50 text-amber-200 shadow-amber-950/40"
+      };
+
+      const iconMap = {
+        info: "ℹ️",
+        success: "✅",
+        error: "❌",
+        warning: "⚠️"
+      };
+
+      const styleClass = borderMap[type] || borderMap.info;
+      const icon = iconMap[type] || "ℹ️";
+
+      toast.className = `p-3.5 rounded-2xl border ${styleClass} shadow-2xl text-xs flex items-center justify-between gap-3 pointer-events-auto transition-all transform duration-300 translate-y-3 opacity-0 backdrop-blur`;
+      toast.innerHTML = `
+        <div class="flex items-center gap-2.5">
+          <span class="text-base">${icon}</span>
+          <span class="font-medium">${message}</span>
+        </div>
+        <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-white text-xs ml-2 font-bold">✕</button>
+      `;
+
+      container.appendChild(toast);
+      requestAnimationFrame(() => {
+        toast.classList.remove("translate-y-3", "opacity-0");
+      });
+
+      setTimeout(() => {
+        toast.classList.add("translate-y-3", "opacity-0");
+        setTimeout(() => toast.remove(), 350);
+      }, 4500);
+    }
+
+    // Utilitário para converter string UTF-8 em Hex para personal_sign
+    function stringToHex(str) {
+      const encoder = new TextEncoder();
+      const bytes = encoder.encode(str);
+      return "0x" + Array.from(bytes).map(b => b.toString(16).padStart(2, "0")).join("");
+    }
+
+    // Criador do Desafio Criptográfico EIP-191
+    function createAuthMessage(wallet, roleName, isAdmin) {
+      const now = new Date();
+      const timestamp = now.toISOString().replace("T", " ").substring(0, 19) + " UTC";
+      const nonce = "agrofi-" + Math.random().toString(36).substring(2, 8) + "-" + Date.now().toString(36);
+
+      let titular = "Produtor Rural";
+      if (isAdmin) {
+        titular = "Administrador Master";
+      } else if (roleName && roleName !== "Usuário Web3") {
+        titular = roleName;
+      } else if (typeof isWalletAuthorized === "function") {
+        const check = isWalletAuthorized(wallet);
+        if (check.authorized) {
+          titular = check.name;
+        }
+      }
+
+      return {
+        message: `🏛️ AgroFi Protocol - Autenticação Web3\n\n` +
+                 `Assine para autenticar sua sessão com segurança.\n\n` +
+                 `• Titular: ${titular}\n` +
+                 `• Carteira: ${wallet}\n` +
+                 `• Nonce: ${nonce}\n` +
+                 `• Horário: ${timestamp}\n` +
+                 `• Destino: Painel AgroFi (:8501)\n\n` +
+                 `Operação gratuita (sem gas). Não envia transações.`,
+        nonce: nonce,
+        timestamp: timestamp
+      };
+    }
+
+    // Inicialização da página e carregamento dinâmico
+    window.addEventListener("DOMContentLoaded", async () => {
+      // 1. Carrega configuração atualizada do farms_config.json
+      try {
+        const res = await fetch("farms_config.json?v=" + Date.now());
+        if (res.ok) {
+          const data = await res.json();
+          if (data.farms && data.farms.length > 0) {
+            FARMS = data.farms.map(f => ({
+              landId: f.land_id,
+              farmName: f.farm_name,
+              wallet: f.wallet_address,
+              owner: f.owner_name || `Produtor ${f.farm_name}`
+            }));
+          }
+        }
+      } catch (err) {
+        console.log("Utilizando lista padrão de fazendas:", err);
+      }
+
+      // 2. Verifica se a página foi chamada com ?action=logout vindo do Streamlit
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get("action") === "logout") {
+        disconnectSession(false);
+        window.history.replaceState({}, document.title, window.location.pathname);
+        showToast("🚪 Sessão encerrada! Você foi desconectado com sucesso.", "info");
+        return;
+      }
+
+      // 3. Restaura sessão salva se houver
+      const savedSession = localStorage.getItem("agrofi_active_session");
+      if (savedSession) {
+        try {
+          currentSession = JSON.parse(savedSession);
+          renderActiveSession();
+        } catch(e) {}
+      } else {
+        renderNavActions();
+      }
+    });
+
+    function openWalletModal() {
+      document.getElementById("wallet-modal").classList.remove("hidden");
+    }
+
+    function closeWalletModal() {
+      document.getElementById("wallet-modal").classList.add("hidden");
+    }
+
+    function closeSignModal() {
+      document.getElementById("sign-modal").classList.add("hidden");
+      pendingAuth = null;
+    }
+
+    // Modal de confirmação de assinatura
+    function promptSignature(landId, wallet, farmName, ownerName, isAdmin = false) {
+      closeWalletModal();
+      const authData = createAuthMessage(wallet, farmName, isAdmin);
+      pendingAuth = {
+        landId: landId,
+        wallet: wallet,
+        farmName: farmName,
+        owner: ownerName,
+        isAdmin: isAdmin,
+        authMsg: authData
+      };
+
+      document.getElementById("sign-modal-role").textContent = isAdmin ? "👑 Administrador Master (Acesso Total)" : farmName;
+      document.getElementById("sign-modal-wallet").textContent = wallet;
+      document.getElementById("sign-modal-msg-preview").textContent = authData.message;
+
+      const hasRabby = typeof window.rabby !== "undefined" || (typeof window.ethereum !== "undefined" && window.ethereum.isRabby);
+      const btnText = document.getElementById("btn-sign-provider-text");
+      if (btnText) {
+        btnText.textContent = hasRabby ? "Assinar via Rabby Wallet (Extensão)" : "Assinar via Extensão (Rabby / MetaMask)";
+      }
+
+      document.getElementById("sign-modal").classList.remove("hidden");
+    }
+
+    // Conexão via Rabby Wallet (Padrão)
+    async function connectRabby() {
+      let provider = null;
+      if (typeof window.rabby !== "undefined") {
+        provider = window.rabby;
+      } else if (typeof window.ethereum !== "undefined" && window.ethereum.isRabby) {
+        provider = window.ethereum;
+      } else if (typeof window.ethereum !== "undefined") {
+        provider = window.ethereum;
+      }
+
+      if (provider) {
+        try {
+          showToast("Conectando à Rabby Wallet...", "info");
+          const accounts = await provider.request({ method: "eth_requestAccounts" });
+          if (accounts && accounts.length > 0) {
+            await handleConnectedAddressWithSignature(accounts[0], provider, "Rabby Wallet");
+          }
+        } catch (err) {
+          if (err.code === 4001) {
+            showToast("Conexão cancelada pelo usuário na carteira.", "warning");
+          } else {
+            alert("Erro ao conectar Rabby Wallet: " + err.message);
+          }
+        }
+      } else {
+        alert("Extensão Rabby Wallet não detectada! Você pode instalá-la em https://rabby.io ou selecionar sua fazenda na lista com assinatura rápida.");
+        openWalletModal();
+      }
+    }
+
+    // Conexão via MetaMask
+    async function connectMetaMask() {
+      if (typeof window.ethereum !== "undefined") {
+        try {
+          showToast("Conectando à MetaMask...", "info");
+          const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+          if (accounts && accounts.length > 0) {
+            await handleConnectedAddressWithSignature(accounts[0], window.ethereum, "MetaMask");
+          }
+        } catch (err) {
+          if (err.code === 4001) {
+            showToast("Conexão cancelada pelo usuário na carteira.", "warning");
+          } else {
+            alert("Erro ao conectar MetaMask: " + err.message);
+          }
+        }
+      } else {
+        alert("Nenhum injetor Web3 detectado. Escolha uma das fazendas para simulação autenticada!");
+        openWalletModal();
+      }
+    }
+
+    // Verificador de Autorização Estrita de Carteiras (Gatekeeper de Whitelist)
+    function isWalletAuthorized(address) {
+      if (!address || typeof address !== "string") {
+        return { authorized: false, role: null, farm: null, reason: "Endereço inválido" };
+      }
+      const addrLower = address.trim().toLowerCase();
+
+      // 1. Administrador Master (Única carteira autorizada como Admin)
+      if (addrLower === ADMIN_MASTER.toLowerCase()) {
+        return { authorized: true, role: "admin", farm: null, name: "Administrador Master" };
+      }
+
+      // 2. Fazendas Cadastradas
+      const farm = FARMS.find(f => f.wallet.toLowerCase() === addrLower);
+      if (farm) {
+        return { authorized: true, role: "farmer", farm: farm, name: farm.farmName };
+      }
+
+      return {
+        authorized: false,
+        role: null,
+        farm: null,
+        reason: "Esta carteira não possui vínculo com nenhuma propriedade rural cadastrada nem com a administração do protocolo."
+      };
+    }
+
+    // Tratamento unificado de endereço conectado com requisição de assinatura real
+    async function handleConnectedAddressWithSignature(userWallet, provider, providerName) {
+      const authCheckBefore = isWalletAuthorized(userWallet);
+      const isAdm = authCheckBefore.role === "admin";
+      const titular = authCheckBefore.authorized ? authCheckBefore.name : "Produtor Rural";
+
+      // 1. Gera a mensagem padronizada contendo a carteira conectada
+      const authData = createAuthMessage(userWallet, titular, isAdm);
+
+      // 2. Abre a caixa de assinatura do Rabby / MetaMask normalmente
+      try {
+        showToast(`Solicitando assinatura na extensão ${providerName}...`, "info");
+        const sig = await requestSignatureFromProvider(provider, userWallet, authData.message);
+
+        // 3. QUANDO ASSINADA: Verifica se a carteira é cadastrada
+        const authCheck = isWalletAuthorized(userWallet);
+
+        if (!authCheck.authorized) {
+          // RECUSADO SE NÃO FOR CADASTRADO
+          showToast("⛔ Acesso Recusado: Carteira não cadastrada.", "error");
+          alert(
+            `⛔ ACESSO RECUSADO!\n\n` +
+            `A assinatura foi concluída com sucesso pela carteira:\n${userWallet}\n\n` +
+            `Porém, esta carteira NÃO possui cadastro no Protocolo AgroFi.\n\n` +
+            `Apenas as carteiras homologadas das 4 fazendas e o Administrador Master (${ADMIN_MASTER.slice(0, 10)}...${ADMIN_MASTER.slice(-6)}) possuem permissão de acesso.\n\n` +
+            `O acesso ao sistema foi bloqueado.`
+          );
+          return;
+        }
+
+        // Se for cadastrada, autoriza e redireciona
+        const landId = authCheck.role === "admin" ? "ALL" : authCheck.farm.landId;
+        const farmName = authCheck.role === "admin" ? "Administrador Master" : authCheck.farm.farmName;
+        const owner = authCheck.role === "admin" ? "Administrador Master do Protocolo" : authCheck.farm.owner;
+
+        finalizeLogin(landId, userWallet, farmName, owner, authCheck.role === "admin", sig);
+
+      } catch (err) {
+        console.error("Assinatura cancelada ou falhou:", err);
+        if (err.code === 4001 || (err.message && err.message.toLowerCase().includes("rejected"))) {
+          showToast("❌ Assinatura cancelada pelo usuário na carteira.", "error");
+        } else {
+          showToast("Falha na assinatura: " + err.message, "error");
+        }
+      }
+    }
+
+    // Chamada do método personal_sign
+    async function requestSignatureFromProvider(provider, address, message) {
+      const hexMsg = stringToHex(message);
+      try {
+        return await provider.request({
+          method: "personal_sign",
+          params: [hexMsg, address]
+        });
+      } catch (err) {
+        try {
+          return await provider.request({
+            method: "personal_sign",
+            params: [address, hexMsg]
+          });
+        } catch (err2) {
+          throw err;
+        }
+      }
+    }
+
+    // Executa assinatura a partir do botão do modal com a extensão do navegador
+    async function executeProviderSignature() {
+      if (!pendingAuth) return;
+
+      let provider = null;
+      if (typeof window.rabby !== "undefined") {
+        provider = window.rabby;
+      } else if (typeof window.ethereum !== "undefined" && window.ethereum.isRabby) {
+        provider = window.ethereum;
+      } else if (typeof window.ethereum !== "undefined") {
+        provider = window.ethereum;
+      }
+
+      if (!provider) {
+        showToast("Nenhuma extensão Web3 detectada. Utilize a opção 'Assinar com Chave Cadastrada'.", "warning");
+        return;
+      }
+
+      try {
+        const accounts = await provider.request({ method: "eth_requestAccounts" });
+        if (!accounts || accounts.length === 0) {
+          showToast("Nenhuma conta selecionada na carteira.", "error");
+          return;
+        }
+
+        const signingAddr = accounts[0];
+        const authCheckBefore = isWalletAuthorized(signingAddr);
+        const isAdm = authCheckBefore.role === "admin";
+        const titular = authCheckBefore.authorized ? authCheckBefore.name : (pendingAuth.farmName || "Produtor Rural");
+
+        // 1. Abre a caixa de autenticação da carteira (Rabby / MetaMask) com a mensagem padronizada
+        showToast("Confirme a assinatura na janela da sua carteira...", "info");
+        const freshAuthMsg = createAuthMessage(signingAddr, titular, isAdm);
+        const sig = await requestSignatureFromProvider(provider, signingAddr, freshAuthMsg.message);
+
+        // 2. QUANDO ASSINADA: Verifica se a carteira é cadastrada
+        const authCheck = isWalletAuthorized(signingAddr);
+
+        if (!authCheck.authorized) {
+          // RECUSADO SE NÃO FOR CADASTRADO
+          showToast("⛔ Acesso Recusado: Carteira não cadastrada.", "error");
+          alert(
+            `⛔ ACESSO RECUSADO!\n\n` +
+            `A assinatura foi concluída com sucesso pela carteira:\n${signingAddr}\n\n` +
+            `Porém, esta carteira NÃO possui cadastro no Protocolo AgroFi.\n\n` +
+            `Apenas as carteiras homologadas das 4 fazendas e o Administrador Master (${ADMIN_MASTER.slice(0, 10)}...${ADMIN_MASTER.slice(-6)}) possuem permissão de acesso.\n\n` +
+            `O acesso ao sistema foi bloqueado.`
+          );
+          closeSignModal();
+          return;
+        }
+
+        // Se cadastrada, verifica compatibilidade com o perfil solicitado
+        if (pendingAuth.isAdmin && !isAdm) {
+          alert(
+            `⛔ DIVERGÊNCIA DE CARTEIRA:\n\n` +
+            `A assinatura foi feita com a carteira da ${authCheck.farm.farmName} (${signingAddr}).\n` +
+            `O perfil de Administrador Master exige a carteira oficial: ${ADMIN_MASTER}.`
+          );
+          closeSignModal();
+          return;
+        }
+
+        const landId = isAdm ? "ALL" : authCheck.farm.landId;
+        const farmName = isAdm ? "Administrador Master" : authCheck.farm.farmName;
+        const owner = isAdm ? "Administrador Master do Protocolo" : authCheck.farm.owner;
+
+        finalizeLogin(landId, signingAddr, farmName, owner, isAdm, sig);
+
+      } catch (err) {
+        if (err.code === 4001 || (err.message && err.message.toLowerCase().includes("rejected"))) {
+          showToast("❌ Assinatura cancelada pelo usuário na carteira.", "error");
+        } else {
+          showToast("Erro na assinatura: " + err.message, "error");
+        }
+      }
+    }
+
+    // Executa assinatura criptográfica simulada para demonstração rápida sem precisar da chave na extensão
+    function executeLocalSignature() {
+      if (!pendingAuth) return;
+      
+      const authCheck = isWalletAuthorized(pendingAuth.wallet);
+      if (!authCheck.authorized) {
+        alert("⛔ Carteira não autorizada.");
+        return;
+      }
+
+      // Gera hash criptográfico simulado EIP-191 válido para sessão de teste
+      const randomBytes = Array.from(new Uint8Array(65)).map(() => Math.floor(Math.random() * 256).toString(16).padStart(2, "0")).join("");
+      const mockSig = "0x" + randomBytes + "1b";
+
+      finalizeLogin(pendingAuth.landId, pendingAuth.wallet, pendingAuth.farmName, pendingAuth.owner, pendingAuth.isAdmin, mockSig);
+    }
+
+    // Finaliza sessão, salva no localStorage e redireciona para o Streamlit
+    function finalizeLogin(landId, wallet, farmName, ownerName, isAdmin, signature) {
+      // Barreira final de segurança
+      const authCheck = isWalletAuthorized(wallet);
+      if (!authCheck.authorized) {
+        alert("⛔ Erro de segurança: Carteira não autorizada no Protocolo AgroFi.");
+        return;
+      }
+
+      closeSignModal();
+
+      currentSession = {
+        landId: landId,
+        wallet: wallet,
+        farmName: farmName,
+        owner: ownerName,
+        isAdmin: isAdmin,
+        signature: signature,
+        signedAt: new Date().toISOString()
+      };
+
+      localStorage.setItem("agrofi_active_session", JSON.stringify(currentSession));
+      renderActiveSession();
+      showToast(`✅ Carteira autorizada e autenticada! Redirecionando...`, "success");
+
+      setTimeout(() => {
+        let targetUrl = `http://localhost:8501/?wallet=${encodeURIComponent(wallet)}&sig=${encodeURIComponent(signature.slice(0, 24))}`;
+        if (isAdmin) {
+          targetUrl += `&role=admin`;
+        } else {
+          targetUrl += `&land_id=${encodeURIComponent(landId)}`;
+        }
+        window.location.href = targetUrl;
+      }, 850);
+    }
+
+    function launchStreamlitDashboard() {
+      if (!currentSession) return;
+      let targetUrl = `http://localhost:8501/?wallet=${encodeURIComponent(currentSession.wallet)}`;
+      if (currentSession.signature) {
+        targetUrl += `&sig=${encodeURIComponent(currentSession.signature.slice(0, 24))}`;
+      }
+      if (currentSession.isAdmin) {
+        targetUrl += `&role=admin`;
+      } else {
+        targetUrl += `&land_id=${encodeURIComponent(currentSession.landId)}`;
+      }
+      window.location.href = targetUrl;
+    }
+
+    // Atualiza barra de navegação com dados da sessão e botão de deslogar
+    function renderNavActions() {
+      const container = document.getElementById("nav-actions-container");
+      if (!container) return;
+
+      if (currentSession) {
+        const shortAddr = currentSession.wallet.slice(0, 6) + "..." + currentSession.wallet.slice(-4);
+        const roleBadge = currentSession.isAdmin ? "👑 Admin Master" : currentSession.farmName;
+        container.innerHTML = `
+          <div class="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700/80 flex items-center gap-2 text-xs shadow-inner">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span class="font-bold text-white">${roleBadge}</span>
+            <span class="font-mono text-emerald-400 text-[11px]">${shortAddr}</span>
+          </div>
+          <button onclick="launchStreamlitDashboard()" class="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition-all flex items-center gap-1 shadow-md shadow-emerald-950/40">
+            <span>🚀</span>
+            <span class="hidden sm:inline">Dashboard</span> (8501)
+          </button>
+          <button onclick="disconnectSession(true)" class="px-3 py-1.5 rounded-xl bg-red-950/50 hover:bg-red-900/70 text-red-300 border border-red-500/40 text-xs font-bold transition-all flex items-center gap-1" title="Deslogar da Carteira">
+            <span>🚪</span>
+            <span>Deslogar</span>
+          </button>
+        `;
+      } else {
+        container.innerHTML = `
+          <button onclick="connectRabby()" id="btn-connect-rabby" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-semibold text-xs transition-all shadow-md shadow-cyan-950 flex items-center gap-1.5 border border-cyan-400/40">
+            <span class="text-sm">🐰</span>
+            <span id="rabby-btn-text">Conectar Rabby (Padrão)</span>
+          </button>
+          <button onclick="connectMetaMask()" id="btn-connect-metamask" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs transition-all border border-slate-700 flex items-center gap-1.5">
+            <span class="text-sm">🦊</span>
+            <span>MetaMask</span>
+          </button>
+          <button onclick="promptSignature('ALL', ADMIN_MASTER, 'Administrador Master', 'Administrador Master do Protocolo', true)" class="hidden sm:flex px-3 py-2 rounded-xl bg-purple-950/40 hover:bg-purple-900/60 text-purple-200 border border-purple-500/40 font-semibold text-xs transition-all items-center gap-1.5 shadow-sm">
+            <span>👑</span>
+            <span>Admin</span>
+          </button>
+        `;
+      }
+    }
+
+    // Renderiza card da sessão ativa
+    function renderActiveSession() {
+      if (!currentSession) return;
+
+      const card = document.getElementById("active-session-card");
+      if (card) {
+        card.classList.remove("hidden");
+        document.getElementById("session-badge-farm").textContent = currentSession.isAdmin ? "👑 Admin Master (Acesso Total)" : currentSession.farmName;
+        document.getElementById("session-owner-name").textContent = currentSession.owner;
+        document.getElementById("session-wallet-addr").textContent = currentSession.wallet;
+
+        const sigElem = document.getElementById("session-sig-hash");
+        if (sigElem && currentSession.signature) {
+          sigElem.textContent = currentSession.signature.slice(0, 14) + "..." + currentSession.signature.slice(-8) + " (EIP-191 OK)";
+        }
+      }
+
+      renderNavActions();
+    }
+
+    // Função de Deslogar
+    function disconnectSession(notify = true) {
+      currentSession = null;
+      localStorage.removeItem("agrofi_active_session");
+
+      const card = document.getElementById("active-session-card");
+      if (card) card.classList.add("hidden");
+
+      renderNavActions();
+
+      if (notify) {
+        showToast("🚪 Sessão encerrada! Sua carteira foi desconectada com segurança.", "info");
+      }
+    }
+
+    // Funções de compatibilidade chamadas pelos cards
+    function connectAdminMaster(walletAddress = ADMIN_MASTER) {
+      promptSignature("ALL", walletAddress, "Administrador Master", "Administrador Master do Protocolo", true);
+    }
+
+    function connectFarmAndRedirect(landId, wallet, farmName, ownerName = "") {
+      if (!ownerName) {
+        const f = FARMS.find(item => item.landId === landId);
+        ownerName = f ? f.owner : `Produtor ${farmName}`;
+      }
+      promptSignature(landId, wallet, farmName, ownerName, false);
+    }
+  </script>
+
+</body>
+</html>

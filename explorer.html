@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgroFiScan - Explorador & Comprovantes de Transação</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @media print {
+      body * { visibility: hidden; }
+      #printable-receipt, #printable-receipt * { visibility: visible; }
+      #printable-receipt { position: absolute; left: 0; top: 0; width: 100%; border: none !important; }
+      .no-print { display: none !important; }
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 antialiased min-h-screen flex flex-col justify-between">
+
+  <!-- TOP BAR -->
+  <div class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-4 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-cyan-500 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-emerald-900/30">
+          🔍
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-bold text-lg text-white">AgroFiScan</h1>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold">Local Etherscan</span>
+          </div>
+          <p class="text-xs text-slate-400">Explorador de Blocos e Emissor de Comprovantes de Transação</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 w-full sm:w-auto">
+        <a href="/" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-700 transition-colors flex items-center gap-1.5 whitespace-nowrap">
+          <span>🏠</span> Portal
+        </a>
+        <div class="flex-1 sm:w-72 relative">
+          <input type="text" id="search-input" placeholder="Buscar por Tx Hash (0x...) ou Bloco..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-500/60 font-mono">
+        </div>
+        <button onclick="handleSearch()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium transition-colors">
+          Buscar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <main class="max-w-6xl mx-auto px-4 py-6 w-full space-y-6 flex-1">
+
+    <!-- SEPOLIA QUICK LINKS BANNER -->
+    <div class="bg-gradient-to-r from-purple-950/40 via-slate-900 to-purple-950/30 border border-purple-500/30 rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <span class="text-2xl">🌐</span>
+        <div>
+          <h3 class="text-sm font-bold text-white flex items-center gap-2">
+            Protocolo AgroFi Ativo na Ethereum Sepolia Testnet
+            <span class="px-2 py-0.5 rounded-full text-[10px] bg-purple-500/20 text-purple-300 border border-purple-500/30 font-mono">Chain ID: 11155111</span>
+          </h3>
+          <p class="text-xs text-slate-400">Transações e contratos públicos com comprovantes verificáveis no Sepolia Etherscan</p>
+        </div>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <a href="https://sepolia.etherscan.io/address/0x178B9bFA3E86a9Ed3F67963e28afBe49BCf45ED2" target="_blank" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-mono flex items-center gap-1 transition-all">
+          💵 MockUSDC ↗
+        </a>
+        <a href="https://sepolia.etherscan.io/address/0xb89Cd470755AD1E25052b57D97af6Fc98b00Dfb2" target="_blank" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-mono flex items-center gap-1 transition-all">
+          🌱 AgroNFT ↗
+        </a>
+        <a href="https://sepolia.etherscan.io/address/0x020c06c4d1410B2131e9815c5D25F7Ee90D37a26" target="_blank" class="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-mono flex items-center gap-1 transition-all shadow">
+          🏦 LendingPool ↗
+        </a>
+        <a href="https://sepolia.etherscan.io/address/0xa449e7838fF89EE956174B682449870597e93C71" target="_blank" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-mono flex items-center gap-1 transition-all">
+          👤 Deployer ↗
+        </a>
+      </div>
+    </div>
+
+    <!-- METRICS OVERVIEW -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800 shadow">
+        <span class="text-xs text-slate-400">Rede Blockchain</span>
+        <div class="text-base font-bold font-mono text-white mt-1 flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          Anvil (ID: 31337)
+        </div>
+      </div>
+      <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800 shadow">
+        <span class="text-xs text-slate-400">Último Bloco Minerado</span>
+        <div class="text-base font-bold font-mono text-emerald-400 mt-1" id="stat-block">
+          Carregando...
+        </div>
+      </div>
+      <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800 shadow">
+        <span class="text-xs text-slate-400">Gas Price Atual</span>
+        <div class="text-base font-bold font-mono text-white mt-1" id="stat-gas">
+          ~1.41 Gwei
+        </div>
+      </div>
+      <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800 shadow">
+        <span class="text-xs text-slate-400">Nó Local RPC</span>
+        <div class="text-base font-bold font-mono text-cyan-400 mt-1 truncate">
+          127.0.0.1:8545
+        </div>
+      </div>
+    </div>
+
+    <!-- TRANSACTION RECEIPT MODAL / DETAIL CARD -->
+    <div id="receipt-card" class="hidden bg-slate-900 border border-emerald-500/30 rounded-3xl p-6 shadow-2xl space-y-5 animate-fadeIn">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xl">📄</span>
+            <h2 class="text-lg font-bold text-white">Comprovante Oficial de Transação (Transaction Receipt)</h2>
+          </div>
+          <p class="text-xs text-slate-400">Registro criptográfico imutável gravado no bloco do nó local</p>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="window.print()" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-medium flex items-center gap-1.5 transition-all">
+            <span>🖨️</span> Imprimir / Salvar PDF
+          </button>
+          <button onclick="closeReceipt()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white text-xs font-medium">
+            ✕ Fechar
+          </button>
+        </div>
+      </div>
+
+      <!-- Printable Area -->
+      <div id="printable-receipt" class="space-y-4 text-xs font-mono bg-slate-950/60 p-5 rounded-2xl border border-slate-800">
+        
+        <div class="flex flex-col sm:flex-row justify-between py-2 border-b border-slate-800/80 gap-1">
+          <span class="text-slate-400">Transaction Hash:</span>
+          <span class="text-emerald-400 font-bold break-all" id="rec-hash">0x...</span>
+        </div>
+
+        <div class="flex flex-col sm:flex-row justify-between py-2 border-b border-slate-800/80 gap-1">
+          <span class="text-slate-400">Status da Execução:</span>
+          <span id="rec-status" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 w-fit">
+            ✓ Sucesso (Confirmed On-Chain)
+          </span>
+        </div>
+
+        <div class="flex flex-col sm:flex-row justify-between py-2 border-b border-slate-800/80 gap-1">
+          <span class="text-slate-400">Bloco Minerado:</span>
+          <span class="text-white font-bold" id="rec-block">#0</span>
+        </div>
+
+        <div class="flex flex-col sm:flex-row justify-between py-2 border-b border-slate-800/80 gap-1">
+          <span class="text-slate-400">Horário / Timestamp:</span>
+          <span class="text-slate-300" id="rec-time">15/11/2026, 16:30:00</span>
+        </div>
+
+        <div class="flex flex-col sm:flex-row justify-between py-2 border-b border-slate-800/80 gap-1">
+          <span class="text-slate-400">Remetente (From):</span>
+          <span class="text-slate-200 break-all" id="rec-from">0x...</span>
+        </div>
+
+        <div class="flex flex-col sm:flex-row justify-between py-2 border-b border-slate-800/80 gap-1">
+          <span class="text-slate-400">Contrato / Destinatário (To):</span>
+          <span class="text-cyan-400 break-all font-bold" id="rec-to">0x...</span>
+        </div>
+
+        <div class="flex flex-col sm:flex-row justify-between py-2 border-b border-slate-800/80 gap-1">
+          <span class="text-slate-400">Operação Identificada:</span>
+          <span class="text-amber-400 font-bold" id="rec-action">Operação DeFi AgroFi</span>
+        </div>
+
+        <div class="flex flex-col sm:flex-row justify-between py-2 border-b border-slate-800/80 gap-1">
+          <span class="text-slate-400">Gás Utilizado (Gas Used):</span>
+          <span class="text-slate-300" id="rec-gas">0 units</span>
+        </div>
+
+        <div class="flex flex-col sm:flex-row justify-between py-2 gap-1">
+          <span class="text-slate-400">Logs de Eventos Emitidos:</span>
+          <span class="text-slate-300" id="rec-logs-count">0 eventos</span>
+        </div>
+
+        <!-- Decoded Event Details Box -->
+        <div id="rec-event-box" class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 space-y-2 mt-2">
+          <span class="text-[11px] text-slate-400 uppercase font-semibold block">Auditoria de Evento On-Chain</span>
+          <div id="rec-event-content" class="text-slate-300 text-[11px]">
+            Evento confirmado na EVM.
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- RECENT TRANSACTIONS TABLE -->
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div>
+          <h2 class="font-bold text-white text-base flex items-center gap-2">
+            <span>⚡</span> Últimas Transações Mineradas
+          </h2>
+          <p class="text-xs text-slate-400">Clique em qualquer transação para abrir o Comprovante Oficial detalhado</p>
+        </div>
+        <button onclick="loadLatestTransactions()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium border border-slate-700 transition-colors">
+          ↻ Atualizar Lista
+        </button>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs font-mono">
+          <thead class="text-slate-400 border-b border-slate-800">
+            <tr>
+              <th class="py-2.5 px-3">Tx Hash</th>
+              <th class="py-2.5 px-3">Bloco</th>
+              <th class="py-2.5 px-3">De (From)</th>
+              <th class="py-2.5 px-3">Para (To)</th>
+              <th class="py-2.5 px-3 text-right">Comprovante</th>
+            </tr>
+          </thead>
+          <tbody id="tx-table-body" class="divide-y divide-slate-800/60">
+            <tr>
+              <td colspan="5" class="py-6 text-center text-slate-500">Buscando transações do nó local...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="border-t border-slate-800 py-4 text-center text-xs text-slate-500">
+    AgroFiScan • Explorador Local do Protocolo AgroFi • RPC: http://127.0.0.1:8545
+  </footer>
+
+  <script>
+    const RPC_URL = "http://127.0.0.1:8545";
+    const KNOWN_CONTRACTS = {
+      "0x5fbdb2315678afecb367f032d93f642f64180aa3": "MockUSDC (ERC-20)",
+      "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512": "AgroNFT (ERC-721)",
+      "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0": "LendingPool (DeFi)"
+    };
+
+    const KNOWN_ACCOUNTS = {
+      "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266": "Admin / Oracle",
+      "0x70997970c51812dc3a010c7d01b50e0d17dc79c8": "Produtor Rural",
+      "0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc": "Credor (Lender)",
+      "0x90f79bf6eb2c4f870365e785982e1f101e93b906": "Liquidador"
+    };
+
+    async function rpcCall(method, params = []) {
+      const res = await fetch(RPC_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params })
+      });
+      const data = await res.json();
+      return data.result;
+    }
+
+    async function loadLatestTransactions() {
+      try {
+        const latestBlockHex = await rpcCall("eth_blockNumber");
+        const latestBlockNum = parseInt(latestBlockHex, 16);
+        document.getElementById("stat-block").innerText = "#" + latestBlockNum;
+
+        const tableBody = document.getElementById("tx-table-body");
+        tableBody.innerHTML = "";
+
+        let txCount = 0;
+        // Search backwards across latest 25 blocks for transactions
+        for (let b = latestBlockNum; b >= 0 && txCount < 15; b--) {
+          const blockHex = "0x" + b.toString(16);
+          const block = await rpcCall("eth_getBlockByNumber", [blockHex, true]);
+          if (!block || !block.transactions) continue;
+
+          for (const tx of block.transactions) {
+            txCount++;
+            const tr = document.createElement("tr");
+            tr.className = "hover:bg-slate-800/40 transition-colors";
+
+            const shortHash = tx.hash.slice(0, 10) + "..." + tx.hash.slice(-8);
+            const fromLabel = formatAddress(tx.from);
+            const toLabel = formatAddress(tx.to);
+
+            tr.innerHTML = `
+              <td class="py-3 px-3 text-emerald-400 font-bold">${shortHash}</td>
+              <td class="py-3 px-3 text-slate-300">#${parseInt(tx.blockNumber, 16)}</td>
+              <td class="py-3 px-3 text-slate-400">${fromLabel}</td>
+              <td class="py-3 px-3 text-cyan-400">${toLabel}</td>
+              <td class="py-3 px-3 text-right">
+                <button onclick="viewReceipt('${tx.hash}')" class="px-2.5 py-1 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-[11px] font-medium transition-all">
+                  Ver Comprovante ↗
+                </button>
+              </td>
+            `;
+            tableBody.appendChild(tr);
+          }
+        }
+
+        if (txCount === 0) {
+          tableBody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-slate-500">Nenhuma transação recente encontrada. Execute o teste para gerar transações.</td></tr>`;
+        }
+      } catch (err) {
+        document.getElementById("tx-table-body").innerHTML = `<tr><td colspan="5" class="py-6 text-center text-red-400">Erro ao conectar no nó Anvil (127.0.0.1:8545). Certifique-se de que o nó está ativo.</td></tr>`;
+      }
+    }
+
+    async function viewReceipt(txHash) {
+      try {
+        const receipt = await rpcCall("eth_getTransactionReceipt", [txHash]);
+        const tx = await rpcCall("eth_getTransactionByHash", [txHash]);
+        if (!receipt || !tx) {
+          alert("Transação não encontrada.");
+          return;
+        }
+
+        const isSuccess = receipt.status === "0x1";
+        document.getElementById("rec-hash").innerText = receipt.transactionHash;
+        document.getElementById("rec-block").innerText = "#" + parseInt(receipt.blockNumber, 16);
+        document.getElementById("rec-from").innerText = tx.from + " (" + formatAddress(tx.from) + ")";
+        document.getElementById("rec-to").innerText = tx.to + " (" + formatAddress(tx.to) + ")";
+        document.getElementById("rec-gas").innerText = parseInt(receipt.gasUsed, 16).toLocaleString() + " units";
+        document.getElementById("rec-logs-count").innerText = (receipt.logs ? receipt.logs.length : 0) + " evento(s) emitido(s)";
+        document.getElementById("rec-time").innerText = new Date().toLocaleString();
+
+        const statusEl = document.getElementById("rec-status");
+        if (isSuccess) {
+          statusEl.className = "inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 w-fit";
+          statusEl.innerText = "✓ Sucesso (Confirmed On-Chain)";
+        } else {
+          statusEl.className = "inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-bold bg-red-500/10 text-red-400 border border-red-500/20 w-fit";
+          statusEl.innerText = "✕ Falha / Revertida";
+        }
+
+        // Action inference
+        const actionEl = document.getElementById("rec-action");
+        const toLower = (tx.to || "").toLowerCase();
+        let actionDesc = "Interação com Smart Contract";
+        let detailDesc = "Transação executada com sucesso na máquina virtual EVM.";
+
+        if (toLower.includes("5fbdb2315678afecb367f032d93f642f64180aa3")) {
+          actionDesc = "MockUSDC: Emissão ou Transferência de Stablecoin";
+          detailDesc = "Emissão ou transferência de tokens USDC para financiamento ou liquidez agrícola.";
+        } else if (toLower.includes("e7f1725e7734ce288f8367e1bb143e90bb3f0512")) {
+          actionDesc = "AgroNFT: Tokenização de Safra / Atualização de Colateral";
+          detailDesc = "Registro de colateral agrícola digital com metadados georreferenciados (IPFS).";
+        } else if (toLower.includes("9fe46736679d2d9a65f0992f2272de9f3c7fa6e0")) {
+          actionDesc = "LendingPool: Operação de Crédito DeFi";
+          detailDesc = "Depósito de liquidez, liberação de empréstimo (borrow) ou quitação de dívida (repay).";
+        }
+        actionEl.innerText = actionDesc;
+        document.getElementById("rec-event-content").innerText = detailDesc;
+
+        // Show card & scroll
+        const receiptCard = document.getElementById("receipt-card");
+        receiptCard.classList.remove("hidden");
+        receiptCard.scrollIntoView({ behavior: "smooth" });
+      } catch (e) {
+        alert("Erro ao carregar comprovante: " + e.message);
+      }
+    }
+
+    function closeReceipt() {
+      document.getElementById("receipt-card").classList.add("hidden");
+    }
+
+    function formatAddress(addr) {
+      if (!addr) return "Deploy de Contrato";
+      const lower = addr.toLowerCase();
+      if (KNOWN_CONTRACTS[lower]) return KNOWN_CONTRACTS[lower];
+      if (KNOWN_ACCOUNTS[lower]) return KNOWN_ACCOUNTS[lower];
+      return addr.slice(0, 6) + "..." + addr.slice(-4);
+    }
+
+    function handleSearch() {
+      const q = document.getElementById("search-input").value.trim();
+      if (!q) return;
+      if (q.startsWith("0x") && q.length === 66) {
+        viewReceipt(q);
+      } else {
+        alert("Digite um Hash de Transação válido (iniciando com 0x...)");
+      }
+    }
+
+    // Auto load on open
+    loadLatestTransactions();
+  </script>
+</body>
+</html>

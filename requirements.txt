@@ -1,0 +1,40 @@
+# ==========================================
+# 🌱 AgroFi - Dependências Unificadas (Web3, ML & Visualização)
+# ==========================================
+
+# --- Web3, Blockchain & Middleware ---
+web3>=6.15.0
+eth-account>=0.11.0
+eth-typing>=3.5.0
+eth-utils>=2.3.0
+
+# --- API & Servidor HTTP Backend ---
+fastapi>=0.110.0
+uvicorn>=0.28.0
+pydantic>=2.6.0
+requests>=2.31.0
+python-dotenv>=1.0.0
+python-multipart>=0.0.9
+
+# --- Ciência de Dados & Machine Learning ---
+numpy>=1.24.0,<2.3.0
+pandas>=2.0.0
+scipy>=1.10.0
+scikit-learn>=1.3.0
+lightgbm>=4.0.0
+xgboost>=2.0.0
+matplotlib>=3.7.0
+
+# --- Geoprocessamento & Sensoriamento Remoto ---
+shapely>=2.0.0
+geopandas>=0.14.0
+rasterio>=1.3.0
+pyproj>=3.6.0
+
+# --- Frontend & Visualização Interativa ---
+streamlit>=1.30.0
+pyarrow>=14.0.0
+altair>=5.0.0
+
+# --- Testes Automatizados & Qualidade de Código ---
+pytest>=7.4.0

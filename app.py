@@ -23,51 +23,78 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Estilização Customizada CSS
+# Estilização Customizada CSS (Paleta de Cores Modo Claro AgroFi)
 st.markdown("""
 <style>
+    /* Fundo geral e tipografia */
+    .stApp {
+        background-color: #F7F9F6;
+        color: #1A2E20;
+    }
+    
+    /* Cards de métricas */
     .metric-card {
-        background-color: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 16px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        background-color: #FFFFFF;
+        border: 1px solid #E2E8E2;
+        border-radius: 12px;
+        padding: 18px;
+        box-shadow: 0 4px 16px -2px rgba(26, 46, 32, 0.05);
     }
     .metric-title {
         font-size: 13px;
-        color: #64748b;
-        font-weight: 600;
+        color: #556B5C;
+        font-weight: 700;
         text-transform: uppercase;
-        margin-bottom: 4px;
+        margin-bottom: 6px;
+        letter-spacing: 0.5px;
     }
     .metric-value {
         font-size: 26px;
-        font-weight: 700;
-        color: #0f172a;
+        font-weight: 800;
+        color: #1A2E20;
     }
+    
+    /* Badges de Status */
     .badge-safe {
-        background-color: #dcfce7;
-        color: #15803d;
-        padding: 4px 10px;
+        background-color: #E8F5E9;
+        color: #00897B;
+        padding: 4px 12px;
         border-radius: 12px;
-        font-weight: 600;
+        font-weight: 700;
         font-size: 12px;
+        border: 1px solid #C8E6C9;
     }
     .badge-warn {
-        background-color: #fef9c3;
-        color: #a16207;
-        padding: 4px 10px;
+        background-color: #FFF3E0;
+        color: #E67E22;
+        padding: 4px 12px;
         border-radius: 12px;
-        font-weight: 600;
+        font-weight: 700;
         font-size: 12px;
+        border: 1px solid #FFE082;
     }
     .badge-danger {
-        background-color: #fee2e2;
-        color: #b91c1c;
-        padding: 4px 10px;
+        background-color: #FFEBEE;
+        color: #C62828;
+        padding: 4px 12px;
         border-radius: 12px;
-        font-weight: 600;
+        font-weight: 700;
         font-size: 12px;
+        border: 1px solid #FFCDD2;
+    }
+    
+    /* Botões personalizados */
+    div.stButton > button:first-child {
+        background-color: #00897B;
+        color: #FFFFFF;
+        font-weight: 700;
+        border-radius: 10px;
+        border: none;
+        box-shadow: 0 2px 8px rgba(0, 137, 123, 0.2);
+    }
+    div.stButton > button:first-child:hover {
+        background-color: #00695C;
+        color: #FFFFFF;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -112,21 +139,21 @@ for lid, f_info in farms_config.items():
 if not param_wallet or (not is_admin and not farmer_farm):
     st.error("⛔ ACESSO RESTRITO - CARTEIRA NÃO CADASTRADA")
     st.markdown(f"""
-    <div style="background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.45); border-radius: 14px; padding: 24px; color: #fca5a5; margin-bottom: 25px;">
-        <h3 style="color: #ef4444; margin-top: 0; font-size: 20px;">🔒 Acesso Restrito ao Protocolo AgroFi</h3>
-        <p style="font-size: 14px; line-height: 1.6;">O acesso ao Dashboard de Inteligência Geoespacial, Valoração de Colaterais e Oráculos de Crédito é <b>estritamente restrito</b> às carteiras autorizadas.</p>
-        <p style="font-size: 13px;"><b>Carteira Conectada:</b> <code style="background: rgba(0,0,0,0.5); padding: 4px 10px; border-radius: 6px; color: #ffffff; font-family: monospace;">{param_wallet if param_wallet else 'Nenhuma carteira conectada'}</code></p>
-        <div style="margin-top: 15px; padding: 14px; background: rgba(0,0,0,0.35); border-radius: 10px; font-size: 12px; border: 1px solid rgba(255,255,255,0.08);">
-            <b style="color: #ffffff;">Carteiras Autorizadas pelo Protocolo:</b>
-            <ul style="margin: 8px 0 0 18px; padding: 0; line-height: 1.8;">
-                <li>👑 <b>Administrador Master:</b> <code style="color: #c084fc;">0xa449e7838fF89EE956174B682449870597e93C71</code></li>
-                <li>🌾 <b>Fazenda Santa Helena (MT):</b> <code style="color: #34d399;">0xfdb2A29d047A8f10E0BC354b2E45C7Af386D112E</code></li>
-                <li>🌱 <b>Fazenda Boa Esperança (GO):</b> <code style="color: #38bdf8;">0xC7C8931F662D9064ff495508AeA2AfA15E446D80</code></li>
-                <li>🌿 <b>Agropecuária Chapadão (MT):</b> <code style="color: #fbbf24;">0xFf3b53ca866BCfEC18F1DD3cDff0A03776ab49b5</code></li>
-                <li>🌽 <b>Fazenda Ouro Verde (BA):</b> <code style="color: #d8b4fe;">0x35474822f1A45c0D2C0ddeb4D8Ff53fD8BD29ef7</code></li>
+    <div style="background: #FFFFFF; border: 2px solid #E67E22; border-radius: 16px; padding: 26px; color: #1A2E20; margin-bottom: 25px; box-shadow: 0 10px 25px -4px rgba(230,126,34,0.12);">
+        <h3 style="color: #E67E22; margin-top: 0; font-size: 20px; font-weight: 800;">🔒 Acesso Restrito ao Protocolo AgroFi</h3>
+        <p style="font-size: 14px; line-height: 1.6; color: #556B5C;">O acesso ao Dashboard de Inteligência Geoespacial, Valoração de Colaterais e Oráculos de Crédito é <b>estritamente restrito</b> às carteiras autorizadas.</p>
+        <p style="font-size: 13px; color: #1A2E20;"><b>Carteira Conectada:</b> <code style="background: #F7F9F6; padding: 4px 10px; border-radius: 6px; color: #00897B; border: 1px solid #E2E8E2; font-family: monospace; font-weight: bold;">{param_wallet if param_wallet else 'Nenhuma carteira conectada'}</code></p>
+        <div style="margin-top: 15px; padding: 16px; background: #F7F9F6; border-radius: 12px; font-size: 12px; border: 1px solid #E2E8E2;">
+            <b style="color: #1A2E20;">Carteiras Autorizadas pelo Protocolo:</b>
+            <ul style="margin: 8px 0 0 18px; padding: 0; line-height: 1.8; color: #556B5C;">
+                <li>👑 <b>Administrador Master:</b> <code style="color: #E67E22; font-weight: bold;">0xa449e7838fF89EE956174B682449870597e93C71</code></li>
+                <li>🌾 <b>Fazenda Santa Helena (MT):</b> <code style="color: #00897B; font-weight: bold;">0xfdb2A29d047A8f10E0BC354b2E45C7Af386D112E</code></li>
+                <li>🌱 <b>Fazenda Boa Esperança (GO):</b> <code style="color: #00897B; font-weight: bold;">0xC7C8931F662D9064ff495508AeA2AfA15E446D80</code></li>
+                <li>🌿 <b>Agropecuária Chapadão (MT):</b> <code style="color: #00897B; font-weight: bold;">0xFf3b53ca866BCfEC18F1DD3cDff0A03776ab49b5</code></li>
+                <li>🌽 <b>Fazenda Ouro Verde (BA):</b> <code style="color: #00897B; font-weight: bold;">0x35474822f1A45c0D2C0ddeb4D8Ff53fD8BD29ef7</code></li>
             </ul>
         </div>
-        <a href="http://localhost:8080" style="display: inline-block; background: #10b981; color: #022c22; padding: 10px 22px; border-radius: 10px; text-decoration: none; font-weight: 800; margin-top: 18px;">⬅ Voltar ao Portal e Conectar Carteira Válida</a>
+        <a href="http://localhost:8080" style="display: inline-block; background: #00897B; color: #FFFFFF; padding: 10px 22px; border-radius: 10px; text-decoration: none; font-weight: 800; margin-top: 18px; box-shadow: 0 4px 12px rgba(0,137,123,0.25);">⬅ Voltar ao Portal e Conectar Carteira Válida</a>
     </div>
     """, unsafe_allow_html=True)
     st.stop()
@@ -150,13 +177,13 @@ if is_admin:
                 break
 
     param_sig = query_params.get("sig", "").strip()
-    sig_display = f"""<div style="font-size: 10px; color: #c084fc; font-family: monospace; margin-top: 4px; word-break: break-all;">✍️ Assinatura: {param_sig[:10]}...{param_sig[-8:]} (Verificada)</div>""" if param_sig else """<div style="font-size: 10px; color: #a855f7; font-family: monospace; margin-top: 4px;">✍️ Autenticado com Assinatura Web3</div>"""
+    sig_display = f"""<div style="font-size: 10px; color: #E67E22; font-family: monospace; margin-top: 4px; word-break: break-all; font-weight: bold;">✍️ Assinatura: {param_sig[:10]}...{param_sig[-8:]} (Verificada)</div>""" if param_sig else """<div style="font-size: 10px; color: #E67E22; font-family: monospace; margin-top: 4px; font-weight: bold;">✍️ Autenticado com Assinatura Web3</div>"""
 
     st.sidebar.markdown(f"""
-    <div style="background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.45); border-radius: 10px; padding: 12px; margin-top: 8px; margin-bottom: 12px;">
-        <div style="font-size: 11px; color: #c084fc; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">👑 Administrador Master</div>
-        <div style="font-size: 12px; color: #f8fafc; font-weight: 600; margin-top: 2px;">Acesso Global a Todas as Fazendas</div>
-        <div style="font-family: monospace; font-size: 11px; color: #d8b4fe; word-break: break-all; margin-top: 4px; background: rgba(0,0,0,0.3); padding: 4px 6px; border-radius: 6px;">{param_wallet}</div>
+    <div style="background: #FFF8E1; border: 1.5px solid #FFE082; border-radius: 12px; padding: 14px; margin-top: 8px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(230,126,34,0.08);">
+        <div style="font-size: 11px; color: #E67E22; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">👑 Administrador Master</div>
+        <div style="font-size: 12px; color: #1A2E20; font-weight: 700; margin-top: 2px;">Acesso Global a Todas as Fazendas</div>
+        <div style="font-family: monospace; font-size: 11px; color: #00897B; word-break: break-all; margin-top: 4px; background: #FFFFFF; border: 1px solid #E2E8E2; padding: 4px 6px; border-radius: 6px; font-weight: bold;">{param_wallet}</div>
         {sig_display}
     </div>
     """, unsafe_allow_html=True)
@@ -185,13 +212,13 @@ elif farmer_farm:
     connected_wallet = farmer_farm["wallet_address"]
     wallet_owner = farmer_farm.get("owner_name", f"Produtor {farmer_farm['farm_name']}")
     param_sig = query_params.get("sig", "").strip()
-    sig_display = f"""<div style="font-size: 10px; color: #34d399; font-family: monospace; margin-top: 4px; word-break: break-all;">✍️ Assinatura: {param_sig[:10]}...{param_sig[-8:]} (Verificada)</div>""" if param_sig else """<div style="font-size: 10px; color: #10b981; font-family: monospace; margin-top: 4px;">✍️ Autenticado com Assinatura Web3</div>"""
+    sig_display = f"""<div style="font-size: 10px; color: #00897B; font-family: monospace; margin-top: 4px; word-break: break-all; font-weight: bold;">✍️ Assinatura: {param_sig[:10]}...{param_sig[-8:]} (Verificada)</div>""" if param_sig else """<div style="font-size: 10px; color: #00897B; font-family: monospace; margin-top: 4px; font-weight: bold;">✍️ Autenticado com Assinatura Web3</div>"""
 
     st.sidebar.markdown(f"""
-    <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 10px; padding: 12px; margin-top: 8px; margin-bottom: 12px;">
-        <div style="font-size: 11px; color: #10b981; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">🌾 Produtor Rural Autenticado</div>
-        <div style="font-size: 12px; color: #f8fafc; font-weight: 600; margin-top: 2px;">{wallet_owner}</div>
-        <div style="font-family: monospace; font-size: 11px; color: #94a3b8; word-break: break-all; margin-top: 4px; background: rgba(0,0,0,0.3); padding: 4px 6px; border-radius: 6px;">{connected_wallet}</div>
+    <div style="background: #E8F5E9; border: 1.5px solid #A7F3D0; border-radius: 12px; padding: 14px; margin-top: 8px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,137,123,0.08);">
+        <div style="font-size: 11px; color: #00897B; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">🌾 Produtor Rural Autenticado</div>
+        <div style="font-size: 12px; color: #1A2E20; font-weight: 700; margin-top: 2px;">{wallet_owner}</div>
+        <div style="font-family: monospace; font-size: 11px; color: #00897B; word-break: break-all; margin-top: 4px; background: #FFFFFF; border: 1px solid #E2E8E2; padding: 4px 6px; border-radius: 6px; font-weight: bold;">{connected_wallet}</div>
         {sig_display}
     </div>
     """, unsafe_allow_html=True)
@@ -276,45 +303,45 @@ mc_results = orchestrator.risk_engine.simulate_monte_carlo_distribution(
 # Banner Superior de Autenticação Web3 (Diferenciado por Papel)
 if is_admin:
     st.markdown(f"""
-    <div style="background: linear-gradient(135deg, #4c1d95 0%, #581c87 50%, #6b21a8 100%); padding: 14px 20px; border-radius: 14px; margin-bottom: 20px; color: white; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; box-shadow: 0 4px 14px rgba(88,28,135,0.4); border: 1px solid rgba(192,132,252,0.4);">
+    <div style="background: linear-gradient(135deg, #1A2E20 0%, #004D40 100%); padding: 16px 22px; border-radius: 16px; margin-bottom: 20px; color: white; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; box-shadow: 0 8px 20px rgba(26,46,32,0.15); border: 1.5px solid #00897B;">
         <div>
             <div style="display: flex; align-items: center; gap: 8px;">
                 <span style="font-size: 20px;">👑</span>
-                <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; background: rgba(255,255,255,0.2); padding: 3px 10px; border-radius: 20px;">Administrador Master • Acesso Total</span>
-                <span style="font-size: 11px; font-weight: 600; color: #e9d5ff;">Sepolia / Anvil Local</span>
+                <span style="font-size: 11px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; background: rgba(255,255,255,0.18); padding: 3px 10px; border-radius: 20px; color: #FFFFFF;">Administrador Master • Acesso Total</span>
+                <span style="font-size: 11px; font-weight: 600; color: #00E676;">Sepolia / Anvil Local</span>
             </div>
             <div style="font-size: 16px; font-weight: 700; margin-top: 6px;">
-                Carteira Master: <code style="background: rgba(0,0,0,0.35); padding: 3px 8px; border-radius: 6px; color: #f0abfc; font-family: monospace; font-size: 13px;">{connected_wallet}</code>
+                Carteira Master: <code style="background: rgba(0,0,0,0.3); padding: 3px 8px; border-radius: 6px; color: #00E676; font-family: monospace; font-size: 13px;">{connected_wallet}</code>
             </div>
-            <div style="font-size: 12px; opacity: 0.9; margin-top: 2px;">
+            <div style="font-size: 12px; opacity: 0.9; margin-top: 2px; color: #E2E8E2;">
                 Inspecionando: <b>{parcel_meta['farm_name']}</b> ({parcel_meta['municipality']}/{parcel_meta['state']}) • Permissão Global de Gestão & Oráculo
             </div>
         </div>
         <div style="display: flex; align-items: center; gap: 10px;">
-            <a href="http://localhost:8080/dashboard.html" target="_blank" style="background: rgba(255,255,255,0.15); color: #f3e8ff; padding: 7px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3);">⚡ Painel DeFi</a>
-            <a href="http://localhost:8080" target="_self" style="background: #a855f7; color: white; padding: 7px 16px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; box-shadow: 0 2px 8px rgba(168,85,247,0.5);">🏠 Portal AgroFi (8080)</a>
+            <a href="http://localhost:8080/dashboard.html" target="_blank" style="background: rgba(255,255,255,0.15); color: #FFFFFF; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3);">⚡ Painel DeFi</a>
+            <a href="http://localhost:8080" target="_self" style="background: #00E676; color: #1A2E20; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 800; box-shadow: 0 2px 8px rgba(0,230,118,0.4);">🏠 Portal AgroFi (8080)</a>
         </div>
     </div>
     """, unsafe_allow_html=True)
 else:
     st.markdown(f"""
-    <div style="background: linear-gradient(135deg, #064e3b 0%, #065f46 50%, #047857 100%); padding: 14px 20px; border-radius: 14px; margin-bottom: 20px; color: white; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; box-shadow: 0 4px 14px rgba(6,78,59,0.3); border: 1px solid rgba(52,211,153,0.35);">
+    <div style="background: linear-gradient(135deg, #00897B 0%, #00695C 100%); padding: 16px 22px; border-radius: 16px; margin-bottom: 20px; color: white; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; box-shadow: 0 8px 20px rgba(0,137,123,0.15); border: 1.5px solid #00E676;">
         <div>
             <div style="display: flex; align-items: center; gap: 8px;">
                 <span style="font-size: 20px;">🌾</span>
-                <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; background: rgba(255,255,255,0.15); padding: 3px 10px; border-radius: 20px;">Fazenda Conectada via Web3</span>
-                <span style="font-size: 11px; font-weight: 600; color: #a7f3d0;">Acesso Exclusivo do Produtor Titular</span>
+                <span style="font-size: 11px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; background: rgba(255,255,255,0.18); padding: 3px 10px; border-radius: 20px; color: #FFFFFF;">Fazenda Conectada via Web3</span>
+                <span style="font-size: 11px; font-weight: 600; color: #00E676;">Acesso Exclusivo do Produtor Titular</span>
             </div>
             <div style="font-size: 16px; font-weight: 700; margin-top: 6px;">
-                {parcel_meta['farm_name']} • Carteira: <code style="background: rgba(0,0,0,0.35); padding: 3px 8px; border-radius: 6px; color: #6ee7b7; font-family: monospace; font-size: 13px;">{connected_wallet}</code>
+                {parcel_meta['farm_name']} • Carteira: <code style="background: rgba(0,0,0,0.3); padding: 3px 8px; border-radius: 6px; color: #00E676; font-family: monospace; font-size: 13px;">{connected_wallet}</code>
             </div>
-            <div style="font-size: 12px; opacity: 0.85; margin-top: 2px;">
+            <div style="font-size: 12px; opacity: 0.9; margin-top: 2px; color: #E2E8E2;">
                 Titular: {wallet_owner} | Limite Aprovado: ${farm_info.get('credit_limit_usd', 250000):,.2f} USDC
             </div>
         </div>
         <div style="display: flex; align-items: center; gap: 10px;">
-            <a href="http://localhost:8080/dashboard.html" target="_blank" style="background: rgba(255,255,255,0.12); color: #e2e8f0; padding: 7px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 600; border: 1px solid rgba(255,255,255,0.2);">⚡ Painel DeFi</a>
-            <a href="http://localhost:8080" target="_self" style="background: #10b981; color: white; padding: 7px 16px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; box-shadow: 0 2px 8px rgba(16,185,129,0.5);">🏠 Portal AgroFi (8080)</a>
+            <a href="http://localhost:8080/dashboard.html" target="_blank" style="background: rgba(255,255,255,0.15); color: #FFFFFF; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3);">⚡ Painel DeFi</a>
+            <a href="http://localhost:8080" target="_self" style="background: #00E676; color: #1A2E20; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 800; box-shadow: 0 2px 8px rgba(0,230,118,0.4);">🏠 Portal AgroFi (8080)</a>
         </div>
     </div>
     """, unsafe_allow_html=True)

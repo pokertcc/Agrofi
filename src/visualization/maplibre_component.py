@@ -45,14 +45,14 @@ def render_maplibre_html(
                 max-width: 250px;
                 z-index: 1;
             }}
-            .map-overlay h4 {{ margin: 0 0 6px 0; color: #1e293b; font-size: 14px; }}
-            .legend-item {{ display: flex; align-items: center; margin-bottom: 4px; }}
+            .map-overlay h4 {{ margin: 0 0 6px 0; color: #1A2E20; font-size: 14px; font-weight: 800; }}
+            .legend-item {{ display: flex; align-items: center; margin-bottom: 4px; color: #556B5C; }}
             .legend-color {{ width: 14px; height: 14px; border-radius: 3px; margin-right: 8px; }}
-            .basemap-switch {{ margin-top: 10px; padding-top: 8px; border-top: 1px solid #cbd5e1; font-weight: 600; }}
+            .basemap-switch {{ margin-top: 10px; padding-top: 8px; border-top: 1px solid #E2E8E2; font-weight: 600; color: #556B5C; }}
             .basemap-btn {{
-                background: #f1f5f9; border: 1px solid #94a3b8; border-radius: 4px; padding: 3px 8px; font-size: 11px; cursor: pointer; margin-right: 4px; margin-top: 4px;
+                background: #F7F9F6; border: 1px solid #E2E8E2; border-radius: 6px; padding: 4px 10px; font-size: 11px; cursor: pointer; margin-right: 4px; margin-top: 4px; color: #1A2E20; font-weight: 600;
             }}
-            .basemap-btn.active {{ background: #0284c7; color: #ffffff; border-color: #0369a1; }}
+            .basemap-btn.active {{ background: #00897B; color: #ffffff; border-color: #00695C; font-weight: 700; }}
             .maplibregl-popup-content {{
                 padding: 12px;
                 border-radius: 8px;

@@ -5,7 +5,34 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AgroFi Protocol - Painel Visual Web3 & DeFi</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            agro: {
+              primary: '#00897B',
+              'primary-dark': '#00695C',
+              'primary-light': '#E0F2F1',
+              highlight: '#00E676',
+              bg: '#F7F9F6',
+              card: '#FFFFFF',
+              border: '#E2E8E2',
+              text: '#1A2E20',
+              sub: '#556B5C',
+              alert: '#E67E22'
+            }
+          }
+        }
+      }
+    }
+  </script>
   <style>
+    body {
+      background-color: #F7F9F6;
+      color: #1A2E20;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
     .gauge-fill {
       transition: width 0.5s ease-in-out, background-color 0.5s ease-in-out;
     }
@@ -16,38 +43,44 @@
       0%, 100% { opacity: 1; transform: scale(1); }
       50% { opacity: 0.85; transform: scale(1.02); }
     }
+    .agro-card {
+      background: #FFFFFF;
+      border: 1px solid #E2E8E2;
+      border-radius: 1rem;
+      box-shadow: 0 4px 16px -2px rgba(26, 46, 32, 0.04);
+    }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 antialiased p-4 md:p-6 min-h-screen">
+<body class="bg-[#F7F9F6] text-[#1A2E20] antialiased p-4 md:p-6 min-h-screen">
 
   <div class="max-w-6xl mx-auto space-y-6">
 
     <!-- HEADER -->
-    <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/80 backdrop-blur border border-slate-800 rounded-2xl p-5 shadow-lg">
+    <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white border border-[#E2E8E2] rounded-2xl p-5 shadow-sm">
       <div class="flex items-center space-x-3">
-        <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold text-2xl">
+        <div class="w-12 h-12 rounded-xl bg-[#E0F2F1] border border-[#B2DFDB] flex items-center justify-center text-[#00897B] font-bold text-2xl">
           🌾
         </div>
         <div>
           <div class="flex items-center gap-2">
-            <h1 class="text-xl font-bold tracking-tight text-white">AgroFi Protocol</h1>
-            <span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Web3 Infrastructure</span>
+            <h1 class="text-xl font-extrabold tracking-tight text-[#1A2E20]">AgroFi Protocol</h1>
+            <span class="px-2 py-0.5 text-xs font-bold rounded-full bg-[#E0F2F1] text-[#00897B] border border-[#B2DFDB]">Web3 Infrastructure</span>
           </div>
-          <p class="text-xs text-slate-400">Crédito Descentralizado Paramétrico com Colateral Agrícola Tokenizado</p>
+          <p class="text-xs text-[#556B5C]">Crédito Descentralizado Paramétrico com Colateral Agrícola Tokenizado</p>
         </div>
       </div>
 
       <div class="flex flex-wrap items-center gap-2">
-        <a href="/" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-700 transition-colors flex items-center gap-1.5">
+        <a href="/" class="px-3.5 py-2 rounded-xl bg-white hover:bg-[#F7F9F6] text-xs font-bold text-[#1A2E20] border border-[#E2E8E2] transition-colors flex items-center gap-1.5 shadow-xs">
           <span>🏠</span> Portal Principal
         </a>
-        <a href="http://localhost:8501" target="_blank" class="px-3 py-1.5 rounded-xl bg-emerald-600/30 hover:bg-emerald-600/40 text-xs font-semibold text-emerald-300 border border-emerald-500/40 transition-colors flex items-center gap-1.5">
+        <a href="http://localhost:8501" target="_blank" class="px-3.5 py-2 rounded-xl bg-[#00897B] hover:bg-[#00695C] text-xs font-bold text-white transition-colors flex items-center gap-1.5 shadow-xs">
           <span>🌾</span> Mapa & Risco (8501) ↗
         </a>
-        <div class="px-3 py-1.5 rounded-xl bg-purple-500/10 border border-purple-500/30 text-xs flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></span>
-          <span class="text-slate-400">Sepolia:</span>
-          <a href="https://sepolia.etherscan.io/address/0x020c06c4d1410B2131e9815c5D25F7Ee90D37a26" target="_blank" class="font-mono font-medium text-purple-300 hover:underline">
+        <div class="px-3 py-1.5 rounded-xl bg-[#FFF8E1] border border-[#FFE082] text-xs flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-[#E67E22] animate-pulse"></span>
+          <span class="text-[#556B5C]">Sepolia:</span>
+          <a href="https://sepolia.etherscan.io/address/0x020c06c4d1410B2131e9815c5D25F7Ee90D37a26" target="_blank" class="font-mono font-bold text-[#00897B] hover:underline">
             11155111 ↗
           </a>
         </div>
@@ -56,37 +89,37 @@
 
     <!-- KEY STATS METRICS -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow">
-        <span class="text-xs text-slate-400 font-medium">Liquidez da Pool (MockUSDC)</span>
-        <div class="text-2xl font-bold mt-1 text-white" id="metric-liquidity">$300,000.00</div>
-        <div class="text-xs text-emerald-400 mt-1 flex items-center gap-1">
+      <div class="agro-card p-4">
+        <span class="text-xs text-[#556B5C] font-semibold">Liquidez da Pool (MockUSDC)</span>
+        <div class="text-2xl font-extrabold mt-1 text-[#1A2E20]" id="metric-liquidity">$300,000.00</div>
+        <div class="text-xs text-[#00897B] mt-1 flex items-center gap-1 font-bold">
           <span>●</span> 100% Solvente & Ativa
         </div>
       </div>
 
-      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow">
-        <span class="text-xs text-slate-400 font-medium">Dívida Ativa Tomada</span>
-        <div class="text-2xl font-bold mt-1 text-white" id="metric-debt">$50,000.00</div>
-        <div class="text-xs text-slate-400 mt-1" id="metric-borrower">
-          Tomador: Fazenda Santa Fé
+      <div class="agro-card p-4">
+        <span class="text-xs text-[#556B5C] font-semibold">Dívida Ativa Tomada</span>
+        <div class="text-2xl font-extrabold mt-1 text-[#1A2E20]" id="metric-debt">$50,000.00</div>
+        <div class="text-xs text-[#556B5C] mt-1 font-medium" id="metric-borrower">
+          Tomador: Fazenda Santa Helena
         </div>
       </div>
 
-      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow">
-        <span class="text-xs text-slate-400 font-medium">Avaliação da Safra (AgroNFT #1)</span>
-        <div class="text-2xl font-bold mt-1 text-emerald-400" id="metric-appraisal">$100,000.00</div>
-        <div class="text-xs text-slate-400 mt-1">
+      <div class="agro-card p-4">
+        <span class="text-xs text-[#556B5C] font-semibold">Avaliação da Safra (AgroNFT #1)</span>
+        <div class="text-2xl font-extrabold mt-1 text-[#00897B]" id="metric-appraisal">$100,000.00</div>
+        <div class="text-xs text-[#556B5C] mt-1 font-medium">
           500 ha de Soja (IPFS bafy...)
         </div>
       </div>
 
-      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow">
-        <span class="text-xs text-slate-400 font-medium">Fator de Saúde (Health Factor)</span>
-        <div class="text-2xl font-bold mt-1 flex items-baseline gap-2" id="metric-hf-container">
-          <span id="metric-hf" class="text-emerald-400">1.50x</span>
-          <span id="metric-hf-status" class="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">SEGURO</span>
+      <div class="agro-card p-4">
+        <span class="text-xs text-[#556B5C] font-semibold">Fator de Saúde (Health Factor)</span>
+        <div class="text-2xl font-extrabold mt-1 flex items-baseline gap-2" id="metric-hf-container">
+          <span id="metric-hf" class="text-[#00897B]">1.50x</span>
+          <span id="metric-hf-status" class="text-xs font-bold px-2 py-0.5 rounded bg-[#E8F5E9] text-[#00897B] border border-[#C8E6C9]">SEGURO</span>
         </div>
-        <div class="text-xs text-slate-400 mt-1">
+        <div class="text-xs text-[#556B5C] mt-1">
           Limite de Liquidação: &lt; 1.00x
         </div>
       </div>
@@ -96,33 +129,33 @@
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
       <!-- LEFT: ORACLE & SENSOR SIMULATOR (7 COLS) -->
-      <div class="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow space-y-5">
-        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+      <div class="lg:col-span-7 agro-card p-5 space-y-5">
+        <div class="flex items-center justify-between border-b border-[#E2E8E2] pb-3">
           <div>
-            <h2 class="text-base font-semibold text-white flex items-center gap-2">
+            <h2 class="text-base font-bold text-[#1A2E20] flex items-center gap-2">
               <span>🛰️</span> Oráculo Agronômico & Injeção de Risco (Web3.py)
             </h2>
-            <p class="text-xs text-slate-400">Simule condições de satélite e clima para atualizar o contrato inteligente em tempo real</p>
+            <p class="text-xs text-[#556B5C]">Simule condições de satélite e clima para atualizar o contrato inteligente em tempo real</p>
           </div>
-          <span class="text-xs px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">
+          <span class="text-xs px-2.5 py-1 rounded-full bg-[#E0F2F1] text-[#00897B] border border-[#B2DFDB] font-mono font-bold">
             updateLTVAndHealthFactor()
           </span>
         </div>
 
         <!-- Presets -->
         <div class="space-y-2">
-          <label class="text-xs font-medium text-slate-400">Cenários Prontos para Teste:</label>
+          <label class="text-xs font-bold text-[#556B5C]">Cenários Prontos para Teste:</label>
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            <button onclick="setScenario('optimal')" class="px-3 py-2 text-xs font-medium rounded-lg bg-slate-800/80 hover:bg-emerald-500/10 hover:text-emerald-400 hover:border-emerald-500/30 border border-slate-700/60 transition-all text-slate-300">
+            <button onclick="setScenario('optimal')" class="px-3 py-2 text-xs font-bold rounded-lg bg-[#E0F2F1] hover:bg-[#B2DFDB] text-[#00897B] border border-[#B2DFDB] transition-all">
               ☀️ Clima Ideal
             </button>
-            <button onclick="setScenario('moderate')" class="px-3 py-2 text-xs font-medium rounded-lg bg-slate-800/80 hover:bg-amber-500/10 hover:text-amber-400 hover:border-amber-500/30 border border-slate-700/60 transition-all text-slate-300">
+            <button onclick="setScenario('moderate')" class="px-3 py-2 text-xs font-bold rounded-lg bg-[#FFF8E1] hover:bg-[#FFE082] text-[#E67E22] border border-[#FFE082] transition-all">
               ⛅ Estresse Médio
             </button>
-            <button onclick="setScenario('drought')" class="px-3 py-2 text-xs font-medium rounded-lg bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500/20 transition-all font-semibold">
+            <button onclick="setScenario('drought')" class="px-3 py-2 text-xs font-bold rounded-lg bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 transition-all">
               🔥 Seca Severa
             </button>
-            <button onclick="setScenario('frost')" class="px-3 py-2 text-xs font-medium rounded-lg bg-slate-800/80 hover:bg-blue-500/10 hover:text-blue-400 hover:border-blue-500/30 border border-slate-700/60 transition-all text-slate-300">
+            <button onclick="setScenario('frost')" class="px-3 py-2 text-xs font-bold rounded-lg bg-[#F7F9F6] hover:bg-[#E2E8E2] border border-[#E2E8E2] text-[#1A2E20] transition-all">
               ❄️ Geada
             </button>
           </div>
@@ -133,11 +166,11 @@
           <!-- NDVI -->
           <div class="space-y-1">
             <div class="flex justify-between text-xs">
-              <span class="text-slate-200 font-medium">Vigor Vegetativo de Satélite (NDVI):</span>
-              <span class="font-mono font-bold text-emerald-400" id="val-ndvi">0.80</span>
+              <span class="text-[#1A2E20] font-bold">Vigor Vegetativo de Satélite (NDVI):</span>
+              <span class="font-mono font-bold text-[#00897B]" id="val-ndvi">0.80</span>
             </div>
-            <input type="range" id="input-ndvi" min="0.10" max="0.95" step="0.01" value="0.80" oninput="recalculateRisk()" class="w-full accent-emerald-500 cursor-pointer">
-            <div class="flex justify-between text-[11px] text-slate-400">
+            <input type="range" id="input-ndvi" min="0.10" max="0.95" step="0.01" value="0.80" oninput="recalculateRisk()" class="w-full accent-[#00897B] cursor-pointer">
+            <div class="flex justify-between text-[11px] text-[#556B5C]">
               <span>0.10 (Quebra Crítica)</span>
               <span>0.50 (Estresse)</span>
               <span>0.95 (Vigor Máximo)</span>
@@ -147,11 +180,11 @@
           <!-- Rainfall Deficit -->
           <div class="space-y-1">
             <div class="flex justify-between text-xs">
-              <span class="text-slate-200 font-medium">Desvio Pluviométrico (Precipitação):</span>
-              <span class="font-mono font-bold" id="val-rain">+5.0%</span>
+              <span class="text-[#1A2E20] font-bold">Desvio Pluviométrico (Precipitação):</span>
+              <span class="font-mono font-bold text-[#00897B]" id="val-rain">+5.0%</span>
             </div>
-            <input type="range" id="input-rain" min="-80" max="40" step="5" value="5" oninput="recalculateRisk()" class="w-full accent-blue-500 cursor-pointer">
-            <div class="flex justify-between text-[11px] text-slate-400">
+            <input type="range" id="input-rain" min="-80" max="40" step="5" value="5" oninput="recalculateRisk()" class="w-full accent-[#00897B] cursor-pointer">
+            <div class="flex justify-between text-[11px] text-[#556B5C]">
               <span>-80% (Seca Extrema)</span>
               <span>0% (Esperado)</span>
               <span>+40% (Excesso)</span>
@@ -161,44 +194,44 @@
           <!-- Soil Moisture -->
           <div class="space-y-1">
             <div class="flex justify-between text-xs">
-              <span class="text-slate-200 font-medium">Umidade do Solo:</span>
-              <span class="font-mono font-bold" id="val-soil">65.0%</span>
+              <span class="text-[#1A2E20] font-bold">Umidade do Solo:</span>
+              <span class="font-mono font-bold text-[#E67E22]" id="val-soil">65.0%</span>
             </div>
-            <input type="range" id="input-soil" min="10" max="90" step="1" value="65" oninput="recalculateRisk()" class="w-full accent-amber-500 cursor-pointer">
+            <input type="range" id="input-soil" min="10" max="90" step="1" value="65" oninput="recalculateRisk()" class="w-full accent-[#E67E22] cursor-pointer">
           </div>
         </div>
 
         <!-- Calculated Live Metrics -->
-        <div class="bg-slate-950/60 border border-slate-800 rounded-xl p-4 space-y-3">
-          <div class="text-xs font-semibold uppercase tracking-wider text-slate-400">
+        <div class="bg-[#F7F9F6] border border-[#E2E8E2] rounded-xl p-4 space-y-3">
+          <div class="text-xs font-bold uppercase tracking-wider text-[#556B5C]">
             Cálculo On-Chain do Oráculo
           </div>
 
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <span class="text-xs text-slate-400">LTV Máximo Calculado:</span>
-              <div class="text-lg font-mono font-bold text-white" id="calc-ltv">65.0%</div>
+              <span class="text-xs text-[#556B5C] font-semibold">LTV Máximo Calculado:</span>
+              <div class="text-lg font-mono font-extrabold text-[#1A2E20]" id="calc-ltv">65.0%</div>
             </div>
             <div>
-              <span class="text-xs text-slate-400">Health Factor Resultante:</span>
-              <div class="text-lg font-mono font-bold" id="calc-hf">1.50x</div>
+              <span class="text-xs text-[#556B5C] font-semibold">Health Factor Resultante:</span>
+              <div class="text-lg font-mono font-extrabold" id="calc-hf">1.50x</div>
             </div>
           </div>
 
           <!-- Health Factor Visual Bar -->
           <div class="space-y-1">
-            <div class="flex justify-between text-[11px] text-slate-400">
+            <div class="flex justify-between text-[11px] text-[#556B5C]">
               <span>0.0x (Insolvente)</span>
-              <span class="text-red-400 font-bold">1.0x (Limite de Liquidação)</span>
+              <span class="text-red-500 font-bold">1.0x (Limite de Liquidação)</span>
               <span>2.0x+ (Saudável)</span>
             </div>
-            <div class="w-full bg-slate-900 h-3 rounded-full overflow-hidden border border-slate-700">
-              <div id="hf-bar" class="gauge-fill h-full bg-emerald-500 w-[75%]"></div>
+            <div class="w-full bg-[#E2E8E2] h-3 rounded-full overflow-hidden">
+              <div id="hf-bar" class="gauge-fill h-full bg-[#00E676] w-[75%]"></div>
             </div>
           </div>
         </div>
 
-        <button onclick="broadcastOracleUpdate()" class="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs rounded-xl shadow transition-colors flex items-center justify-center gap-2">
+        <button onclick="broadcastOracleUpdate()" class="w-full py-3 px-4 bg-[#00897B] hover:bg-[#00695C] text-white font-bold text-xs rounded-xl shadow-md shadow-[#00897B]/20 transition-colors flex items-center justify-center gap-2">
           <span>⚡</span> Transmitir Atualização ao Nó Anvil (updateLTVAndHealthFactor)
         </button>
       </div>
@@ -207,97 +240,97 @@
       <div class="lg:col-span-5 space-y-5">
 
         <!-- DEFI ACTION CARD -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow space-y-4">
-          <div class="border-b border-slate-800 pb-3">
-            <h2 class="text-base font-semibold text-white flex items-center gap-2">
+        <div class="agro-card p-5 space-y-4">
+          <div class="border-b border-[#E2E8E2] pb-3">
+            <h2 class="text-base font-bold text-[#1A2E20] flex items-center gap-2">
               <span>🏦</span> Gestão de Crédito & Liquidação
             </h2>
-            <p class="text-xs text-slate-400">Operações diretas da LendingPool</p>
+            <p class="text-xs text-[#556B5C]">Operações diretas da LendingPool</p>
           </div>
 
           <!-- Collateral Status -->
-          <div class="p-3.5 rounded-xl border border-slate-800 bg-slate-950/60 space-y-2">
+          <div class="p-3.5 rounded-xl border border-[#E2E8E2] bg-[#F7F9F6] space-y-2">
             <div class="flex justify-between items-center">
-              <span class="text-xs font-medium text-white">AgroNFT #1 (Soja)</span>
-              <span id="badge-collateral" class="text-[11px] px-2 py-0.5 rounded font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              <span class="text-xs font-bold text-[#1A2E20]">AgroNFT #1 (Soja)</span>
+              <span id="badge-collateral" class="text-[11px] px-2 py-0.5 rounded font-bold bg-[#E0F2F1] text-[#00897B] border border-[#B2DFDB]">
                 Colateralizado na Pool
               </span>
             </div>
-            <div class="text-xs text-slate-400 space-y-1 font-mono">
+            <div class="text-xs text-[#556B5C] space-y-1 font-mono">
               <div class="flex justify-between">
                 <span>Dívida Atual:</span>
-                <span class="text-white font-bold" id="card-debt">$50,000.00 USDC</span>
+                <span class="text-[#1A2E20] font-bold" id="card-debt">$50,000.00 USDC</span>
               </div>
               <div class="flex justify-between">
                 <span>Capacidade Restante:</span>
-                <span class="text-emerald-400 font-bold" id="card-capacity">$15,000.00 USDC</span>
+                <span class="text-[#00897B] font-bold" id="card-capacity">$15,000.00 USDC</span>
               </div>
             </div>
           </div>
 
           <!-- Liquidation Alert / Button -->
-          <div id="liquidation-box" class="p-4 rounded-xl border border-red-500/30 bg-red-500/10 hidden space-y-3">
-            <div class="flex items-center gap-2 text-red-400 font-semibold text-xs">
+          <div id="liquidation-box" class="p-4 rounded-xl border-2 border-red-400 bg-red-50 hidden space-y-3">
+            <div class="flex items-center gap-2 text-red-600 font-extrabold text-xs">
               <span class="text-base">⚠️</span> COLATERAL INSOLVENTE (HF &lt; 1.00x)
             </div>
-            <p class="text-[11px] text-red-300">
+            <p class="text-[11px] text-red-700 leading-relaxed font-medium">
               O risco agroclimático excedeu a margem de segurança. A execução paramétrica permite quitar a dívida e liquidar o ativo instantaneamente sem processo judicial.
             </p>
-            <button onclick="triggerParametricLiquidation()" class="w-full py-2 px-3 bg-red-600 hover:bg-red-500 text-white font-semibold text-xs rounded-lg shadow pulse-danger transition-all">
+            <button onclick="triggerParametricLiquidation()" class="w-full py-2.5 px-3 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-lg shadow-md pulse-danger transition-all">
               ⚡ Executar Liquidação Paramétrica (Sem Juiz)
             </button>
           </div>
 
           <!-- Standard Actions -->
           <div class="grid grid-cols-2 gap-2" id="standard-actions">
-            <button onclick="simulateBorrow()" class="py-2.5 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-medium text-xs rounded-xl transition-all">
+            <button onclick="simulateBorrow()" class="py-2.5 px-3 bg-[#F7F9F6] hover:bg-[#E2E8E2] text-[#1A2E20] border border-[#E2E8E2] font-bold text-xs rounded-xl transition-all">
               📥 Tomar Empréstimo (+ $10k)
             </button>
-            <button onclick="simulateRepay()" class="py-2.5 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-medium text-xs rounded-xl transition-all">
+            <button onclick="simulateRepay()" class="py-2.5 px-3 bg-[#F7F9F6] hover:bg-[#E2E8E2] text-[#1A2E20] border border-[#E2E8E2] font-bold text-xs rounded-xl transition-all">
               📤 Quitar Dívida (- $10k)
             </button>
           </div>
 
-          <button onclick="resetDemo()" class="w-full py-2 text-[11px] text-slate-400 hover:text-white text-center transition-colors">
+          <button onclick="resetDemo()" class="w-full py-2 text-[11px] text-[#556B5C] hover:text-[#1A2E20] font-semibold text-center transition-colors">
             ↻ Reiniciar Simulação da Demonstração
           </button>
         </div>
 
         <!-- CONTRACT ADDRESSES -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow space-y-3">
-          <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-            <h3 class="text-xs font-semibold text-purple-400 uppercase tracking-wider flex items-center gap-1.5">
+        <div class="agro-card p-5 space-y-3">
+          <div class="flex items-center justify-between border-b border-[#E2E8E2] pb-2">
+            <h3 class="text-xs font-bold text-[#00897B] uppercase tracking-wider flex items-center gap-1.5">
               <span>🌐</span> Contratos na Ethereum Sepolia
             </h3>
-            <span class="text-[10px] px-2 py-0.5 rounded bg-purple-500/10 text-purple-300 border border-purple-500/20">Testnet Pública</span>
+            <span class="text-[10px] px-2 py-0.5 rounded font-bold bg-[#E0F2F1] text-[#00897B] border border-[#B2DFDB]">Testnet Pública</span>
           </div>
           <div class="space-y-2 text-xs font-mono">
-            <div class="flex items-center justify-between p-2 rounded-lg bg-slate-950/60 border border-slate-800">
-              <span class="text-slate-400">MockUSDC:</span>
-              <a href="https://sepolia.etherscan.io/address/0x178B9bFA3E86a9Ed3F67963e28afBe49BCf45ED2" target="_blank" class="text-emerald-400 hover:text-emerald-300 font-bold text-[11px] flex items-center gap-1">
+            <div class="flex items-center justify-between p-2 rounded-lg bg-[#F7F9F6] border border-[#E2E8E2]">
+              <span class="text-[#556B5C]">MockUSDC:</span>
+              <a href="https://sepolia.etherscan.io/address/0x178B9bFA3E86a9Ed3F67963e28afBe49BCf45ED2" target="_blank" class="text-[#00897B] font-bold text-[11px] hover:underline flex items-center gap-1">
                 0x178B...5ED2 ↗
               </a>
             </div>
-            <div class="flex items-center justify-between p-2 rounded-lg bg-slate-950/60 border border-slate-800">
-              <span class="text-slate-400">AgroNFT:</span>
-              <a href="https://sepolia.etherscan.io/address/0xb89Cd470755AD1E25052b57D97af6Fc98b00Dfb2" target="_blank" class="text-emerald-400 hover:text-emerald-300 font-bold text-[11px] flex items-center gap-1">
+            <div class="flex items-center justify-between p-2 rounded-lg bg-[#F7F9F6] border border-[#E2E8E2]">
+              <span class="text-[#556B5C]">AgroNFT:</span>
+              <a href="https://sepolia.etherscan.io/address/0xb89Cd470755AD1E25052b57D97af6Fc98b00Dfb2" target="_blank" class="text-[#00897B] font-bold text-[11px] hover:underline flex items-center gap-1">
                 0xb89C...Dfb2 ↗
               </a>
             </div>
-            <div class="flex items-center justify-between p-2 rounded-lg bg-slate-950/60 border border-slate-800">
-              <span class="text-slate-400">LendingPool:</span>
-              <a href="https://sepolia.etherscan.io/address/0x020c06c4d1410B2131e9815c5D25F7Ee90D37a26" target="_blank" class="text-purple-300 hover:text-purple-200 font-bold text-[11px] flex items-center gap-1">
+            <div class="flex items-center justify-between p-2 rounded-lg bg-[#F7F9F6] border border-[#E2E8E2]">
+              <span class="text-[#556B5C]">LendingPool:</span>
+              <a href="https://sepolia.etherscan.io/address/0x020c06c4d1410B2131e9815c5D25F7Ee90D37a26" target="_blank" class="text-[#00897B] font-bold text-[11px] hover:underline flex items-center gap-1">
                 0x020c...7a26 ↗
               </a>
             </div>
-            <div class="flex items-center justify-between p-2 rounded-lg bg-slate-950/60 border border-slate-800">
-              <span class="text-slate-400">Deployer:</span>
-              <a href="https://sepolia.etherscan.io/address/0xa449e7838fF89EE956174B682449870597e93C71" target="_blank" class="text-slate-300 hover:text-white font-bold text-[11px] flex items-center gap-1">
+            <div class="flex items-center justify-between p-2 rounded-lg bg-[#F7F9F6] border border-[#E2E8E2]">
+              <span class="text-[#556B5C]">Deployer:</span>
+              <a href="https://sepolia.etherscan.io/address/0xa449e7838fF89EE956174B682449870597e93C71" target="_blank" class="text-[#E67E22] font-bold text-[11px] hover:underline flex items-center gap-1">
                 0xa449...3C71 ↗
               </a>
             </div>
           </div>
-          <p class="text-[10px] text-slate-500 pt-1">
+          <p class="text-[10px] text-[#556B5C] pt-1">
             * Clique em qualquer endereço para abrir o comprovante oficial no Etherscan.
           </p>
         </div>
@@ -307,28 +340,28 @@
     </div>
 
     <!-- LIVE EVENT & AUDIT LOG -->
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow space-y-3">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-        <h3 class="text-sm font-semibold text-white flex items-center gap-2">
+    <div class="agro-card p-5 space-y-3">
+      <div class="flex items-center justify-between border-b border-[#E2E8E2] pb-2">
+        <h3 class="text-sm font-bold text-[#1A2E20] flex items-center gap-2">
           <span>📜</span> Log de Transações & Eventos On-Chain
         </h3>
-        <span class="text-xs text-slate-400 font-mono" id="log-count">3 eventos registrados</span>
+        <span class="text-xs text-[#556B5C] font-mono" id="log-count">3 eventos registrados</span>
       </div>
       <div id="event-log" class="space-y-2 max-h-48 overflow-y-auto text-xs font-mono">
-        <div class="p-2 rounded bg-slate-950/60 border border-slate-800 flex justify-between items-center">
-          <span class="text-emerald-400">[CollateralMinted]</span>
-          <span class="text-slate-300">TokenId: 1 | Valor: $100,000.00 USDC | Dono: Fazenda Santa Fé</span>
-          <span class="text-[11px] text-slate-400">Bloco #2</span>
+        <div class="p-2.5 rounded-lg bg-[#F7F9F6] border border-[#E2E8E2] flex justify-between items-center">
+          <span class="text-[#00897B] font-bold">[CollateralMinted]</span>
+          <span class="text-[#1A2E20]">TokenId: 1 | Valor: $100,000.00 USDC | Dono: Fazenda Santa Helena</span>
+          <span class="text-[11px] text-[#556B5C]">Bloco #2</span>
         </div>
-        <div class="p-2 rounded bg-slate-950/60 border border-slate-800 flex justify-between items-center">
-          <span class="text-blue-400">[CollateralDeposited]</span>
-          <span class="text-slate-300">AgroNFT #1 transferido em custódia para LendingPool</span>
-          <span class="text-[11px] text-slate-400">Bloco #3</span>
+        <div class="p-2.5 rounded-lg bg-[#F7F9F6] border border-[#E2E8E2] flex justify-between items-center">
+          <span class="text-[#00897B] font-bold">[CollateralDeposited]</span>
+          <span class="text-[#1A2E20]">AgroNFT #1 transferido em custódia para LendingPool</span>
+          <span class="text-[11px] text-[#556B5C]">Bloco #3</span>
         </div>
-        <div class="p-2 rounded bg-slate-950/60 border border-slate-800 flex justify-between items-center">
-          <span class="text-amber-400">[Borrowed]</span>
-          <span class="text-slate-300">Saque de $50,000.00 USDC liberado para o produtor</span>
-          <span class="text-[11px] text-slate-400">Bloco #4</span>
+        <div class="p-2.5 rounded-lg bg-[#F7F9F6] border border-[#E2E8E2] flex justify-between items-center">
+          <span class="text-[#E67E22] font-bold">[Borrowed]</span>
+          <span class="text-[#1A2E20]">Saque de $50,000.00 USDC liberado para o produtor</span>
+          <span class="text-[11px] text-[#556B5C]">Bloco #4</span>
         </div>
       </div>
     </div>
@@ -384,13 +417,13 @@
 
       if (calculatedHf < 1.0) {
         hfBar.className = 'gauge-fill h-full bg-red-500';
-        document.getElementById('calc-hf').className = 'text-lg font-mono font-bold text-red-500';
+        document.getElementById('calc-hf').className = 'text-lg font-mono font-bold text-red-600';
       } else if (calculatedHf < 1.25) {
-        hfBar.className = 'gauge-fill h-full bg-amber-500';
-        document.getElementById('calc-hf').className = 'text-lg font-mono font-bold text-amber-500';
+        hfBar.className = 'gauge-fill h-full bg-[#E67E22]';
+        document.getElementById('calc-hf').className = 'text-lg font-mono font-bold text-[#E67E22]';
       } else {
-        hfBar.className = 'gauge-fill h-full bg-emerald-500';
-        document.getElementById('calc-hf').className = 'text-lg font-mono font-bold text-emerald-400';
+        hfBar.className = 'gauge-fill h-full bg-[#00E676]';
+        document.getElementById('calc-hf').className = 'text-lg font-mono font-bold text-[#00897B]';
       }
     }
 
@@ -435,18 +468,18 @@
       hfEl.innerText = state.healthFactor.toFixed(2) + 'x';
 
       if (state.healthFactor < 1.0 && !state.isLiquidated && state.debt > 0) {
-        hfEl.className = 'text-2xl font-bold mt-1 text-red-500';
-        hfStatus.className = 'text-xs font-semibold px-2 py-0.5 rounded bg-red-500/10 text-red-500 border border-red-500/20';
+        hfEl.className = 'text-2xl font-bold mt-1 text-red-600';
+        hfStatus.className = 'text-xs font-bold px-2 py-0.5 rounded bg-red-100 text-red-700 border border-red-300';
         hfStatus.innerText = 'CRÍTICO / INSOLVENTE';
         liqBox.classList.remove('hidden');
       } else if (state.healthFactor < 1.25 && !state.isLiquidated) {
-        hfEl.className = 'text-2xl font-bold mt-1 text-amber-500';
-        hfStatus.className = 'text-xs font-semibold px-2 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/20';
+        hfEl.className = 'text-2xl font-bold mt-1 text-[#E67E22]';
+        hfStatus.className = 'text-xs font-bold px-2 py-0.5 rounded bg-[#FFF3E0] text-[#E67E22] border border-[#FFE082]';
         hfStatus.innerText = 'ATENÇÃO';
         liqBox.classList.add('hidden');
       } else {
-        hfEl.className = 'text-2xl font-bold mt-1 text-emerald-400';
-        hfStatus.className = 'text-xs font-semibold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
+        hfEl.className = 'text-2xl font-bold mt-1 text-[#00897B]';
+        hfStatus.className = 'text-xs font-bold px-2 py-0.5 rounded bg-[#E8F5E9] text-[#00897B] border border-[#C8E6C9]';
         hfStatus.innerText = state.isLiquidated ? 'LIQUIDADO' : 'SEGURO';
         liqBox.classList.add('hidden');
       }
@@ -465,7 +498,7 @@
       state.debt = 0;
       state.healthFactor = 2.0;
 
-      document.getElementById('badge-collateral').className = 'text-[11px] px-2 py-0.5 rounded font-medium bg-red-500/10 text-red-400 border border-red-500/20';
+      document.getElementById('badge-collateral').className = 'text-[11px] px-2 py-0.5 rounded font-bold bg-red-100 text-red-700 border border-red-300';
       document.getElementById('badge-collateral').innerText = 'Liquidado (Propriedade: Liquidador)';
 
       updateDashboardUI();
@@ -502,7 +535,7 @@
         blockNumber: 1
       };
       setScenario('optimal');
-      document.getElementById('badge-collateral').className = 'text-[11px] px-2 py-0.5 rounded font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
+      document.getElementById('badge-collateral').className = 'text-[11px] px-2 py-0.5 rounded font-bold bg-[#E8F5E9] text-[#00897B] border border-[#C8E6C9]';
       document.getElementById('badge-collateral').innerText = 'Colateralizado na Pool';
       updateDashboardUI();
       addLogEntry('SimulationReset', 'Ambiente de teste e colateral redefinidos para o estado inicial.', 'emerald');
@@ -512,18 +545,18 @@
       state.blockNumber++;
       const logContainer = document.getElementById('event-log');
       const div = document.createElement('div');
-      div.className = 'p-2 rounded bg-slate-950/60 border border-slate-800 flex justify-between items-center text-xs animate-fadeIn';
+      div.className = 'p-2.5 rounded-lg bg-[#F7F9F6] border border-[#E2E8E2] flex justify-between items-center text-xs animate-fadeIn';
       
-      let badgeColor = 'text-emerald-400';
-      if (color === 'red') badgeColor = 'text-red-400 font-bold';
-      if (color === 'amber') badgeColor = 'text-amber-400';
-      if (color === 'blue') badgeColor = 'text-blue-400';
-      if (color === 'purple') badgeColor = 'text-purple-400';
+      let badgeColor = 'text-[#00897B] font-bold';
+      if (color === 'red') badgeColor = 'text-red-600 font-bold';
+      if (color === 'amber') badgeColor = 'text-[#E67E22] font-bold';
+      if (color === 'blue') badgeColor = 'text-[#00897B] font-bold';
+      if (color === 'purple') badgeColor = 'text-[#00897B] font-bold';
 
       div.innerHTML = `
         <span class="${badgeColor}">[${event}]</span>
-        <span class="text-slate-300">${msg}</span>
-        <span class="text-[11px] text-slate-400">Bloco #${state.blockNumber}</span>
+        <span class="text-[#1A2E20]">${msg}</span>
+        <span class="text-[11px] text-[#556B5C]">Bloco #${state.blockNumber}</span>
       `;
       logContainer.insertBefore(div, logContainer.firstChild);
     }

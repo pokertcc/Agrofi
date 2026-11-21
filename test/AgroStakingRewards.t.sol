@@ -16,16 +16,16 @@ contract AgroStakingRewardsTest is Test {
 
     function setUp() public {
         vm.startPrank(admin);
-        
+
         // 1. Deploy MockUSDC (6 decimais)
         usdc = new MockUSDC();
-        
+
         // 2. Deploy AgroToken (18 decimais)
         agroToken = new AgroToken(admin);
-        
+
         // 3. Deploy AgroStakingRewards com 22% APY (2200 bps)
         staking = new AgroStakingRewards(address(usdc), address(agroToken), 2200);
-        
+
         // 4. Autorizar o contrato de Staking como minter no AgroToken
         agroToken.setAuthorizedMinter(address(staking), true);
 

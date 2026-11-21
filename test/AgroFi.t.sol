@@ -38,9 +38,9 @@ contract AgroFiTest is Test {
         vm.stopPrank();
 
         // Fund accounts with MockUSDC
-        usdc.mint(lender, 500_000 * 1e6);    // $500,000 USDC for liquidity
-        usdc.mint(liquidator, 100_000 * 1e6);// $100,000 USDC for liquidation
-        usdc.mint(farmer, 10_000 * 1e6);     // $10,000 USDC for repayments
+        usdc.mint(lender, 500_000 * 1e6); // $500,000 USDC for liquidity
+        usdc.mint(liquidator, 100_000 * 1e6); // $100,000 USDC for liquidation
+        usdc.mint(farmer, 10_000 * 1e6); // $10,000 USDC for repayments
 
         // Lender provides liquidity to pool
         vm.startPrank(lender);

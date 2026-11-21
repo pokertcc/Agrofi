@@ -24,9 +24,9 @@ contract LendingPool is ERC721Holder, ReentrancyGuard, Ownable {
 
     struct Loan {
         address borrower;
-        uint256 debt;           // Outstanding debt in micro-USDC (6 decimals)
-        bool isActive;          // True when collateral is held in pool
-        uint256 borrowedAt;     // Timestamp of last borrow
+        uint256 debt; // Outstanding debt in micro-USDC (6 decimals)
+        bool isActive; // True when collateral is held in pool
+        uint256 borrowedAt; // Timestamp of last borrow
     }
 
     // Mapping from AgroNFT tokenId to Loan
@@ -57,10 +57,7 @@ contract LendingPool is ERC721Holder, ReentrancyGuard, Ownable {
     event OracleAuthorized(address indexed oracle, bool authorized);
 
     modifier onlyOracle() {
-        require(
-            msg.sender == owner() || authorizedOracles[msg.sender],
-            "LendingPool: caller not authorized oracle"
-        );
+        require(msg.sender == owner() || authorizedOracles[msg.sender], "LendingPool: caller not authorized oracle");
         _;
     }
 
@@ -121,12 +118,7 @@ contract LendingPool is ERC721Holder, ReentrancyGuard, Ownable {
         require(agroNFT.ownerOf(tokenId) == msg.sender, "LendingPool: caller does not own AgroNFT");
         require(!loans[tokenId].isActive, "LendingPool: loan already active for this token");
 
-        loans[tokenId] = Loan({
-            borrower: msg.sender,
-            debt: 0,
-            isActive: true,
-            borrowedAt: 0
-        });
+        loans[tokenId] = Loan({borrower: msg.sender, debt: 0, isActive: true, borrowedAt: 0});
         emit CollateralDeposited(tokenId, msg.sender);
 
         agroNFT.setCollateralStatus(tokenId, true);
@@ -211,22 +203,18 @@ contract LendingPool is ERC721Holder, ReentrancyGuard, Ownable {
      * @param ltv New LTV in basis points (e.g. 5000 = 50%)
      * @param healthFactor New Health Factor scaled by 1e4 (e.g. 9500 = 0.95)
      */
-    function updateLTVAndHealthFactor(
-        uint256 tokenId,
-        uint256 ltv,
-        uint256 healthFactor
-    ) external onlyOracle {
+    function updateLTVAndHealthFactor(uint256 tokenId, uint256 ltv, uint256 healthFactor) external onlyOracle {
         agroNFT.updateLTVAndHealthFactor(tokenId, ltv, healthFactor);
     }
 
     /**
      * @notice Helper allowing the oracle/middleware to mint collateral through the protocol interface.
      */
-    function mintCollateral(
-        address to,
-        string memory tokenURI,
-        uint256 appraisalValue
-    ) external onlyOracle returns (uint256) {
+    function mintCollateral(address to, string memory tokenURI, uint256 appraisalValue)
+        external
+        onlyOracle
+        returns (uint256)
+    {
         return agroNFT.mintCollateral(to, tokenURI, appraisalValue);
     }
 

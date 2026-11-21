@@ -14,10 +14,10 @@ contract AgroNFT is ERC721URIStorage, Ownable {
 
     struct CollateralData {
         uint256 appraisalValue; // In USDC units (6 decimals)
-        uint256 ltv;            // Basis points (e.g., 6000 = 60.00%)
-        uint256 healthFactor;   // Scaled by 1e4 (e.g., 15000 = 1.50; 10000 = 1.00 threshold)
-        bool isCollateralized;  // True when locked in LendingPool
-        uint256 mintedAt;       // Timestamp of tokenization
+        uint256 ltv; // Basis points (e.g., 6000 = 60.00%)
+        uint256 healthFactor; // Scaled by 1e4 (e.g., 15000 = 1.50; 10000 = 1.00 threshold)
+        bool isCollateralized; // True when locked in LendingPool
+        uint256 mintedAt; // Timestamp of tokenization
     }
 
     // Mapping from tokenId to CollateralData
@@ -28,9 +28,9 @@ contract AgroNFT is ERC721URIStorage, Ownable {
     mapping(address => bool) public authorizedLendingPools;
 
     // Constants
-    uint256 public constant DEFAULT_LTV = 6000;         // 60.00%
+    uint256 public constant DEFAULT_LTV = 6000; // 60.00%
     uint256 public constant DEFAULT_HEALTH_FACTOR = 15000; // 1.50
-    uint256 public constant MAX_LTV = 8500;             // 85.00%
+    uint256 public constant MAX_LTV = 8500; // 85.00%
 
     // Events
     event CollateralMinted(
@@ -41,11 +41,7 @@ contract AgroNFT is ERC721URIStorage, Ownable {
         uint256 ltv,
         uint256 healthFactor
     );
-    event RiskParametersUpdated(
-        uint256 indexed tokenId,
-        uint256 ltv,
-        uint256 healthFactor
-    );
+    event RiskParametersUpdated(uint256 indexed tokenId, uint256 ltv, uint256 healthFactor);
     event AppraisalUpdated(uint256 indexed tokenId, uint256 newAppraisalValue);
     event CollateralStatusChanged(uint256 indexed tokenId, bool isCollateralized);
     event OracleAuthorizationChanged(address indexed oracle, bool authorized);
@@ -61,8 +57,7 @@ contract AgroNFT is ERC721URIStorage, Ownable {
 
     modifier onlyLendingPool() {
         require(
-            msg.sender == owner() || authorizedLendingPools[msg.sender],
-            "AgroNFT: caller not authorized lending pool"
+            msg.sender == owner() || authorizedLendingPools[msg.sender], "AgroNFT: caller not authorized lending pool"
         );
         _;
     }
@@ -80,11 +75,7 @@ contract AgroNFT is ERC721URIStorage, Ownable {
      * @param appraisalValue Valuation of the agricultural asset in USDC units (6 decimals)
      * @return tokenId The ID of the newly minted NFT
      */
-    function mintCollateral(
-        address to,
-        string memory _tokenURI,
-        uint256 appraisalValue
-    ) external returns (uint256) {
+    function mintCollateral(address to, string memory _tokenURI, uint256 appraisalValue) external returns (uint256) {
         require(to != address(0), "AgroNFT: mint to zero address");
         require(appraisalValue > 0, "AgroNFT: appraisal value must be > 0");
 
@@ -98,14 +89,7 @@ contract AgroNFT is ERC721URIStorage, Ownable {
             mintedAt: block.timestamp
         });
 
-        emit CollateralMinted(
-            tokenId,
-            to,
-            _tokenURI,
-            appraisalValue,
-            DEFAULT_LTV,
-            DEFAULT_HEALTH_FACTOR
-        );
+        emit CollateralMinted(tokenId, to, _tokenURI, appraisalValue, DEFAULT_LTV, DEFAULT_HEALTH_FACTOR);
 
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, _tokenURI);
@@ -119,11 +103,10 @@ contract AgroNFT is ERC721URIStorage, Ownable {
      * @param ltv New Loan-To-Value in basis points (e.g. 6000 = 60%)
      * @param healthFactor New Health Factor scaled by 1e4 (e.g. 12500 = 1.25)
      */
-    function updateLTVAndHealthFactor(
-        uint256 tokenId,
-        uint256 ltv,
-        uint256 healthFactor
-    ) external onlyAuthorizedUpdater {
+    function updateLTVAndHealthFactor(uint256 tokenId, uint256 ltv, uint256 healthFactor)
+        external
+        onlyAuthorizedUpdater
+    {
         require(_ownerOf(tokenId) != address(0), "AgroNFT: token does not exist");
         require(ltv <= MAX_LTV, "AgroNFT: ltv exceeds max allowed");
 

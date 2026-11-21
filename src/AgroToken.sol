@@ -11,12 +11,12 @@ contract AgroToken {
     string public symbol = "AGRO";
     uint8 public decimals = 18;
     uint256 public totalSupply;
-    
+
     // Teto máximo de fornecimento (100 Milhões de tokens $AGRO)
-    uint256 public constant MAX_SUPPLY = 100_000_000 * 10**18;
+    uint256 public constant MAX_SUPPLY = 100_000_000 * 10 ** 18;
 
     address public owner;
-    
+
     // Contratos autorizados a emitir recompensas (ex: LendingPool, StakingPool)
     mapping(address => bool) public authorizedMinters;
 
@@ -40,9 +40,9 @@ contract AgroToken {
 
     constructor(address initialOwner) {
         owner = initialOwner != address(0) ? initialOwner : msg.sender;
-        
+
         // Emissão inicial: 20 Milhões de tokens para reserva de incentivos de safra e liquidez
-        _mint(owner, 20_000_000 * 10**18);
+        _mint(owner, 20_000_000 * 10 ** 18);
     }
 
     function transfer(address to, uint256 value) external returns (bool) {

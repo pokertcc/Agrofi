@@ -1,0 +1,1669 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgroFi Invista - Pools de Crédito Agrícola RWA & Recompensas</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            agro: {
+              primary: '#00897B',
+              'primary-dark': '#00695C',
+              'primary-light': '#E0F2F1',
+              highlight: '#00E676',
+              'highlight-dark': '#00C853',
+              bg: '#F7F9F6',
+              card: '#FFFFFF',
+              border: '#E2E8E2',
+              text: '#1A2E20',
+              sub: '#556B5C',
+              gold: '#D97706',
+              'gold-light': '#FEF3C7'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #F7F9F6;
+      color: #1A2E20;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    .agro-card {
+      background: #FFFFFF;
+      border: 1px solid #E2E8E2;
+      border-radius: 1.25rem;
+      box-shadow: 0 4px 20px -2px rgba(26, 46, 32, 0.05);
+      transition: all 0.25s ease-in-out;
+    }
+    .agro-card-hover:hover {
+      border-color: #00897B;
+      box-shadow: 0 12px 30px -4px rgba(0, 137, 123, 0.15);
+      transform: translateY(-2px);
+    }
+    .gauge-bg {
+      background: linear-gradient(90deg, #00E676 0%, #00897B 60%, #E67E22 100%);
+    }
+  </style>
+</head>
+<body class="bg-[#F7F9F6] text-[#1A2E20] antialiased min-h-screen flex flex-col justify-between selection:bg-[#00897B] selection:text-white">
+
+  <!-- TOP NAVIGATION -->
+  <header class="border-b border-[#E2E8E2] bg-white/95 backdrop-blur sticky top-0 z-50 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-4">
+      
+      <!-- LOGO -->
+      <div class="flex items-center space-x-3">
+        <a href="/" class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-[#00897B] to-[#00E676] flex items-center justify-center text-white font-bold text-2xl shadow-md shadow-[#00897B]/20">
+          🌾
+        </a>
+        <div>
+          <div class="flex items-center gap-2">
+            <a href="/" class="text-xl font-extrabold tracking-tight text-[#1A2E20] hover:text-[#00897B] transition-colors">AgroFi Protocol</a>
+            <span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-[#FEF3C7] text-[#D97706] border border-[#FDE68A] uppercase tracking-wider">
+              Módulo Invista
+            </span>
+          </div>
+          <p class="text-xs text-[#556B5C]">Pools de Liquidez RWA, Rendimentos em Dólar & Staking de Safra</p>
+        </div>
+      </div>
+
+      <!-- CURRENCY TOGGLE & ORACLE FX -->
+      <div class="flex items-center gap-3">
+        
+        <!-- CÂMBIO ORÁCULO AO VIVO -->
+        <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#F7F9F6] border border-[#E2E8E2] text-xs">
+          <span class="w-2 h-2 rounded-full bg-[#00E676] animate-pulse"></span>
+          <span class="text-[#556B5C]">Oráculo Câmbio:</span>
+          <span class="font-mono font-bold text-[#00897B]">1 USD = R$ 5,75</span>
+        </div>
+
+        <!-- TOGGLE USD / BRL -->
+        <div class="flex items-center bg-[#F7F9F6] border border-[#E2E8E2] rounded-xl p-1 text-xs font-bold">
+          <button id="btn-curr-usd" onclick="setCurrency('USD')" class="px-3 py-1 rounded-lg bg-[#00897B] text-white shadow-xs transition-all">
+            USD ($)
+          </button>
+          <button id="btn-curr-brl" onclick="setCurrency('BRL')" class="px-3 py-1 rounded-lg text-[#556B5C] hover:text-[#1A2E20] transition-all">
+            BRL (R$)
+          </button>
+        </div>
+
+        <!-- NAVIGATION LINKS -->
+        <div class="flex items-center gap-2">
+          <a href="/" class="px-3 py-2 rounded-xl bg-white hover:bg-[#F7F9F6] border border-[#E2E8E2] text-xs font-bold text-[#1A2E20] transition-colors flex items-center gap-1.5 shadow-xs">
+            <span>🏠</span>
+            <span class="hidden sm:inline">Portal</span>
+          </a>
+          <a href="dashboard.html" class="px-3 py-2 rounded-xl bg-white hover:bg-[#F7F9F6] border border-[#B2DFDB] text-xs font-bold text-[#00897B] transition-colors flex items-center gap-1.5 shadow-xs">
+            <span>🌾</span>
+            <span class="hidden sm:inline">Produtor (RWA)</span>
+          </a>
+          <a href="http://localhost:8501" target="_blank" class="px-3 py-2 rounded-xl bg-white hover:bg-[#F7F9F6] border border-[#E2E8E2] text-xs font-bold text-[#1A2E20] transition-colors flex items-center gap-1.5 shadow-xs">
+            <span>📊</span>
+            <span class="hidden sm:inline">Risco (8501)</span>
+          </a>
+          <button onclick="connectWeb3Wallet()" id="btn-wallet-connect" class="px-4 py-2 rounded-xl bg-[#00897B] hover:bg-[#00695C] text-white font-bold text-xs transition-all shadow-md shadow-[#00897B]/25 flex items-center gap-1.5">
+            <span>👛</span>
+            <span id="wallet-btn-label">Conectar Carteira</span>
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-10 w-full flex-1">
+
+    <!-- HERO SECTION: APRESENTAÇÃO DO INVESTIMENTO EM RWA -->
+    <div class="relative overflow-hidden rounded-3xl border border-[#E2E8E2] bg-white p-6 md:p-10 shadow-lg">
+      <div class="absolute -right-20 -top-20 w-96 h-96 bg-[#00897B]/5 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -left-20 -bottom-20 w-96 h-96 bg-[#D97706]/10 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="relative z-10 max-w-3xl space-y-4">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E0F2F1] border border-[#B2DFDB] text-[#00897B] text-xs font-bold">
+          <span>🌱</span> Investimento Descentralizado com Colateral Real (RWA)
+        </div>
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-[#1A2E20] leading-tight">
+          Financie safras de alta produtividade e ganhe <span class="bg-gradient-to-r from-[#00897B] to-[#D97706] bg-clip-text text-transparent">rendimentos em Dólar</span>.
+        </h1>
+        <p class="text-sm sm:text-base text-[#556B5C] leading-relaxed">
+          Aporte liquidez em stablecoin (MockUSDC) diretamente nas pools de dívida agrícola das fazendas cadastradas.
+          Cada operação possui <b>garantia de terra via NFT (ERC-721)</b> e travas paramétricas reguladas por oráculo geoespacial.
+        </p>
+
+        <!-- CTAS RÁPIDOS -->
+        <div class="flex flex-wrap items-center gap-3 pt-2">
+          <a href="#pools-section" class="px-5 py-3 rounded-xl bg-[#00897B] hover:bg-[#00695C] text-white font-bold text-xs sm:text-sm transition-all shadow-lg shadow-[#00897B]/25 flex items-center gap-2">
+            <span>🌾</span> Explorar Pools de Fazendas
+          </a>
+          <a href="#rewards-section" class="px-4 py-3 rounded-xl bg-[#FEF3C7] hover:bg-[#FDE68A] text-[#D97706] font-bold text-xs sm:text-sm transition-all shadow-sm flex items-center gap-2 border border-[#FDE68A]">
+            <span>✨</span> Pool de Recompensa (22.0% APY)
+          </a>
+          <a href="#simulator-section" class="px-4 py-3 rounded-xl bg-[#F7F9F6] hover:bg-[#E2E8E2] border border-[#E2E8E2] text-[#1A2E20] font-semibold text-xs sm:text-sm transition-all flex items-center gap-2">
+            <span>📈</span> Simulação Futura ao Vencimento
+          </a>
+        </div>
+      </div>
+
+      <!-- PROTOCOL STATS OVERVIEW -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 pt-8 border-t border-[#E2E8E2] text-xs">
+        <div>
+          <span class="text-[#556B5C] font-medium">TVL Total em Pools</span>
+          <div class="text-xl sm:text-2xl font-extrabold font-mono text-[#1A2E20] mt-0.5" id="stat-tvl">$ 1,485,000</div>
+          <span class="text-[#00897B] font-semibold text-[11px]">R$ 8.538.750 colateralizados</span>
+        </div>
+        <div>
+          <span class="text-[#556B5C] font-medium">Empréstimos Concedidos às Fazendas</span>
+          <div class="text-xl sm:text-2xl font-extrabold font-mono text-[#1A2E20] mt-0.5" id="stat-borrowed">$ 525,000</div>
+          <span class="text-[#D97706] font-semibold text-[11px]">54.7% de utilização de limite</span>
+        </div>
+        <div>
+          <span class="text-[#556B5C] font-medium">Rendimento Médio Ponderado</span>
+          <div class="text-xl sm:text-2xl font-extrabold font-mono text-[#00897B] mt-0.5">14.2% a.a.</div>
+          <span class="text-[#556B5C] font-medium text-[11px]">Em Dólar (USDC)</span>
+        </div>
+        <div>
+          <span class="text-[#556B5C] font-medium">Overcollateralization (Garantia de Terra)</span>
+          <div class="text-xl sm:text-2xl font-extrabold font-mono text-[#1A2E20] mt-0.5">312%</div>
+          <span class="text-[#00897B] font-semibold text-[11px]">Piso Q10 de estresse líquido</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- FAUCET CARD: RESGATE DE MOEDAS DE TESTE SEPOLIA -->
+    <div class="relative overflow-hidden rounded-3xl border border-[#B2DFDB] bg-gradient-to-br from-[#E0F2F1]/80 via-white to-[#FEF3C7]/40 p-6 shadow-md">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        
+        <!-- INFORMAÇÕES DA TORNEIRA -->
+        <div class="space-y-2 max-w-xl">
+          <div class="flex items-center gap-2">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#00897B] text-white text-xs font-bold shadow-xs">
+              <span>💧</span> Faucet Web3 Oficial
+            </span>
+            <span class="px-2.5 py-1 rounded-full bg-white border border-[#B2DFDB] text-[11px] font-mono font-bold text-[#00695C]">
+              Ethereum Sepolia Testnet
+            </span>
+          </div>
+          <h3 class="text-xl font-extrabold text-[#1A2E20]">
+            Precisa de saldo de teste para investir nas pools?
+          </h3>
+          <p class="text-xs sm:text-sm text-[#556B5C] leading-relaxed">
+            Resgate <b>10.000 MockUSDC</b> e <b>5.000 $AGRO</b> gratuitamente para simular aportes nas fazendas e receber recompensas agrícolas em tempo real.
+          </p>
+
+          <!-- SALDOS DA CARTEIRA AO VIVO -->
+          <div class="grid grid-cols-3 gap-2 pt-2 text-xs">
+            <div class="p-2.5 rounded-xl bg-white/90 border border-[#E2E8E2] shadow-2xs">
+              <span class="text-[10px] uppercase font-bold text-[#556B5C] block">Sepolia ETH (Gás)</span>
+              <span id="faucet-eth-val" class="font-mono font-bold text-[#1A2E20] text-sm">--</span>
+            </div>
+            <div class="p-2.5 rounded-xl bg-white/90 border border-[#E2E8E2] shadow-2xs">
+              <span class="text-[10px] uppercase font-bold text-[#00897B] block">Dólar (MockUSDC)</span>
+              <span id="faucet-usdc-val" class="font-mono font-bold text-[#00897B] text-sm">--</span>
+            </div>
+            <div class="p-2.5 rounded-xl bg-white/90 border border-[#FDE68A] shadow-2xs">
+              <span class="text-[10px] uppercase font-bold text-[#D97706] block">Governança ($AGRO)</span>
+              <span id="faucet-agro-val" class="font-mono font-bold text-[#D97706] text-sm">--</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- BOTÕES DE AÇÃO DO FAUCET -->
+        <div class="flex flex-col sm:flex-row lg:flex-col gap-2.5 shrink-0 justify-center">
+          <button id="btn-faucet-claim" onclick="claimFaucetUSDC()" class="px-5 py-3 rounded-2xl bg-[#00897B] hover:bg-[#00695C] text-white font-extrabold text-xs sm:text-sm transition-all shadow-lg shadow-[#00897B]/25 flex items-center justify-center gap-2">
+            <span>💧</span>
+            <span id="btn-faucet-label">Resgatar 10.000 MockUSDC</span>
+          </button>
+
+          <div class="flex items-center gap-2">
+            <button onclick="watchTokenAsset('AGRO')" class="flex-1 px-3 py-2 rounded-xl bg-white hover:bg-[#FEF3C7] border border-[#FDE68A] text-[#D97706] font-bold text-[11px] transition-all shadow-xs flex items-center justify-center gap-1.5">
+              <span>🌾</span> Adicionar $AGRO
+            </button>
+            <button onclick="watchTokenAsset('USDC')" class="flex-1 px-3 py-2 rounded-xl bg-white hover:bg-[#E0F2F1] border border-[#B2DFDB] text-[#00897B] font-bold text-[11px] transition-all shadow-xs flex items-center justify-center gap-1.5">
+              <span>💵</span> Adicionar USDC
+            </button>
+          </div>
+
+          <p class="text-[10px] text-center text-[#556B5C]">
+            Sem saldo de ETH para gás? Rode: <code class="bg-white/80 px-1 py-0.5 rounded font-mono font-bold text-[#00897B]">python faucet.py</code>
+          </p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- SEÇÃO 1: POOLS DE CRÉDITO POR FAZENDA (QUANDO A MESMA PEGA EMPRÉSTIMO) -->
+    <section id="pools-section" class="space-y-6">
+      
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E2E8E2] pb-4">
+        <div>
+          <h2 class="text-2xl font-extrabold text-[#1A2E20] flex items-center gap-2">
+            <span>🚜</span> Pools de Empréstimo por Fazenda Cadastrada
+          </h2>
+          <p class="text-sm text-[#556B5C]">
+            Quando cada produtor rural toma um empréstimo colateralizado em sua safra, sua pool abre cotas de liquidez para investidores.
+          </p>
+        </div>
+        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white border border-[#E2E8E2] text-xs font-semibold text-[#556B5C] shadow-xs">
+          <span>🛡️</span> Todos os empréstimos possuem Trava Paramétrica [35% a 65% LTV]
+        </div>
+      </div>
+
+      <!-- GRID COM AS 4 FAZENDAS -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <!-- POOL 1: FAZENDA SANTA HELENA -->
+        <div class="agro-card agro-card-hover p-6 flex flex-col justify-between space-y-5">
+          <div class="space-y-4">
+            
+            <!-- HEADER DO CARD -->
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 rounded-2xl bg-[#E0F2F1] text-[#00897B] flex items-center justify-center font-bold text-2xl border border-[#B2DFDB]">
+                  🌱
+                </div>
+                <div>
+                  <h3 class="text-base font-extrabold text-[#1A2E20]">Fazenda Santa Helena</h3>
+                  <p class="text-xs text-[#556B5C]">Sorriso - MT • Amazônia • 1.420 ha Soja & Milho</p>
+                </div>
+              </div>
+              <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-[#E8F5E9] text-[#00897B] border border-[#C8E6C9]">
+                Empréstimo Ativo
+              </span>
+            </div>
+
+            <!-- DADOS DO EMPRÉSTIMO & RENDIMENTO -->
+            <div class="grid grid-cols-2 gap-3 bg-[#F7F9F6] p-3.5 rounded-xl border border-[#E2E8E2] text-xs">
+              <div>
+                <span class="text-[#556B5C] font-medium">Empréstimo Tomado:</span>
+                <div class="text-base font-extrabold font-mono text-[#1A2E20]" data-usd="150000" id="val-loan-1">$ 150,000.00</div>
+                <span class="text-[10px] text-[#556B5C]">Limite: $ 250,000.00</span>
+              </div>
+              <div>
+                <span class="text-[#556B5C] font-medium">Rendimento ao Investidor:</span>
+                <div class="text-base font-extrabold font-mono text-[#00897B]">13.8% APY</div>
+                <span class="text-[10px] text-[#00897B] font-semibold">Juros pagos na colheita</span>
+              </div>
+            </div>
+
+            <!-- DETALHES DE RISCO & COLATERAL -->
+            <div class="space-y-2 text-xs">
+              <div class="flex items-center justify-between text-[#556B5C]">
+                <span>LTV Dinâmico Atual:</span>
+                <span class="font-bold text-[#1A2E20] font-mono">48.0% (Piso 35% / Teto 65%)</span>
+              </div>
+              <div class="flex items-center justify-between text-[#556B5C]">
+                <span>Health Factor (Solvência DeFi):</span>
+                <span class="font-bold text-[#00897B] font-mono">1.42x (Seguro)</span>
+              </div>
+              <div class="flex items-center justify-between text-[#556B5C]">
+                <span>Vencimento do Prazo de Safra:</span>
+                <span class="font-bold text-[#1A2E20]">180 dias (Junho/2027)</span>
+              </div>
+              <div class="flex items-center justify-between text-[#556B5C]">
+                <span>Garantia de Colateral (NFT #1):</span>
+                <span class="font-mono text-[#00897B] font-bold">R$ 42,5 M (Valoração Q10)</span>
+              </div>
+            </div>
+
+            <!-- BARRA DE PREENCHIMENTO DA POOL -->
+            <div class="space-y-1">
+              <div class="flex items-center justify-between text-[11px] text-[#556B5C]">
+                <span>Capacidade Financiada por Investidores</span>
+                <span class="font-bold text-[#1A2E20]">60% ($ 150k / $ 250k)</span>
+              </div>
+              <div class="w-full bg-[#E2E8E2] h-2.5 rounded-full overflow-hidden">
+                <div class="bg-[#00897B] h-full rounded-full" style="width: 60%"></div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- BOTÃO APORTAR -->
+          <button onclick="openDepositModal('Fazenda Santa Helena', 13.8, 150000, 100000)" class="w-full py-3 rounded-xl bg-[#00897B] hover:bg-[#00695C] text-white font-bold text-xs transition-all shadow-md shadow-[#00897B]/20 flex items-center justify-center gap-2">
+            <span>💵</span> Aportar Dólares (USDC) nesta Pool
+          </button>
+        </div>
+
+        <!-- POOL 2: FAZENDA BOA ESPERANÇA -->
+        <div class="agro-card agro-card-hover p-6 flex flex-col justify-between space-y-5">
+          <div class="space-y-4">
+            
+            <!-- HEADER DO CARD -->
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 rounded-2xl bg-[#E0F2F1] text-[#00897B] flex items-center justify-center font-bold text-2xl border border-[#B2DFDB]">
+                  🌽
+                </div>
+                <div>
+                  <h3 class="text-base font-extrabold text-[#1A2E20]">Fazenda Boa Esperança</h3>
+                  <p class="text-xs text-[#556B5C]">Rio Verde - GO • Cerrado • 1.040 ha Grãos & Sorgo</p>
+                </div>
+              </div>
+              <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-[#E8F5E9] text-[#00897B] border border-[#C8E6C9]">
+                Empréstimo Ativo
+              </span>
+            </div>
+
+            <!-- DADOS DO EMPRÉSTIMO & RENDIMENTO -->
+            <div class="grid grid-cols-2 gap-3 bg-[#F7F9F6] p-3.5 rounded-xl border border-[#E2E8E2] text-xs">
+              <div>
+                <span class="text-[#556B5C] font-medium">Empréstimo Tomado:</span>
+                <div class="text-base font-extrabold font-mono text-[#1A2E20]" data-usd="80000" id="val-loan-2">$ 80,000.00</div>
+                <span class="text-[10px] text-[#556B5C]">Limite: $ 180,000.00</span>
+              </div>
+              <div>
+                <span class="text-[#556B5C] font-medium">Rendimento ao Investidor:</span>
+                <div class="text-base font-extrabold font-mono text-[#00897B]">12.5% APY</div>
+                <span class="text-[10px] text-[#00897B] font-semibold">Baixo Risco Agroclimático</span>
+              </div>
+            </div>
+
+            <!-- DETALHES DE RISCO & COLATERAL -->
+            <div class="space-y-2 text-xs">
+              <div class="flex items-center justify-between text-[#556B5C]">
+                <span>LTV Dinâmico Atual:</span>
+                <span class="font-bold text-[#1A2E20] font-mono">42.0% (Piso 35% / Teto 65%)</span>
+              </div>
+              <div class="flex items-center justify-between text-[#556B5C]">
+                <span>Health Factor (Solvência DeFi):</span>
+                <span class="font-bold text-[#00897B] font-mono">1.55x (Muito Seguro)</span>
+              </div>
+              <div class="flex items-center justify-between text-[#556B5C]">
+                <span>Vencimento do Prazo de Safra:</span>
+                <span class="font-bold text-[#1A2E20]">150 dias (Maio/2027)</span>
+              </div>
+              <div class="flex items-center justify-between text-[#556B5C]">
+                <span>Garantia de Colateral (NFT #2):</span>
+                <span class="font-mono text-[#00897B] font-bold">R$ 31,8 M (Valoração Q10)</span>
+              </div>
+            </div>
+
+            <!-- BARRA DE PREENCHIMENTO DA POOL -->
+            <div class="space-y-1">
+              <div class="flex items-center justify-between text-[11px] text-[#556B5C]">
+                <span>Capacidade Financiada por Investidores</span>
+                <span class="font-bold text-[#1A2E20]">44.4% ($ 80k / $ 180k)</span>
+              </div>
+              <div class="w-full bg-[#E2E8E2] h-2.5 rounded-full overflow-hidden">
+                <div class="bg-[#00897B] h-full rounded-full" style="width: 44.4%"></div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- BOTÃO APORTAR -->
+          <button onclick="openDepositModal('Fazenda Boa Esperança', 12.5, 80000, 100000)" class="w-full py-3 rounded-xl bg-[#00897B] hover:bg-[#00695C] text-white font-bold text-xs transition-all shadow-md shadow-[#00897B]/20 flex items-center justify-center gap-2">
+            <span>💵</span> Aportar Dólares (USDC) nesta Pool
+          </button>
+        </div>
+
+        <!-- POOL 3: AGROPECUÁRIA CHAPADÃO -->
+        <div class="agro-card agro-card-hover p-6 flex flex-col justify-between space-y-5">
+          <div class="space-y-4">
+            
+            <!-- HEADER DO CARD -->
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 rounded-2xl bg-[#FEF3C7] text-[#D97706] flex items-center justify-center font-bold text-2xl border border-[#FDE68A]">
+                  🌾
+                </div>
+                <div>
+                  <h3 class="text-base font-extrabold text-[#1A2E20]">Agropecuária Chapadão</h3>
+                  <p class="text-xs text-[#556B5C]">Sapezal - MT • Cerrado • 1.520 ha Algodão & Soja</p>
+                </div>
+              </div>
+              <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-[#E8F5E9] text-[#00897B] border border-[#C8E6C9]">
+                Empréstimo Ativo
+              </span>
+            </div>
+
+            <!-- DADOS DO EMPRÉSTIMO & RENDIMENTO -->
+            <div class="grid grid-cols-2 gap-3 bg-[#F7F9F6] p-3.5 rounded-xl border border-[#E2E8E2] text-xs">
+              <div>
+                <span class="text-[#556B5C] font-medium">Empréstimo Tomado:</span>
+                <div class="text-base font-extrabold font-mono text-[#1A2E20]" data-usd="200000" id="val-loan-3">$ 200,000.00</div>
+                <span class="text-[10px] text-[#556B5C]">Limite: $ 320,000.00</span>
+              </div>
+              <div>
+                <span class="text-[#556B5C] font-medium">Rendimento ao Investidor:</span>
+                <div class="text-base font-extrabold font-mono text-[#D97706]">15.2% APY</div>
+                <span class="text-[10px] text-[#D97706] font-semibold">Algodão de Alta Margem</span>
+              </div>
+            </div>
+
+            <!-- DETALHES DE RISCO & COLATERAL -->
+            <div class="space-y-2 text-xs">
+              <div class="flex items-center justify-between text-[#556B5C]">
+                <span>LTV Dinâmico Atual:</span>
+                <span class="font-bold text-[#1A2E20] font-mono">55.0% (Piso 35% / Teto 65%)</span>
+              </div>
+              <div class="flex items-center justify-between text-[#556B5C]">
+                <span>Health Factor (Solvência DeFi):</span>
+                <span class="font-bold text-[#00897B] font-mono">1.34x (Seguro)</span>
+              </div>
+              <div class="flex items-center justify-between text-[#556B5C]">
+                <span>Vencimento do Prazo de Safra:</span>
+                <span class="font-bold text-[#1A2E20]">240 dias (Agosto/2027)</span>
+              </div>
+              <div class="flex items-center justify-between text-[#556B5C]">
+                <span>Garantia de Colateral (NFT #3):</span>
+                <span class="font-mono text-[#00897B] font-bold">R$ 54,2 M (Valoração Q10)</span>
+              </div>
+            </div>
+
+            <!-- BARRA DE PREENCHIMENTO DA POOL -->
+            <div class="space-y-1">
+              <div class="flex items-center justify-between text-[11px] text-[#556B5C]">
+                <span>Capacidade Financiada por Investidores</span>
+                <span class="font-bold text-[#1A2E20]">62.5% ($ 200k / $ 320k)</span>
+              </div>
+              <div class="w-full bg-[#E2E8E2] h-2.5 rounded-full overflow-hidden">
+                <div class="bg-[#D97706] h-full rounded-full" style="width: 62.5%"></div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- BOTÃO APORTAR -->
+          <button onclick="openDepositModal('Agropecuária Chapadão', 15.2, 200000, 120000)" class="w-full py-3 rounded-xl bg-[#00897B] hover:bg-[#00695C] text-white font-bold text-xs transition-all shadow-md shadow-[#00897B]/20 flex items-center justify-center gap-2">
+            <span>💵</span> Aportar Dólares (USDC) nesta Pool
+          </button>
+        </div>
+
+        <!-- POOL 4: FAZENDA OURO VERDE -->
+        <div class="agro-card agro-card-hover p-6 flex flex-col justify-between space-y-5">
+          <div class="space-y-4">
+            
+            <!-- HEADER DO CARD -->
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 rounded-2xl bg-[#E0F2F1] text-[#00897B] flex items-center justify-center font-bold text-2xl border border-[#B2DFDB]">
+                  💧
+                </div>
+                <div>
+                  <h3 class="text-base font-extrabold text-[#1A2E20]">Fazenda Ouro Verde</h3>
+                  <p class="text-xs text-[#556B5C]">Luís Eduardo Magalhães - BA • 1.220 ha Soja Irrigada</p>
+                </div>
+              </div>
+              <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-[#E8F5E9] text-[#00897B] border border-[#C8E6C9]">
+                Empréstimo Ativo
+              </span>
+            </div>
+
+            <!-- DADOS DO EMPRÉSTIMO & RENDIMENTO -->
+            <div class="grid grid-cols-2 gap-3 bg-[#F7F9F6] p-3.5 rounded-xl border border-[#E2E8E2] text-xs">
+              <div>
+                <span class="text-[#556B5C] font-medium">Empréstimo Tomado:</span>
+                <div class="text-base font-extrabold font-mono text-[#1A2E20]" data-usd="95000" id="val-loan-4">$ 95,000.00</div>
+                <span class="text-[10px] text-[#556B5C]">Limite: $ 210,000.00</span>
+              </div>
+              <div>
+                <span class="text-[#556B5C] font-medium">Rendimento ao Investidor:</span>
+                <div class="text-base font-extrabold font-mono text-[#00897B]">14.0% APY</div>
+                <span class="text-[10px] text-[#00897B] font-semibold">Irrigação Pivô Central</span>
+              </div>
+            </div>
+
+            <!-- DETALHES DE RISCO & COLATERAL -->
+            <div class="space-y-2 text-xs">
+              <div class="flex items-center justify-between text-[#556B5C]">
+                <span>LTV Dinâmico Atual:</span>
+                <span class="font-bold text-[#1A2E20] font-mono">45.0% (Piso 35% / Teto 65%)</span>
+              </div>
+              <div class="flex items-center justify-between text-[#556B5C]">
+                <span>Health Factor (Solvência DeFi):</span>
+                <span class="font-bold text-[#00897B] font-mono">1.48x (Seguro)</span>
+              </div>
+              <div class="flex items-center justify-between text-[#556B5C]">
+                <span>Vencimento do Prazo de Safra:</span>
+                <span class="font-bold text-[#1A2E20]">180 dias (Junho/2027)</span>
+              </div>
+              <div class="flex items-center justify-between text-[#556B5C]">
+                <span>Garantia de Colateral (NFT #4):</span>
+                <span class="font-mono text-[#00897B] font-bold">R$ 36,1 M (Valoração Q10)</span>
+              </div>
+            </div>
+
+            <!-- BARRA DE PREENCHIMENTO DA POOL -->
+            <div class="space-y-1">
+              <div class="flex items-center justify-between text-[11px] text-[#556B5C]">
+                <span>Capacidade Financiada por Investidores</span>
+                <span class="font-bold text-[#1A2E20]">45.2% ($ 95k / $ 210k)</span>
+              </div>
+              <div class="w-full bg-[#E2E8E2] h-2.5 rounded-full overflow-hidden">
+                <div class="bg-[#00897B] h-full rounded-full" style="width: 45.2%"></div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- BOTÃO APORTAR -->
+          <button onclick="openDepositModal('Fazenda Ouro Verde', 14.0, 95000, 115000)" class="w-full py-3 rounded-xl bg-[#00897B] hover:bg-[#00695C] text-white font-bold text-xs transition-all shadow-md shadow-[#00897B]/20 flex items-center justify-center gap-2">
+            <span>💵</span> Aportar Dólares (USDC) nesta Pool
+          </button>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- SEÇÃO 2: POOL DE RECOMPENSA & STAKING ($AGRO + USDC) -->
+    <section id="rewards-section" class="rounded-3xl border border-[#FDE68A] bg-gradient-to-br from-[#FFFBEB] to-[#FEF3C7] p-6 sm:p-10 shadow-lg relative overflow-hidden">
+      <div class="absolute right-0 bottom-0 translate-x-10 translate-y-10 text-[180px] opacity-10 pointer-events-none select-none">
+        🌾
+      </div>
+
+      <div class="relative z-10 max-w-4xl space-y-6">
+        
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div class="space-y-1">
+            <span class="px-3 py-1 rounded-full text-xs font-bold bg-[#D97706] text-white uppercase tracking-wider">
+              Pool de Incentivo & Recompensa
+            </span>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-[#1A2E20]">
+              Staking Pool AgroFi Rewards ($AGRO + Taxas do Protocolo)
+            </h2>
+            <p class="text-sm text-[#78350F]">
+              Turbine o retorno dos seus aportes de Dólar participando da pool de recompensa governada pelo protocolo.
+            </p>
+          </div>
+
+          <!-- BADGE DE APY TOTAL -->
+          <div class="bg-white/90 backdrop-blur border border-[#FDE68A] p-4 rounded-2xl shadow-sm text-center">
+            <span class="text-xs uppercase font-bold text-[#D97706] block">APY Total Estimado</span>
+            <span class="text-3xl font-extrabold font-mono text-[#00897B]">22.0% a.a.</span>
+            <span class="text-[11px] text-[#556B5C] block mt-0.5">13.5% USDC + 8.5% $AGRO</span>
+          </div>
+        </div>
+
+        <!-- 3 CARDS DE COMPOSIÇÃO DE RECOMPENSA -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+          
+          <div class="bg-white/80 backdrop-blur p-4 rounded-2xl border border-[#FDE68A] space-y-2">
+            <div class="flex items-center gap-2 text-sm font-bold text-[#1A2E20]">
+              <span>💰</span> 1. Taxas de Originação
+            </div>
+            <p class="text-[#556B5C] leading-relaxed">
+              1,5% de cada empréstimo tomado pelos produtores rurais é retido e redistribuído aos provedores da pool de liquidez.
+            </p>
+          </div>
+
+          <div class="bg-white/80 backdrop-blur p-4 rounded-2xl border border-[#FDE68A] space-y-2">
+            <div class="flex items-center gap-2 text-sm font-bold text-[#1A2E20]">
+              <span>⚖️</span> 2. Taxas de Liquidação & Oráculo
+            </div>
+            <p class="text-[#556B5C] leading-relaxed">
+              Penalidades e spreads capturados pelo Oracle Keeper quando ocorrem variações paramétricas de LTV são creditados em USDC.
+            </p>
+          </div>
+
+          <div class="bg-white/80 backdrop-blur p-4 rounded-2xl border border-[#FDE68A] space-y-2">
+            <div class="flex items-center gap-2 text-sm font-bold text-[#1A2E20]">
+              <span>🪙</span> 3. Emissão do Token $AGRO
+            </div>
+            <p class="text-[#556B5C] leading-relaxed">
+              Incentivo de mineração de liquidez distribuído a cada bloco minerado proporcionalmente ao seu tempo de permanência na pool.
+            </p>
+          </div>
+
+        </div>
+
+        <!-- PAINEL INTERATIVO DO INVESTIDOR (STAKING & RECOMPENSAS AO VIVO) -->
+        <div class="bg-white p-6 rounded-3xl border border-[#FDE68A] shadow-md space-y-5">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            
+            <div class="flex items-center gap-4">
+              <div class="w-14 h-14 rounded-2xl bg-[#FEF3C7] text-[#D97706] flex items-center justify-center font-bold text-3xl border border-[#FDE68A] shadow-xs">
+                🌾
+              </div>
+              <div class="space-y-1">
+                <span class="text-xs uppercase font-bold text-[#556B5C] block">Recompensas em $AGRO Acumuladas:</span>
+                <div class="text-2xl sm:text-3xl font-extrabold font-mono text-[#D97706] flex items-baseline gap-2" id="user-reward-balance">
+                  0.0000 <span class="text-sm font-bold text-[#1A2E20]">$AGRO</span>
+                </div>
+                <span class="text-[11px] text-[#00897B] font-semibold block">Rendimento em tempo real a 22.0% a.a.</span>
+              </div>
+            </div>
+
+            <!-- SALDO EM STAKING -->
+            <div class="p-3.5 rounded-2xl bg-[#F7F9F6] border border-[#E2E8E2] text-xs space-y-1 min-w-[200px]">
+              <span class="text-[#556B5C] font-semibold block">Seu Saldo em Staking:</span>
+              <div class="text-lg font-extrabold font-mono text-[#1A2E20]" id="user-staked-balance">
+                0.00 USDC
+              </div>
+              <span class="text-[10px] text-[#556B5C] block">Depósitos geram $AGRO continuamente</span>
+            </div>
+
+          </div>
+
+          <!-- AÇÕES DO STAKING -->
+          <div class="pt-4 border-t border-[#FDE68A]/60 flex flex-col sm:flex-row items-center justify-between gap-3">
+            
+            <div class="flex items-center gap-2 w-full sm:w-auto">
+              <input type="number" id="stake-amount-input" placeholder="Ex: 5000" class="w-32 px-3 py-2 rounded-xl bg-[#F7F9F6] border border-[#E2E8E2] text-xs font-mono font-bold text-[#1A2E20] focus:outline-none focus:border-[#D97706]" />
+              <button onclick="executeStakeUSDC()" id="btn-stake-action" class="px-4 py-2 rounded-xl bg-[#00897B] hover:bg-[#00695C] text-white font-bold text-xs transition-all shadow-xs flex items-center gap-1.5 shrink-0">
+                <span>🥩</span> <span id="btn-stake-label">Fazer Stake USDC</span>
+              </button>
+            </div>
+
+            <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+              <button onclick="claimRewards()" id="btn-claim-rewards" class="px-5 py-2.5 rounded-xl bg-[#D97706] hover:bg-[#B45309] text-white font-extrabold text-xs shadow-md shadow-[#D97706]/20 transition-all flex items-center gap-1.5">
+                <span>🌾</span> <span id="btn-claim-label">Colher $AGRO (Claim)</span>
+              </button>
+              <button onclick="executeUnstakeUSDC()" class="px-4 py-2.5 rounded-xl bg-white hover:bg-[#FEF3C7] border border-[#FDE68A] text-[#D97706] font-bold text-xs transition-all flex items-center gap-1.5">
+                <span>🔓</span> Retirar (Unstake)
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SEÇÃO 3: SIMULAÇÃO FUTURA INTERATIVA (PARA QUANDO DER O PRAZO) -->
+    <section id="simulator-section" class="agro-card p-6 md:p-10 space-y-8">
+      
+      <div class="border-b border-[#E2E8E2] pb-4">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E0F2F1] text-[#00897B] text-xs font-bold mb-2">
+          <span>📈</span> Motor de Projeção Estocástica AgroFi
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-[#1A2E20]">
+          Simulação Futura de Rendimento (ao Vencimento da Safra)
+        </h2>
+        <p class="text-sm text-[#556B5C]">
+          Calcule exatamente quanto seu capital em Dólares renderá quando der o prazo do empréstimo de cada fazenda, simulando diferentes cenários climáticos e de produtividade.
+        </p>
+      </div>
+
+      <!-- GRID: CONTROLES DA SIMULAÇÃO (ESQUERDA) + RESULTADOS PROJETADOS (DIREITA) -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        <!-- CONTROLES -->
+        <div class="lg:col-span-7 space-y-6">
+          
+          <!-- VALOR DO APORTE -->
+          <div class="space-y-2">
+            <label class="block text-xs font-bold text-[#1A2E20] uppercase tracking-wider">
+              1. Quanto você deseja aportar?
+            </label>
+            <div class="relative">
+              <span class="absolute left-4 top-3 text-sm font-bold text-[#556B5C] font-mono" id="sim-input-prefix">USD $</span>
+              <input type="number" id="sim-amount" value="10000" min="100" max="1000000" step="500" oninput="runSimulation()" class="w-full bg-[#F7F9F6] border border-[#E2E8E2] rounded-2xl py-3 pl-20 pr-4 text-base font-extrabold font-mono text-[#1A2E20] focus:outline-none focus:border-[#00897B]">
+            </div>
+            
+            <!-- ATALHOS DE VALOR RÁPIDO -->
+            <div class="flex flex-wrap gap-2 pt-1 text-xs font-mono">
+              <button onclick="setSimAmount(1000)" class="px-2.5 py-1 rounded-lg bg-[#F7F9F6] hover:bg-[#E0F2F1] border border-[#E2E8E2] text-[#556B5C] font-bold transition-colors">$ 1,000</button>
+              <button onclick="setSimAmount(5000)" class="px-2.5 py-1 rounded-lg bg-[#F7F9F6] hover:bg-[#E0F2F1] border border-[#E2E8E2] text-[#556B5C] font-bold transition-colors">$ 5,000</button>
+              <button onclick="setSimAmount(10000)" class="px-2.5 py-1 rounded-lg bg-[#E0F2F1] border border-[#B2DFDB] text-[#00897B] font-bold transition-colors">$ 10,000</button>
+              <button onclick="setSimAmount(50000)" class="px-2.5 py-1 rounded-lg bg-[#F7F9F6] hover:bg-[#E0F2F1] border border-[#E2E8E2] text-[#556B5C] font-bold transition-colors">$ 50,000</button>
+              <button onclick="setSimAmount(100000)" class="px-2.5 py-1 rounded-lg bg-[#F7F9F6] hover:bg-[#E0F2F1] border border-[#E2E8E2] text-[#556B5C] font-bold transition-colors">$ 100,000</button>
+            </div>
+          </div>
+
+          <!-- ESCOLHA DA POOL / FAZENDA -->
+          <div class="space-y-2">
+            <label class="block text-xs font-bold text-[#1A2E20] uppercase tracking-wider">
+              2. Escolha a Pool de Empréstimo
+            </label>
+            <select id="sim-farm-select" onchange="runSimulation()" class="w-full bg-[#F7F9F6] border border-[#E2E8E2] rounded-2xl py-3 px-4 text-xs font-bold text-[#1A2E20] focus:outline-none focus:border-[#00897B]">
+              <option value="DIVERSIFIED" data-apy="14.2" data-days="180">Pool Diversificada AgroFi (Todas as 4 Fazendas) • 14.2% APY</option>
+              <option value="MT001" data-apy="13.8" data-days="180">Fazenda Santa Helena (Sorriso - MT) • 13.8% APY • 180 dias</option>
+              <option value="GO002" data-apy="12.5" data-days="150">Fazenda Boa Esperança (Rio Verde - GO) • 12.5% APY • 150 dias</option>
+              <option value="MT003" data-apy="15.2" data-days="240">Agropecuária Chapadão (Sapezal - MT) • 15.2% APY • 240 dias</option>
+              <option value="BA004" data-apy="14.0" data-days="180">Fazenda Ouro Verde (LEM - BA) • 14.0% APY • 180 dias</option>
+            </select>
+          </div>
+
+          <!-- SLIDER DE PRAZO DO EMPRÉSTIMO -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between text-xs">
+              <label class="font-bold text-[#1A2E20] uppercase tracking-wider">
+                3. Prazo do Empréstimo (Maturação da Safra)
+              </label>
+              <span class="font-mono font-bold text-[#00897B] text-sm" id="sim-days-display">180 dias (6 meses)</span>
+            </div>
+            <input type="range" id="sim-days-slider" min="90" max="360" step="30" value="180" oninput="updateDaysFromSlider()" class="w-full accent-[#00897B] cursor-pointer">
+            <div class="flex justify-between text-[10px] text-[#556B5C] font-mono">
+              <span>90 dias (3 meses)</span>
+              <span>180 dias (Safra)</span>
+              <span>270 dias (Safra + Safrinha)</span>
+              <span>360 dias (1 ano)</span>
+            </div>
+          </div>
+
+          <!-- CENÁRIOS CLIMÁTICOS DE RISCO -->
+          <div class="space-y-2">
+            <label class="block text-xs font-bold text-[#1A2E20] uppercase tracking-wider">
+              4. Cenário de Produtividade & Estresse Agroclimático
+            </label>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              
+              <label class="p-3 rounded-xl border-2 border-[#00897B] bg-[#E0F2F1]/30 flex flex-col justify-between cursor-pointer transition-all" id="scenario-card-opt">
+                <div class="flex items-center gap-2">
+                  <input type="radio" name="climate_scenario" value="opt" checked onchange="updateScenario(this.value)" class="accent-[#00897B]">
+                  <span class="text-xs font-bold text-[#1A2E20]">Safra Normal</span>
+                </div>
+                <span class="text-[10px] text-[#556B5C] mt-2 block">100% do APY contratado pago pontualmente na colheita.</span>
+              </label>
+
+              <label class="p-3 rounded-xl border border-[#E2E8E2] bg-white flex flex-col justify-between cursor-pointer hover:border-[#00897B] transition-all" id="scenario-card-mod">
+                <div class="flex items-center gap-2">
+                  <input type="radio" name="climate_scenario" value="mod" onchange="updateScenario(this.value)" class="accent-[#00897B]">
+                  <span class="text-xs font-bold text-[#1A2E20]">Seca Moderada</span>
+                </div>
+                <span class="text-[10px] text-[#556B5C] mt-2 block">LTV ajusta automaticamente via oráculo; principal garantido.</span>
+              </label>
+
+              <label class="p-3 rounded-xl border border-[#E2E8E2] bg-white flex flex-col justify-between cursor-pointer hover:border-[#00897B] transition-all" id="scenario-card-sev">
+                <div class="flex items-center gap-2">
+                  <input type="radio" name="climate_scenario" value="sev" onchange="updateScenario(this.value)" class="accent-[#00897B]">
+                  <span class="text-xs font-bold text-[#1A2E20]">Choque Severo</span>
+                </div>
+                <span class="text-[10px] text-[#556B5C] mt-2 block">Liquidação paramétrica da terra (NFT Q10) protege o investidor.</span>
+              </label>
+
+            </div>
+          </div>
+
+        </div>
+
+        <!-- CARD DE RESULTADOS DA SIMULAÇÃO (DIREITA) -->
+        <div class="lg:col-span-5 bg-gradient-to-br from-[#121F17] to-[#1A2E20] text-white p-6 sm:p-8 rounded-3xl space-y-6 shadow-xl border border-[#1F382A]">
+          
+          <div class="flex items-center justify-between border-b border-[#2D4A37] pb-4">
+            <div>
+              <span class="text-xs font-mono uppercase tracking-wider text-[#00E676] font-bold">Projeção de Retorno Futuro</span>
+              <h3 class="text-lg font-bold text-white mt-0.5" id="sim-summary-title">Vencimento em 180 dias</h3>
+            </div>
+            <div class="w-10 h-10 rounded-2xl bg-[#00897B]/20 text-[#00E676] flex items-center justify-center font-bold text-lg border border-[#00897B]/40">
+              📊
+            </div>
+          </div>
+
+          <!-- MONTANTE FINAL ESTIMADO (DESTAQUE) -->
+          <div class="space-y-1">
+            <span class="text-xs text-[#81A58E] font-medium">Montante Total ao Final do Prazo:</span>
+            <div class="text-3xl sm:text-4xl font-extrabold font-mono text-[#00E676]" id="sim-res-total">
+              $ 10,710.00
+            </div>
+            <div class="text-xs font-mono text-[#A7F3D0]" id="sim-res-brl">
+              ≈ R$ 61.582,50 BRL
+            </div>
+          </div>
+
+          <!-- QUEBRA DE DETALHES -->
+          <div class="space-y-3 pt-3 border-t border-[#2D4A37] text-xs font-mono">
+            
+            <div class="flex items-center justify-between">
+              <span class="text-[#81A58E]">Capital Principal Aportado:</span>
+              <span class="font-bold text-white" id="sim-res-principal">$ 10,000.00</span>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <span class="text-[#81A58E]">Juros em Dólar (USDC):</span>
+              <span class="font-bold text-[#00E676]" id="sim-res-interest">+ $ 710.00</span>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <span class="text-[#81A58E]">Bônus Pool de Recompensa ($AGRO):</span>
+              <span class="font-bold text-[#FBBF24]" id="sim-res-rewards">+ 425 $AGRO</span>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <span class="text-[#81A58E]">Taxa Efetiva no Período:</span>
+              <span class="font-bold text-white" id="sim-res-effective-rate">7.10% (14.2% a.a.)</span>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <span class="text-[#81A58E]">Garantia Real do Colateral:</span>
+              <span class="font-bold text-[#00E676]">Overcollateralized 312%</span>
+            </div>
+
+          </div>
+
+          <!-- NOTA DE SEGURANÇA -->
+          <div class="p-3.5 rounded-2xl bg-[#16281E] border border-[#2D4A37] text-[11px] text-[#A7F3D0] leading-relaxed flex items-start gap-2">
+            <span>🛡️</span>
+            <div>
+              <b>Proteção RWA:</b> Caso a safra sofra quebra severa, o contrato inteligente aciona a liquidação paramétrica do NFT de terra, cobrindo o valor principal e os juros contratuais até o limite de 65% de LTV.
+            </div>
+          </div>
+
+          <!-- BOTÃO SIMULAR APORTE COM ESSE VALOR -->
+          <button onclick="confirmSimulatedDeposit()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#00897B] to-[#00E676] hover:from-[#00695C] hover:to-[#00C853] text-[#0B130E] font-extrabold text-xs transition-all shadow-lg shadow-[#00897B]/30 flex items-center justify-center gap-2">
+            <span>🚀</span> Investir com este Cenário Simulado
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- MODAL: APORTE EM POOL DE FAZENDA -->
+  <div id="deposit-modal" class="fixed inset-0 bg-[#1A2E20]/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white border border-[#E2E8E2] rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-5 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+      
+      <div class="flex items-center justify-between border-b border-[#E2E8E2] pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-2xl bg-[#E0F2F1] text-[#00897B] flex items-center justify-center font-bold text-xl border border-[#B2DFDB]">
+            💵
+          </div>
+          <div>
+            <h3 class="font-extrabold text-base text-[#1A2E20]">Aporte em Pool de Dólar</h3>
+            <p class="text-xs text-[#556B5C]" id="modal-farm-name">Fazenda Santa Helena</p>
+          </div>
+        </div>
+        <button onclick="closeDepositModal()" class="text-[#556B5C] hover:text-[#1A2E20] text-lg px-2 font-bold">✕</button>
+      </div>
+
+      <div class="space-y-4 text-xs">
+        
+        <div class="bg-[#F7F9F6] p-3 rounded-xl border border-[#E2E8E2] space-y-1">
+          <div class="flex justify-between text-[#556B5C]">
+            <span>Rendimento Projetado:</span>
+            <span class="font-bold text-[#00897B]" id="modal-apy">13.8% APY</span>
+          </div>
+          <div class="flex justify-between text-[#556B5C]">
+            <span>Capacidade Disponível:</span>
+            <span class="font-bold text-[#1A2E20]" id="modal-cap">$ 100,000.00 USDC</span>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-[#1A2E20] mb-1">Valor do Aporte em Dólar (USDC):</label>
+          <div class="relative">
+            <span class="absolute left-3.5 top-2.5 text-xs font-bold text-[#556B5C]">USDC</span>
+            <input type="number" id="deposit-amount" value="5000" min="50" step="100" class="w-full bg-[#F7F9F6] border border-[#E2E8E2] rounded-xl py-2 pl-14 pr-3 text-sm font-bold text-[#1A2E20] focus:outline-none focus:border-[#00897B]">
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between text-[11px] text-[#556B5C]">
+          <span>Retorno Estimado no Vencimento (180d):</span>
+          <span class="font-mono font-bold text-[#00897B]" id="modal-return-preview">+ $ 345.00 USDC</span>
+        </div>
+
+        <div class="pt-2 border-t border-[#E2E8E2] flex items-center justify-end gap-2">
+          <button onclick="closeDepositModal()" class="px-4 py-2.5 rounded-xl bg-[#F7F9F6] hover:bg-[#E2E8E2] text-[#1A2E20] font-semibold text-xs transition-colors">
+            Cancelar
+          </button>
+          <button id="btn-confirm-deposit" onclick="executeDeposit()" class="px-5 py-2.5 rounded-xl bg-[#00897B] hover:bg-[#00695C] text-white font-bold text-xs shadow-md shadow-[#00897B]/25 transition-all flex items-center gap-1.5">
+            <span id="btn-confirm-deposit-label">Confirmar Aporte ➔</span>
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL: COMPROVANTE OFICIAL DE TRANSAÇÃO (TRANSACTION RECEIPT) -->
+  <div id="receipt-modal" class="fixed inset-0 bg-[#1A2E20]/75 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white border border-[#B2DFDB] rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-5 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+      
+      <!-- Cabeçalho do Comprovante -->
+      <div class="flex items-center justify-between border-b border-[#E2E8E2] pb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-2xl bg-[#E0F2F1] text-[#00897B] flex items-center justify-center font-bold text-2xl border border-[#B2DFDB] shadow-xs">
+            📜
+          </div>
+          <div>
+            <h3 class="font-extrabold text-base sm:text-lg text-[#1A2E20]">Comprovante Oficial de Transação</h3>
+            <p class="text-xs text-[#556B5C]">AgroFi Protocol • Ethereum Sepolia Testnet</p>
+          </div>
+        </div>
+        <button onclick="closeReceiptModal()" class="text-[#556B5C] hover:text-[#1A2E20] text-lg px-2 font-bold">✕</button>
+      </div>
+
+      <!-- Detalhes Criptográficos do Comprovante -->
+      <div id="printable-receipt-area" class="space-y-3 text-xs font-mono bg-[#F7F9F6] p-4 rounded-2xl border border-[#E2E8E2]">
+        
+        <div class="flex flex-col sm:flex-row justify-between py-1.5 border-b border-[#E2E8E2] gap-1">
+          <span class="text-[#556B5C] font-sans">Status da Execução:</span>
+          <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-bold bg-[#E8F5E9] text-[#00897B] border border-[#C8E6C9] w-fit">
+            ✓ Sucesso (Confirmado On-Chain)
+          </span>
+        </div>
+
+        <div class="flex flex-col sm:flex-row justify-between py-1.5 border-b border-[#E2E8E2] gap-1">
+          <span class="text-[#556B5C] font-sans">Operação:</span>
+          <span class="font-bold text-[#1A2E20] font-sans text-xs" id="receipt-op-title">Aporte em Pool de Dólar</span>
+        </div>
+
+        <div class="flex flex-col sm:flex-row justify-between py-1.5 border-b border-[#E2E8E2] gap-1">
+          <span class="text-[#556B5C] font-sans">Valor Transacionado:</span>
+          <span class="font-bold text-[#00897B] text-sm" id="receipt-amount">$ 5,000.00 USDC</span>
+        </div>
+
+        <div class="flex flex-col sm:flex-row justify-between py-1.5 border-b border-[#E2E8E2] gap-1">
+          <span class="text-[#556B5C] font-sans">Transaction Hash:</span>
+          <span class="text-[#00897B] font-bold break-all text-[11px]" id="receipt-tx-hash">0x...</span>
+        </div>
+
+        <div class="flex flex-col sm:flex-row justify-between py-1.5 border-b border-[#E2E8E2] gap-1">
+          <span class="text-[#556B5C] font-sans">Bloco Minerado:</span>
+          <span class="text-[#1A2E20] font-bold" id="receipt-block">#0</span>
+        </div>
+
+        <div class="flex flex-col sm:flex-row justify-between py-1.5 border-b border-[#E2E8E2] gap-1">
+          <span class="text-[#556B5C] font-sans">Investidor (From):</span>
+          <span class="text-[#556B5C] break-all text-[11px]" id="receipt-sender">0x...</span>
+        </div>
+
+        <div class="flex flex-col sm:flex-row justify-between py-1.5 border-b border-[#E2E8E2] gap-1">
+          <span class="text-[#556B5C] font-sans">Contrato AgroFi (To):</span>
+          <span class="text-[#D97706] break-all text-[11px] font-bold" id="receipt-contract">0x...</span>
+        </div>
+
+        <div class="flex flex-col sm:flex-row justify-between py-1.5 gap-1">
+          <span class="text-[#556B5C] font-sans">Gás Consumido:</span>
+          <span class="text-[#556B5C]" id="receipt-gas">0 units</span>
+        </div>
+
+      </div>
+
+      <!-- Ações do Comprovante -->
+      <div class="pt-2 flex flex-wrap items-center justify-between gap-2">
+        <button onclick="window.print()" class="px-4 py-2.5 rounded-xl bg-white hover:bg-[#F7F9F6] border border-[#E2E8E2] text-[#1A2E20] font-bold text-xs flex items-center gap-1.5 shadow-xs transition-all">
+          <span>🖨️</span> Imprimir / Salvar PDF
+        </button>
+
+        <div class="flex items-center gap-2">
+          <a id="receipt-etherscan-link" href="#" target="_blank" class="px-4 py-2.5 rounded-xl bg-[#E0F2F1] hover:bg-[#B2DFDB] text-[#00897B] font-bold text-xs flex items-center gap-1.5 transition-all">
+            <span>🔍</span> Sepolia Etherscan ↗
+          </a>
+          <button onclick="closeReceiptModal()" class="px-5 py-2.5 rounded-xl bg-[#00897B] hover:bg-[#00695C] text-white font-bold text-xs transition-all shadow-md shadow-[#00897B]/25">
+            Concluir
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-[#E2E8E2] bg-white py-6 text-xs text-[#556B5C] text-center mt-12">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <span>🌾</span>
+        <span class="font-bold text-[#1A2E20]">AgroFi Protocol - Módulo Invista</span>
+        <span>•</span>
+        <span>Crédito Agrícola RWA em Dólar</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <span>Contratos: <b>Sepolia & Anvil</b></span>
+        <span>•</span>
+        <span>Oráculo: <b>Sentinel-2 + SRTM + VTN</b></span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    const USD_BRL_RATE = 5.75;
+    let currentCurrency = 'USD'; // 'USD' ou 'BRL'
+    let currentScenario = 'opt'; // 'opt', 'mod', 'sev'
+    let isConnected = false;
+
+    // Alternar Moeda (USD vs BRL)
+    function setCurrency(curr) {
+      currentCurrency = curr;
+      const btnUsd = document.getElementById('btn-curr-usd');
+      const btnBrl = document.getElementById('btn-curr-brl');
+
+      if (curr === 'USD') {
+        btnUsd.className = "px-3 py-1 rounded-lg bg-[#00897B] text-white shadow-xs transition-all";
+        btnBrl.className = "px-3 py-1 rounded-lg text-[#556B5C] hover:text-[#1A2E20] transition-all";
+        document.getElementById('sim-input-prefix').innerText = "USD $";
+      } else {
+        btnBrl.className = "px-3 py-1 rounded-lg bg-[#00897B] text-white shadow-xs transition-all";
+        btnUsd.className = "px-3 py-1 rounded-lg text-[#556B5C] hover:text-[#1A2E20] transition-all";
+        document.getElementById('sim-input-prefix').innerText = "BRL R$";
+      }
+
+      updatePoolCardValues();
+      runSimulation();
+    }
+
+    function updatePoolCardValues() {
+      const isBrl = currentCurrency === 'BRL';
+      const factor = isBrl ? USD_BRL_RATE : 1;
+      const prefix = isBrl ? 'R$ ' : '$ ';
+
+      const loans = [
+        { id: 'val-loan-1', usd: 150000 },
+        { id: 'val-loan-2', usd: 80000 },
+        { id: 'val-loan-3', usd: 200000 },
+        { id: 'val-loan-4', usd: 95000 }
+      ];
+
+      loans.forEach(item => {
+        const val = item.usd * factor;
+        const el = document.getElementById(item.id);
+        if (el) {
+          el.innerText = prefix + val.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+      });
+    }
+
+    // Atualização de Cenário Climático
+    function updateScenario(val) {
+      currentScenario = val;
+      ['opt', 'mod', 'sev'].forEach(sc => {
+        const card = document.getElementById('scenario-card-' + sc);
+        if (sc === val) {
+          card.className = "p-3 rounded-xl border-2 border-[#00897B] bg-[#E0F2F1]/30 flex flex-col justify-between cursor-pointer transition-all";
+        } else {
+          card.className = "p-3 rounded-xl border border-[#E2E8E2] bg-white flex flex-col justify-between cursor-pointer hover:border-[#00897B] transition-all";
+        }
+      });
+      runSimulation();
+    }
+
+    function setSimAmount(val) {
+      const input = document.getElementById('sim-amount');
+      const factor = currentCurrency === 'BRL' ? USD_BRL_RATE : 1;
+      input.value = Math.round(val * factor);
+      runSimulation();
+    }
+
+    function updateDaysFromSlider() {
+      const days = document.getElementById('sim-days-slider').value;
+      const months = Math.round(days / 30);
+      document.getElementById('sim-days-display').innerText = `${days} dias (${months} meses)`;
+      runSimulation();
+    }
+
+    // Execução do Motor de Simulação
+    function runSimulation() {
+      const amountInput = parseFloat(document.getElementById('sim-amount').value) || 0;
+      const select = document.getElementById('sim-farm-select');
+      const selectedOption = select.options[select.selectedIndex];
+      const baseApy = parseFloat(selectedOption.getAttribute('data-apy')) || 14.2;
+      const days = parseInt(document.getElementById('sim-days-slider').value) || 180;
+
+      // Ajuste de APY conforme o cenário
+      let effectiveApy = baseApy;
+      if (currentScenario === 'mod') {
+        effectiveApy = baseApy * 0.95; // Leve desconto por seguro
+      } else if (currentScenario === 'sev') {
+        effectiveApy = baseApy * 0.90; // Cobertura integral pelo piso Q10 com desconto de liquidação
+      }
+
+      // Pro-rata no prazo
+      const periodRatio = days / 365;
+      const interest = amountInput * (effectiveApy / 100) * periodRatio;
+      const total = amountInput + interest;
+
+      // Recompensas em $AGRO (proporcional ao tempo e valor)
+      const agroRewards = Math.round((amountInput / (currentCurrency === 'BRL' ? USD_BRL_RATE : 1)) * 0.085 * periodRatio);
+
+      // Conversão para exibição
+      const prefix = currentCurrency === 'BRL' ? 'R$ ' : '$ ';
+      const totalBrl = currentCurrency === 'BRL' ? total : total * USD_BRL_RATE;
+
+      document.getElementById('sim-summary-title').innerText = `Vencimento em ${days} dias (${Math.round(days / 30)} meses)`;
+      document.getElementById('sim-res-total').innerText = prefix + total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      document.getElementById('sim-res-brl').innerText = `≈ R$ ${totalBrl.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} BRL`;
+      document.getElementById('sim-res-principal').innerText = prefix + amountInput.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      document.getElementById('sim-res-interest').innerText = `+ ` + prefix + interest.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      document.getElementById('sim-res-rewards').innerText = `+ ${agroRewards.toLocaleString('pt-BR')} $AGRO`;
+      document.getElementById('sim-res-effective-rate').innerText = `${((interest / amountInput) * 100).toFixed(2)}% (${effectiveApy.toFixed(1)}% a.a.)`;
+    }
+
+    // Modal de Depósito
+    function openDepositModal(farmName, apy, currentLoan, availableCap) {
+      document.getElementById('modal-farm-name').innerText = farmName;
+      document.getElementById('modal-apy').innerText = apy + '% APY';
+      document.getElementById('modal-cap').innerText = '$ ' + availableCap.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) + ' USDC';
+      document.getElementById('deposit-modal').classList.remove('hidden');
+    }
+
+    function closeDepositModal() {
+      document.getElementById('deposit-modal').classList.add('hidden');
+    }
+
+    // ==========================================
+    // INTEGRAÇÃO WEB3 & COMPROVANTES (SEPOLIA)
+    // ==========================================
+    const SEPOLIA_CHAIN_ID_HEX = "0xaa36a7"; // 11155111
+    const SEPOLIA_CHAIN_ID_DEC = 11155111;
+    const USDC_ADDRESS = "0x178B9bFA3E86a9Ed3F67963e28afBe49BCf45ED2";
+    const AGRO_ADDRESS = "0xBBa1B54b0b6962F586a9971965811b79b1CdAeB8";
+    const LENDING_POOL_ADDRESS = "0x020c06c4d1410B2131e9815c5D25F7Ee90D37a26";
+    const STAKING_REWARDS_ADDRESS = "0x154B3f7B2D99E83912267594b8B4aDF76fF58e26";
+
+    const ERC20_ABI = [
+      "function balanceOf(address account) view returns (uint256)",
+      "function mint(address to, uint256 value) external",
+      "function decimals() view returns (uint8)",
+      "function approve(address spender, uint256 amount) returns (bool)",
+      "function allowance(address owner, address spender) view returns (uint256)"
+    ];
+
+    const LENDING_POOL_ABI = [
+      "function depositLiquidity(uint256 amount) external",
+      "function withdrawLiquidity(uint256 amount) external",
+      "function liquidityBalances(address user) view returns (uint256)",
+      "function totalLiquidityDeposited() view returns (uint256)"
+    ];
+
+    const STAKING_REWARDS_ABI = [
+      "function earned(address account) view returns (uint256)",
+      "function stakedBalance(address account) view returns (uint256)",
+      "function stake(uint256 amount) external",
+      "function withdraw(uint256 amount) external",
+      "function claimRewards() external returns (uint256)",
+      "function apyBasisPoints() view returns (uint256)"
+    ];
+
+    let currentAccount = null;
+    let web3Provider = null;
+    let web3Signer = null;
+
+    function closeReceiptModal() {
+      const m = document.getElementById('receipt-modal');
+      if (m) m.classList.add('hidden');
+    }
+
+    function showTransactionReceipt(data) {
+      document.getElementById('receipt-op-title').innerText = data.title;
+      document.getElementById('receipt-amount').innerText = data.amount;
+      document.getElementById('receipt-tx-hash').innerText = data.hash;
+      document.getElementById('receipt-block').innerText = '#' + data.block;
+      document.getElementById('receipt-sender').innerText = data.from;
+      document.getElementById('receipt-contract').innerText = data.contract;
+      document.getElementById('receipt-gas').innerText = parseInt(data.gasUsed || 0).toLocaleString() + ' units';
+      
+      const link = document.getElementById('receipt-etherscan-link');
+      if (link) {
+        link.href = `https://sepolia.etherscan.io/tx/${data.hash}`;
+      }
+
+      document.getElementById('receipt-modal').classList.remove('hidden');
+    }
+
+    async function connectWeb3Wallet() {
+      const eth = window.rabby || window.ethereum;
+      if (!eth) {
+        showToast("⚠️ Nenhuma extensão Web3 encontrada (instale Rabby Wallet ou MetaMask).", "error");
+        return;
+      }
+
+      try {
+        showToast("Conectando Rabby / MetaMask...", "info");
+        const accounts = await eth.request({ method: "eth_requestAccounts" });
+        if (!accounts || accounts.length === 0) {
+          showToast("Nenhuma conta selecionada na carteira.", "error");
+          return;
+        }
+
+        currentAccount = accounts[0];
+        isConnected = true;
+
+        // Verificar rede Sepolia
+        const chainId = await eth.request({ method: "eth_chainId" });
+        if (chainId !== SEPOLIA_CHAIN_ID_HEX && parseInt(chainId, 16) !== SEPOLIA_CHAIN_ID_DEC) {
+          try {
+            await eth.request({
+              method: "wallet_switchEthereumChain",
+              params: [{ chainId: SEPOLIA_CHAIN_ID_HEX }]
+            });
+          } catch (switchError) {
+            if (switchError.code === 4902) {
+              await eth.request({
+                method: "wallet_addEthereumChain",
+                params: [{
+                  chainId: SEPOLIA_CHAIN_ID_HEX,
+                  chainName: "Ethereum Sepolia",
+                  nativeCurrency: { name: "Sepolia ETH", symbol: "SEP", decimals: 18 },
+                  rpcUrls: ["https://ethereum-sepolia-rpc.publicnode.com"],
+                  blockExplorerUrls: ["https://sepolia.etherscan.io"]
+                }]
+              });
+            }
+          }
+        }
+
+        if (window.ethers) {
+          web3Provider = new ethers.BrowserProvider(eth);
+          web3Signer = await web3Provider.getSigner();
+        }
+
+        const shortAddr = `${currentAccount.substring(0, 6)}...${currentAccount.substring(currentAccount.length - 4)}`;
+        document.getElementById('wallet-btn-label').innerText = `${shortAddr} (Sepolia)`;
+        showToast(`👛 Conectado na Sepolia: ${shortAddr}`, "success");
+
+        await updateWeb3Balances();
+
+        // Ticker de recompensas
+        setInterval(pollRewardsAccrual, 4000);
+
+        if (eth.on) {
+          eth.on("accountsChanged", (accs) => {
+            if (accs.length > 0) {
+              currentAccount = accs[0];
+              const s = `${currentAccount.substring(0, 6)}...${currentAccount.substring(currentAccount.length - 4)}`;
+              document.getElementById('wallet-btn-label').innerText = `${s} (Sepolia)`;
+              updateWeb3Balances();
+            } else {
+              document.getElementById('wallet-btn-label').innerText = "Conectar Carteira";
+            }
+          });
+        }
+      } catch (err) {
+        console.error("Erro ao conectar Web3:", err);
+        showToast(`Erro ao conectar: ${err.message || err}`, "error");
+      }
+    }
+
+    async function updateWeb3Balances() {
+      if (!currentAccount || !window.ethers || !web3Provider) return;
+      try {
+        // Saldo ETH
+        const balWei = await web3Provider.getBalance(currentAccount);
+        const ethBal = parseFloat(ethers.formatEther(balWei)).toFixed(4);
+        const ethEl = document.getElementById('faucet-eth-val');
+        if (ethEl) ethEl.innerText = `${ethBal} ETH`;
+
+        // Saldo MockUSDC (6 Decimais)
+        const usdcContract = new ethers.Contract(USDC_ADDRESS, ERC20_ABI, web3Provider);
+        const usdcWei = await usdcContract.balanceOf(currentAccount);
+        const usdcBal = parseFloat(ethers.formatUnits(usdcWei, 6)).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+        const usdcEl = document.getElementById('faucet-usdc-val');
+        if (usdcEl) usdcEl.innerText = `${usdcBal} USDC`;
+
+        // Saldo $AGRO (18 Decimais)
+        const agroContract = new ethers.Contract(AGRO_ADDRESS, ERC20_ABI, web3Provider);
+        const agroWei = await agroContract.balanceOf(currentAccount);
+        const agroBal = parseFloat(ethers.formatUnits(agroWei, 18)).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+        const agroEl = document.getElementById('faucet-agro-val');
+        if (agroEl) agroEl.innerText = `${agroBal} AGRO`;
+
+        // Saldo em Staking & Recompensas
+        const stakingContract = new ethers.Contract(STAKING_REWARDS_ADDRESS, STAKING_REWARDS_ABI, web3Provider);
+        const stakedWei = await stakingContract.stakedBalance(currentAccount);
+        const stakedUSDC = parseFloat(ethers.formatUnits(stakedWei, 6)).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+        const stakedEl = document.getElementById('user-staked-balance');
+        if (stakedEl) stakedEl.innerText = `${stakedUSDC} USDC`;
+
+        await pollRewardsAccrual();
+      } catch (e) {
+        console.warn("Erro ao buscar saldos on-chain:", e);
+      }
+    }
+
+    async function pollRewardsAccrual() {
+      if (!currentAccount || !window.ethers || !web3Provider) return;
+      try {
+        const stakingContract = new ethers.Contract(STAKING_REWARDS_ADDRESS, STAKING_REWARDS_ABI, web3Provider);
+        const earnedWei = await stakingContract.earned(currentAccount);
+        const earnedAGRO = parseFloat(ethers.formatUnits(earnedWei, 18)).toFixed(4);
+        
+        const rewardEl = document.getElementById('user-reward-balance');
+        if (rewardEl) {
+          rewardEl.innerHTML = `${earnedAGRO} <span class="text-sm font-bold text-[#1A2E20]">$AGRO</span>`;
+        }
+      } catch (err) {}
+    }
+
+    async function executeDeposit() {
+      const amount = parseFloat(document.getElementById('deposit-amount').value) || 0;
+      const farm = document.getElementById('modal-farm-name').innerText;
+      
+      if (amount <= 0) {
+        showToast("Digite um valor válido para aporte.", "error");
+        return;
+      }
+
+      if (!currentAccount || !web3Signer) {
+        await connectWeb3Wallet();
+        if (!currentAccount || !web3Signer) {
+          showToast("⚠️ Conecte sua carteira para assinar a transação na Sepolia!", "warning");
+          return;
+        }
+      }
+
+      const btn = document.getElementById('btn-confirm-deposit');
+      const label = document.getElementById('btn-confirm-deposit-label');
+      const originalText = label ? label.innerText : "Confirmar Aporte";
+
+      try {
+        if (btn) btn.disabled = true;
+        if (label) label.innerText = "⏳ [1/2] Aprovando na Rabby...";
+        showToast(`Abra sua carteira para aprovar $ ${amount.toLocaleString('pt-BR')} USDC...`, "info");
+
+        const usdcContract = new ethers.Contract(USDC_ADDRESS, ERC20_ABI, web3Signer);
+        const lendingContract = new ethers.Contract(LENDING_POOL_ADDRESS, LENDING_POOL_ABI, web3Signer);
+        const amountWei = ethers.parseUnits(amount.toString(), 6);
+
+        // 1. Checar allowance
+        const allowance = await usdcContract.allowance(currentAccount, LENDING_POOL_ADDRESS);
+        if (allowance < amountWei) {
+          const approveTx = await usdcContract.approve(LENDING_POOL_ADDRESS, amountWei);
+          showToast("Aprovação enviada! Aguardando confirmação...", "info");
+          await approveTx.wait(1);
+        }
+
+        // 2. Depositar liquidez
+        if (label) label.innerText = "⏳ [2/2] Assinando Depósito...";
+        showToast("Abra sua carteira para assinar o depósito no LendingPool...", "info");
+        const depositTx = await lendingContract.depositLiquidity(amountWei);
+        showToast(`Tx enviada: ${depositTx.hash.substring(0, 10)}... Minerando bloco...`, "info");
+        
+        const receipt = await depositTx.wait(1);
+        closeDepositModal();
+        await updateWeb3Balances();
+
+        // 3. Exibir Comprovante Oficial
+        showTransactionReceipt({
+          title: `Aporte em Pool - ${farm}`,
+          amount: `$ ${amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} USDC`,
+          hash: depositTx.hash,
+          block: receipt.blockNumber,
+          from: currentAccount,
+          contract: LENDING_POOL_ADDRESS,
+          gasUsed: receipt.gasUsed ? receipt.gasUsed.toString() : "145000"
+        });
+
+      } catch (err) {
+        console.error("Erro no aporte Web3:", err);
+        showToast(`Falha no aporte: ${err.reason || err.message || err}`, "error");
+      } finally {
+        if (btn) btn.disabled = false;
+        if (label) label.innerText = originalText;
+      }
+    }
+
+    async function executeStakeUSDC() {
+      const input = document.getElementById('stake-amount-input');
+      const amount = parseFloat(input.value) || 0;
+      if (amount <= 0) {
+        showToast("Digite um valor válido de USDC para fazer stake.", "error");
+        return;
+      }
+
+      if (!currentAccount || !web3Signer) {
+        await connectWeb3Wallet();
+        if (!currentAccount || !web3Signer) {
+          showToast("⚠️ Conecte sua carteira para fazer stake!", "warning");
+          return;
+        }
+      }
+
+      const btn = document.getElementById('btn-stake-action');
+      const label = document.getElementById('btn-stake-label');
+      const originalText = label ? label.innerText : "Fazer Stake";
+
+      try {
+        if (btn) btn.disabled = true;
+        if (label) label.innerText = "⏳ [1/2] Aprovando...";
+        showToast(`Abra sua carteira para aprovar $ ${amount.toLocaleString('pt-BR')} USDC para o Staking...`, "info");
+
+        const usdcContract = new ethers.Contract(USDC_ADDRESS, ERC20_ABI, web3Signer);
+        const stakingContract = new ethers.Contract(STAKING_REWARDS_ADDRESS, STAKING_REWARDS_ABI, web3Signer);
+        const amountWei = ethers.parseUnits(amount.toString(), 6);
+
+        const allowance = await usdcContract.allowance(currentAccount, STAKING_REWARDS_ADDRESS);
+        if (allowance < amountWei) {
+          const approveTx = await usdcContract.approve(STAKING_REWARDS_ADDRESS, amountWei);
+          await approveTx.wait(1);
+        }
+
+        if (label) label.innerText = "⏳ [2/2] Depositando...";
+        showToast("Abra sua carteira para confirmar o Stake...", "info");
+        const stakeTx = await stakingContract.stake(amountWei);
+        showToast(`Stake enviado: ${stakeTx.hash.substring(0, 10)}... Aguardando mineração...`, "info");
+        
+        const receipt = await stakeTx.wait(1);
+        input.value = "";
+        await updateWeb3Balances();
+
+        showTransactionReceipt({
+          title: "Stake de Liquidez - Pool de Recompensas",
+          amount: `$ ${amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} USDC`,
+          hash: stakeTx.hash,
+          block: receipt.blockNumber,
+          from: currentAccount,
+          contract: STAKING_REWARDS_ADDRESS,
+          gasUsed: receipt.gasUsed ? receipt.gasUsed.toString() : "120000"
+        });
+
+      } catch (err) {
+        console.error("Erro no stake:", err);
+        showToast(`Erro no stake: ${err.reason || err.message || err}`, "error");
+      } finally {
+        if (btn) btn.disabled = false;
+        if (label) label.innerText = originalText;
+      }
+    }
+
+    async function claimRewards() {
+      if (!currentAccount || !web3Signer) {
+        await connectWeb3Wallet();
+        if (!currentAccount || !web3Signer) return;
+      }
+
+      const btn = document.getElementById('btn-claim-rewards');
+      const label = document.getElementById('btn-claim-label');
+      const originalText = label ? label.innerText : "Colher $AGRO";
+
+      try {
+        if (btn) btn.disabled = true;
+        if (label) label.innerText = "⏳ Colhendo...";
+        showToast("Abra sua carteira para assinar a colheita de $AGRO...", "info");
+
+        const stakingContract = new ethers.Contract(STAKING_REWARDS_ADDRESS, STAKING_REWARDS_ABI, web3Signer);
+        const tx = await stakingContract.claimRewards();
+        showToast(`Tx enviada: ${tx.hash.substring(0, 10)}... Minerando bloco...`, "info");
+        
+        const receipt = await tx.wait(1);
+        await updateWeb3Balances();
+
+        showTransactionReceipt({
+          title: "Colheita de Recompensas ($AGRO Mint)",
+          amount: "Tokens $AGRO creditados",
+          hash: tx.hash,
+          block: receipt.blockNumber,
+          from: currentAccount,
+          contract: STAKING_REWARDS_ADDRESS,
+          gasUsed: receipt.gasUsed ? receipt.gasUsed.toString() : "85000"
+        });
+
+      } catch (err) {
+        console.error("Erro ao colher:", err);
+        showToast(`Erro ao colher: ${err.reason || err.message || err}`, "error");
+      } finally {
+        if (btn) btn.disabled = false;
+        if (label) label.innerText = originalText;
+      }
+    }
+
+    async function executeUnstakeUSDC() {
+      if (!currentAccount || !web3Signer) {
+        await connectWeb3Wallet();
+        if (!currentAccount || !web3Signer) return;
+      }
+
+      try {
+        const stakingContract = new ethers.Contract(STAKING_REWARDS_ADDRESS, STAKING_REWARDS_ABI, web3Signer);
+        const stakedWei = await stakingContract.stakedBalance(currentAccount);
+        if (stakedWei === 0n) {
+          showToast("Você não possui saldo em Staking para retirar.", "warning");
+          return;
+        }
+
+        const valUSDC = parseFloat(ethers.formatUnits(stakedWei, 6)).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+        showToast(`Abra sua carteira para assinar a retirada de $ ${valUSDC} USDC...`, "info");
+        const tx = await stakingContract.withdraw(stakedWei);
+        const receipt = await tx.wait(1);
+
+        await updateWeb3Balances();
+
+        showTransactionReceipt({
+          title: "Retirada de Staking (Unstake)",
+          amount: `$ ${valUSDC} USDC`,
+          hash: tx.hash,
+          block: receipt.blockNumber,
+          from: currentAccount,
+          contract: STAKING_REWARDS_ADDRESS,
+          gasUsed: receipt.gasUsed ? receipt.gasUsed.toString() : "110000"
+        });
+
+      } catch (err) {
+        console.error("Erro ao retirar:", err);
+        showToast(`Erro na retirada: ${err.reason || err.message || err}`, "error");
+      }
+    }
+
+    async function claimFaucetUSDC() {
+      if (!currentAccount || !web3Signer) {
+        await connectWeb3Wallet();
+        if (!currentAccount || !web3Signer) return;
+      }
+
+      const btn = document.getElementById('btn-faucet-claim');
+      const label = document.getElementById('btn-faucet-label');
+      const originalText = label.innerText;
+
+      try {
+        btn.disabled = true;
+        label.innerText = "⏳ Confirmando na carteira...";
+        showToast("💧 Solicitando emissão de 10.000 MockUSDC via transação Sepolia...", "info");
+
+        const usdcContract = new ethers.Contract(USDC_ADDRESS, ERC20_ABI, web3Signer);
+        const amountWei = ethers.parseUnits("10000", 6);
+        
+        const tx = await usdcContract.mint(currentAccount, amountWei);
+        label.innerText = "⏳ Minerando bloco Sepolia...";
+        showToast(`🚀 Tx enviada! Hash: ${tx.hash.substring(0, 10)}... Minerando...`, "info");
+
+        const receipt = await tx.wait(1);
+        await updateWeb3Balances();
+
+        showTransactionReceipt({
+          title: "Resgate Faucet Oficial (MockUSDC)",
+          amount: "$ 10,000.00 MockUSDC",
+          hash: tx.hash,
+          block: receipt.blockNumber,
+          from: currentAccount,
+          contract: USDC_ADDRESS,
+          gasUsed: receipt.gasUsed ? receipt.gasUsed.toString() : "70000"
+        });
+
+      } catch (err) {
+        console.error("Erro no faucet:", err);
+        showToast(`Erro no Faucet: ${err.reason || err.message || err}`, "error");
+      } finally {
+        btn.disabled = false;
+        label.innerText = originalText;
+      }
+    }
+
+    async function watchTokenAsset(tokenType) {
+      const eth = window.rabby || window.ethereum;
+      if (!eth) {
+        showToast("Nenhuma extensão Web3 encontrada.", "error");
+        return;
+      }
+
+      try {
+        let params = {};
+        if (tokenType === 'USDC') {
+          params = {
+            type: 'ERC20',
+            options: {
+              address: USDC_ADDRESS,
+              symbol: 'USDC',
+              decimals: 6,
+              image: 'https://cryptologos.cc/logos/usd-coin-usdc-logo.png'
+            }
+          };
+        } else if (tokenType === 'AGRO') {
+          params = {
+            type: 'ERC20',
+            options: {
+              address: AGRO_ADDRESS,
+              symbol: 'AGRO',
+              decimals: 18,
+              image: 'https://raw.githubusercontent.com/feathericons/feather/master/icons/sun.svg'
+            }
+          };
+        }
+
+        const wasAdded = await eth.request({
+          method: 'wallet_watchAsset',
+          params: params
+        });
+
+        if (wasAdded) {
+          showToast(`✅ Token ${tokenType} adicionado à carteira!`, 'success');
+        }
+      } catch (err) {
+        console.error("Erro ao adicionar token:", err);
+        showToast(`Erro: ${err.message || err}`, 'error');
+      }
+    }
+
+    function confirmSimulatedDeposit() {
+      const amount = document.getElementById('sim-amount').value;
+      const prefix = currentCurrency === 'BRL' ? 'R$ ' : '$ ';
+      showToast(`🎯 Simulação confirmada! Preparando aporte de ${prefix}${parseFloat(amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}.`, 'info');
+      openDepositModal('Pool Selecionada', 14.2, 150000, 100000);
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      
+      let bg = 'bg-[#1A2E20] text-white border border-[#2D4A37]';
+      if (type === 'success') bg = 'bg-[#E8F5E9] text-[#00897B] border border-[#C8E6C9]';
+      else if (type === 'error') bg = 'bg-[#FFEBEE] text-[#C62828] border border-[#FFCDD2]';
+
+      toast.className = `${bg} px-4 py-3 rounded-2xl shadow-xl text-xs font-bold transition-all transform translate-y-2 pointer-events-auto flex items-center justify-between gap-3`;
+      toast.innerHTML = `<span>${message}</span><button onclick="this.parentElement.remove()" class="text-xs font-bold opacity-60 hover:opacity-100">✕</button>`;
+      
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.remove();
+      }, 4000);
+    }
+
+    // Inicialização ao carregar
+    window.addEventListener('DOMContentLoaded', async () => {
+      runSimulation();
+      // Auto-conexão se a carteira já estiver autorizada
+      const eth = window.rabby || window.ethereum;
+      if (eth && eth.request) {
+        try {
+          const accs = await eth.request({ method: 'eth_accounts' });
+          if (accs && accs.length > 0) {
+            await connectWeb3Wallet();
+          }
+        } catch (e) {
+          console.warn("Auto-connect:", e);
+        }
+      }
+    });
+  </script>
+
+</body>
+</html>

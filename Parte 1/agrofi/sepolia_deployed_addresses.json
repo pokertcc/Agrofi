@@ -1,0 +1,13 @@
+{
+  "network": "Ethereum Sepolia Testnet",
+  "chainId": 11155111,
+  "deployer": "0xa449e7838fF89EE956174B682449870597e93C71",
+  "MockUSDC": "0x178B9bFA3E86a9Ed3F67963e28afBe49BCf45ED2",
+  "AgroNFT": "0xb89Cd470755AD1E25052b57D97af6Fc98b00Dfb2",
+  "LendingPool": "0x020c06c4d1410B2131e9815c5D25F7Ee90D37a26",
+  "etherscan": {
+    "MockUSDC": "https://sepolia.etherscan.io/address/0x178B9bFA3E86a9Ed3F67963e28afBe49BCf45ED2",
+    "AgroNFT": "https://sepolia.etherscan.io/address/0xb89Cd470755AD1E25052b57D97af6Fc98b00Dfb2",
+    "LendingPool": "https://sepolia.etherscan.io/address/0x020c06c4d1410B2131e9815c5D25F7Ee90D37a26"
+  }
+}

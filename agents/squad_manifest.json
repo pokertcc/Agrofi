@@ -1,0 +1,186 @@
+{
+  "squad_name": "AgroFi Autonomous Squad",
+  "version": "1.0.0",
+  "updated_at": "2026-11-21T09:47:00Z",
+  "description": "Equipe multidisciplinar de agentes autônomos especializados em Crédito Agrícola Descentralizado, Geoprocessamento, Machine Learning e Web3 RWA.",
+  "agents": [
+    {
+      "id": "agrofi-techlead",
+      "name": "Dr. Arquiteto Tech Lead",
+      "title": "Tech Lead & Arquiteto de Software",
+      "icon": "🏛️",
+      "color": "from-teal-600 to-emerald-700",
+      "badge_color": "bg-teal-500/10 text-teal-400 border-teal-500/30",
+      "status": "Ativo & Monitorando",
+      "stream": "Governança & Arquitetura",
+      "system_subagent": "agrofi-techlead",
+      "key_focus": "Arquitetura global, latência de oráculos (<200ms), contrato Web3CollateralPayload e segurança.",
+      "domain_files": [
+        "src/core/schemas.py",
+        "src/api/service.py",
+        "src/api/oracle_keeper.py",
+        "TEAM.md"
+      ],
+      "tools": ["read_file", "edit_file", "write_file", "run_command", "mcp_tools", "invoke_subagent"],
+      "responsibilities": [
+        "Governança de padrões de código e Clean Architecture",
+        "Garantia de conformidade entre Ingestão, ML e Smart Contracts",
+        "Supervisão de segurança de dados e oráculos off-chain"
+      ]
+    },
+    {
+      "id": "agrofi-mlops",
+      "name": "Eng. ML & MLOps",
+      "title": "Engenheiro de Machine Learning & MLOps",
+      "icon": "🤖",
+      "color": "from-purple-600 to-indigo-700",
+      "badge_color": "bg-purple-500/10 text-purple-400 border-purple-500/30",
+      "status": "Pronto para Tarefas",
+      "stream": "Data Science & AI",
+      "system_subagent": "agrofi-mlops",
+      "key_focus": "Modelos de valoração (LightGBM/XGBoost/Stacking), Regressão Quantílica Q10/Q50/Q90 e Monte Carlo (5.000 runs).",
+      "domain_files": [
+        "src/models/valuation_regressor.py",
+        "src/models/risk_engine.py",
+        "models_store/"
+      ],
+      "tools": ["read_file", "edit_file", "write_file", "run_command"],
+      "responsibilities": [
+        "Treinamento, calibração e métricas R² >= 0.98",
+        "Geração de quantis estocásticos (Q10 piso de liquidação rápida)",
+        "Simulação de Monte Carlo, VaR 95% e CVaR 95% sob choque climático",
+        "Monitoramento de data drift e concept drift territorial"
+      ]
+    },
+    {
+      "id": "agrofi-geospatial",
+      "name": "Eng. Geoprocessamento GIS",
+      "title": "Engenheiro de Geoprocessamento & Sensoriamento Remoto",
+      "icon": "🛰️",
+      "color": "from-blue-600 to-cyan-700",
+      "badge_color": "bg-blue-500/10 text-blue-400 border-blue-500/30",
+      "status": "Pronto para Tarefas",
+      "stream": "Stream Geoespacial",
+      "system_subagent": "agrofi-geospatial",
+      "key_focus": "Polígonos SICAR, séries temporais Sentinel-2 (NDVI/NDWI), rasters SRTM DEM e GeoPandas.",
+      "domain_files": [
+        "src/etl/sicar_ingestor.py",
+        "src/etl/srtm_processor.py",
+        "src/etl/sentinel_ndvi.py",
+        "src/etl/vtn_ingestor.py"
+      ],
+      "tools": ["read_file", "edit_file", "write_file", "run_command"],
+      "responsibilities": [
+        "Higienização geométrica e cálculo de áreas úteis consolidadas (CAR)",
+        "Extração de métricas de declividade média e mecanização agrícola",
+        "Processamento temporal de índices espectrais (NDVI quinzenal)",
+        "Detecção de estresse vegetativo em janelas críticas de safra"
+      ]
+    },
+    {
+      "id": "agrofi-agronomist",
+      "name": "Dr. Engenheiro Agrônomo",
+      "title": "Engenheiro Agrônomo & Risco Agroclimático",
+      "icon": "🌾",
+      "color": "from-amber-600 to-yellow-600",
+      "badge_color": "bg-amber-500/10 text-amber-400 border-amber-500/30",
+      "status": "Pronto para Tarefas",
+      "stream": "Inteligência Agronômica",
+      "system_subagent": "agrofi-agronomist",
+      "key_focus": "Fenologia de safras, balanço hídrico, ZARC Embrapa, quebra de produtividade e Código Florestal.",
+      "domain_files": [
+        "src/etl/sentinel_ndvi.py",
+        "src/models/risk_engine.py",
+        "data/farms_sicar.geojson"
+      ],
+      "tools": ["read_file", "edit_file", "write_file", "run_command"],
+      "responsibilities": [
+        "Validação de estágios fenológicos (floração/enchimento de grãos)",
+        "Parametrização agronômica da curva de sensibilidade a estresse hídrico",
+        "Auditoria de conformidade ambiental (Reserva Legal e APP)",
+        "Calibração de risco regional de produtividade em sacas/ha"
+      ]
+    },
+    {
+      "id": "agrofi-web3",
+      "name": "Eng. Web3 & Smart Contracts",
+      "title": "Engenheiro Web3 & Smart Contracts",
+      "icon": "⚡",
+      "color": "from-emerald-600 to-teal-800",
+      "badge_color": "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
+      "status": "Pronto para Tarefas",
+      "stream": "Blockchain & DeFi",
+      "system_subagent": "agrofi-web3",
+      "key_focus": "Solidity 0.8.20, AgroFiVault, AgroLandNFT, LendingPool, Sepolia, Anvil e liquidação paramétrica.",
+      "domain_files": [
+        "contracts/AgroFiVault.sol",
+        "contracts/AgroLandNFT.sol",
+        "contracts/LendingPool.sol",
+        "contracts/MockUSDC.sol",
+        "middleware/",
+        "integrar_oraculo.py"
+      ],
+      "tools": ["read_file", "edit_file", "write_file", "run_command"],
+      "responsibilities": [
+        "Desenvolvimento e auditoria de contratos inteligentes (ERC-721 e ERC-20)",
+        "Garantia dos limites matemáticos de LTV (3.500 a 6.500 bps)",
+        "Execução de liquidação paramétrica automatizada quando Health Factor < 1.0",
+        "Deploy e testes de integração em Anvil e Sepolia Testnet"
+      ]
+    },
+    {
+      "id": "agrofi-frontend",
+      "name": "Eng. Frontend & Cartografia",
+      "title": "Engenheiro Frontend & Cartografia Interativa",
+      "icon": "🗺️",
+      "color": "from-cyan-600 to-blue-700",
+      "badge_color": "bg-cyan-500/10 text-cyan-400 border-cyan-500/30",
+      "status": "Ativo & Desenvolvendo",
+      "stream": "Visualização & UX",
+      "system_subagent": "agrofi-frontend",
+      "key_focus": "Streamlit (app.py), MapLibre GL JS, TailwindCSS, portais Web3 e visualizador de mudanças.",
+      "domain_files": [
+        "app.py",
+        "index.html",
+        "dashboard.html",
+        "explorer.html",
+        "wallet.html",
+        "changes.html",
+        "src/visualization/maplibre_component.py"
+      ],
+      "tools": ["read_file", "edit_file", "write_file", "run_command"],
+      "responsibilities": [
+        "Renderização geoespacial com MapLibre GL JS e Mapbox Tiles",
+        "Interface Streamlit com sliders de choque hídrico em tempo real",
+        "Páginas Web3 com conexão de carteiras (Rabby/MetaMask) e assinatura EIP-191",
+        "Telas de localhost para visualização de mudanças e telemetria"
+      ]
+    },
+    {
+      "id": "agrofi-devops",
+      "name": "Eng. DevOps, SRE & QA",
+      "title": "Engenheiro DevOps, SRE & QA",
+      "icon": "🛡️",
+      "color": "from-rose-600 to-red-700",
+      "badge_color": "bg-rose-500/10 text-rose-400 border-rose-500/30",
+      "status": "Pronto para Tarefas",
+      "stream": "Confiabilidade & Infra",
+      "system_subagent": "agrofi-devops",
+      "key_focus": "Bateria de testes pytest (11/11 aprovados), estabilidade FastAPI, CI/CD e saúde de nós RPC.",
+      "domain_files": [
+        "run_tests.py",
+        "step_by_step_test.py",
+        "pytest.ini",
+        "tests/",
+        "test/"
+      ],
+      "tools": ["read_file", "edit_file", "write_file", "run_command"],
+      "responsibilities": [
+        "Execução de baterias de testes unitários e de integração",
+        "Monitoramento contínuo dos nós locais Anvil e RPC Sepolia",
+        "Garantia de 99.95% de uptime nos endpoints do oráculo",
+        "Automação de scripts de inicialização e gestão de dependências"
+      ]
+    }
+  ]
+}

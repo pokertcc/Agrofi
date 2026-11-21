@@ -1,0 +1,191 @@
+{
+  "project": "AgroFi Protocol",
+  "last_updated": "2026-11-21T09:47:00Z",
+  "version": "1.1.0-dev",
+  "summary": {
+    "total_changes": 8,
+    "completed": 1,
+    "in_progress": 2,
+    "in_review": 1,
+    "planned": 4
+  },
+  "changes": [
+    {
+      "id": "CHG-008",
+      "title": "Central de Mudanças Localhost & Painel da Equipe de Agentes",
+      "category": "Frontend & Orquestração",
+      "version_target": "v1.1.0",
+      "status": "Concluído",
+      "priority": "Alta",
+      "progress_pct": 100,
+      "lead_agent_id": "agrofi-frontend",
+      "support_agents": ["agrofi-techlead", "agrofi-devops"],
+      "description": "Criação de tela interativa no localhost (porta 8085) para monitoramento em tempo real de futuras alterações, status de tarefas dos agentes, histórico Git e links do ecossistema.",
+      "affected_files": [
+        "changes.html",
+        "serve_changes.py",
+        "agents/squad_manifest.json",
+        "agents/changes_backlog.json",
+        "index.html"
+      ],
+      "acceptance_criteria": [
+        "Tela carregando em http://localhost:8085 com interface responsiva Tailwind",
+        "Visualização de todos os 7 agentes com especialidades e status",
+        "Quadro Kanban de mudanças futuras com filtros por status, agente e prioridade",
+        "Endpoints REST /api/changes, /api/agents e /api/git-status ativos"
+      ]
+    },
+    {
+      "id": "CHG-002",
+      "title": "Ingestão de Radar Sentinel-1 (SAR) para Detecção sob Nuvens",
+      "category": "Sensoriamento Remoto & GIS",
+      "version_target": "v1.2.0",
+      "status": "Em Progresso",
+      "priority": "Alta",
+      "progress_pct": 65,
+      "lead_agent_id": "agrofi-geospatial",
+      "support_agents": ["agrofi-agronomist", "agrofi-mlops"],
+      "description": "Incorporação de dados SAR banda C (retroespalhamento VV/VH) do satélite Sentinel-1 para manter o monitoramento de biomassa em dias com cobertura densa de nuvens no Cerrado e Matopiba.",
+      "affected_files": [
+        "src/etl/sentinel_sar.py",
+        "src/etl/sentinel_ndvi.py",
+        "src/core/schemas.py"
+      ],
+      "acceptance_criteria": [
+        "Download de granulados GRD Sentinel-1 via STAC API",
+        "Calibração radiométrica sigma0 e correção de terreno com SRTM",
+        "Índice de Vegetação por Radar (RVI) integrado ao vetor de features"
+      ]
+    },
+    {
+      "id": "CHG-003",
+      "title": "Calibração de Incerteza Conformal (Conformal Prediction) no Stacking",
+      "category": "Machine Learning & Risco",
+      "version_target": "v1.2.0",
+      "status": "Em Progresso",
+      "priority": "Média",
+      "progress_pct": 40,
+      "lead_agent_id": "agrofi-mlops",
+      "support_agents": ["agrofi-techlead"],
+      "description": "Substituição de intervalos empíricos de quantis por Conformal Prediction com garantia estatística de cobertura de 90% para valoração de terras em regiões com escassez de negócios imobiliários.",
+      "affected_files": [
+        "src/models/valuation_regressor.py",
+        "src/models/conformal_risk.py"
+      ],
+      "acceptance_criteria": [
+        "Garantia de cobertura >= 90% em split temporal de teste",
+        "Largura média do intervalo reduzida em pelo menos 12%",
+        "Compatibilidade retroativa com a saída Q10/Q50/Q90"
+      ]
+    },
+    {
+      "id": "CHG-006",
+      "title": "Testes Automatizados de Liquidação On-Chain em Nó Anvil no CI/CD",
+      "category": "DevOps & QA",
+      "version_target": "v1.1.0",
+      "status": "Em Revisão",
+      "priority": "Alta",
+      "progress_pct": 85,
+      "lead_agent_id": "agrofi-devops",
+      "support_agents": ["agrofi-web3"],
+      "description": "Pipeline automatizado no GitHub Actions que sobe nó local Anvil, faz deploy dos contratos e simula liquidação forçada acionada pelo Oracle Keeper ao injetar choque de seca de 60%.",
+      "affected_files": [
+        ".github/workflows/e2e-liquidation.yml",
+        "middleware/stress_test.py",
+        "run_tests.py"
+      ],
+      "acceptance_criteria": [
+        "Execução autônoma em contêiner Linux no GitHub Actions",
+        "Liquidação bem sucedida registrada e verificada via RPC Anvil",
+        "Emissão de log estruturado e recibo AgroFiScan gerado"
+      ]
+    },
+    {
+      "id": "CHG-001",
+      "title": "Expansão de Oráculo para Redes L2 (Arbitrum & Base)",
+      "category": "Web3 & Smart Contracts",
+      "version_target": "v1.3.0",
+      "status": "Planejado",
+      "priority": "Crítica",
+      "progress_pct": 10,
+      "lead_agent_id": "agrofi-web3",
+      "support_agents": ["agrofi-techlead"],
+      "description": "Deploy dos vaults colateralizados e oráculos na Arbitrum One e Base Sepolia, reduzindo o custo de transação de atualização de LTV em 95% em relação à mainnet Ethereum.",
+      "affected_files": [
+        "contracts/AgroFiVault.sol",
+        "contracts/LendingPool.sol",
+        "foundry.toml",
+        "script/DeployL2.s.sol"
+      ],
+      "acceptance_criteria": [
+        "Gas por atualização de valoração < 65.000 unidades",
+        "Oráculo compatível com Chainlink Data Feeds L2 Sequencer Uptime",
+        "Contratos verificados no Arbiscan e Basescan"
+      ]
+    },
+    {
+      "id": "CHG-004",
+      "title": "Integração com ZARC (Zoneamento Agrícola de Risco Climático)",
+      "category": "Agronomia & Risco",
+      "version_target": "v1.3.0",
+      "status": "Planejado",
+      "priority": "Média",
+      "progress_pct": 0,
+      "lead_agent_id": "agrofi-agronomist",
+      "support_agents": ["agrofi-geospatial", "agrofi-mlops"],
+      "description": "Conexão com a base oficial de dados do ZARC da Embrapa / MAPA por município, tipo de solo (AD1, AD2, AD3) e ciclo de cultivar para cálculo estocástico de perda de safra.",
+      "affected_files": [
+        "src/etl/zarc_ingestor.py",
+        "src/models/risk_engine.py",
+        "data/zarc_municipalities.json"
+      ],
+      "acceptance_criteria": [
+        "Mapeamento automático de janelas de plantio favoráveis por município",
+        "Penalização automática do LTV para plantios fora da janela ZARC",
+        "Exibição da classe de solo e risco agronômico no dossiê cadastral"
+      ]
+    },
+    {
+      "id": "CHG-005",
+      "title": "Renderizador 3D de Relevo e Mapas de Calor de NDVI no Streamlit",
+      "category": "Frontend & Cartografia",
+      "version_target": "v1.2.0",
+      "status": "Planejado",
+      "priority": "Média",
+      "progress_pct": 15,
+      "lead_agent_id": "agrofi-frontend",
+      "support_agents": ["agrofi-geospatial"],
+      "description": "Incorporação de visualização de terreno 3D (Hillshade + Malha TIN) no componente MapLibre GL JS para análise de curvas de nível e áreas mecanizáveis em tempo real.",
+      "affected_files": [
+        "src/visualization/maplibre_component.py",
+        "app.py"
+      ],
+      "acceptance_criteria": [
+        "Camada 3D Terrain ativável por toggle no dashboard Streamlit",
+        "Renderização de colinas e talhões com elevação exagerada (1.5x) fluida em WebGL",
+        "Legenda interativa de declividade percentual"
+      ]
+    },
+    {
+      "id": "CHG-007",
+      "title": "Suporte a Múltiplos Tokens RWA com Padrão ERC-3643 (Identity)",
+      "category": "Web3 & Governança",
+      "version_target": "v2.0.0",
+      "status": "Planejado",
+      "priority": "Baixa",
+      "progress_pct": 0,
+      "lead_agent_id": "agrofi-web3",
+      "support_agents": ["agrofi-techlead"],
+      "description": "Migração opcional do AgroLandNFT para o padrão ERC-3643 (T-REX) permitindo conformidade regulatória com CVM e investidores qualificados através de verificação de identidade OnchainID.",
+      "affected_files": [
+        "contracts/AgroLandTREX.sol",
+        "contracts/IdentityRegistry.sol"
+      ],
+      "acceptance_criteria": [
+        "Transferência condicionada a verificação de KYC/AML no registro",
+        "Emissão de títulos de dívida agrícola tokenizados (CRA e CPR-Fácil)",
+        "Auditoria formal de segurança do protocolo"
+      ]
+    }
+  ]
+}

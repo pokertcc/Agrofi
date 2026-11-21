@@ -175,7 +175,14 @@ $env:PYTHONPATH="."
 ```
 👉 Acesse a documentação Swagger interativa: `http://127.0.0.1:8000/docs`.
 
-### 5.5 Executar o Oráculo & Integração Web3
+### 5.5 Iniciar a Central de Mudanças & Equipe de Agentes (Porta 8085)
+Painel interativo para monitoramento das futuras mudanças no roadmap e status dos 7 agentes especialistas autônomos:
+```powershell
+.\.venv\Scripts\python.exe serve_changes.py
+```
+👉 Acesse: `http://localhost:8085`
+
+### 5.6 Executar o Oráculo & Integração Web3
 
 O módulo Web3 detecta automaticamente a rede disponível:
 
@@ -202,7 +209,7 @@ O módulo Web3 detecta automaticamente a rede disponível:
   .\.venv\Scripts\python.exe integrar_oraculo.py
   ```
 
-### 5.6 Executar a Bateria Completa de Testes
+### 5.7 Executar a Bateria Completa de Testes
 ```powershell
 $env:PYTHONPATH="."
 .\.venv\Scripts\pytest.exe

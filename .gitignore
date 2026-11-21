@@ -9,6 +9,13 @@
 *.key
 farms_private_keys.json
 
+# --- Documentação Privada & Arquivos Locais (Não sobem ao GitHub) ---
+docs_privados/
+documentacao_privada/
+private/
+*.zip
+*.docx
+
 # --- Ambientes Virtuais Python ---
 .venv/
 venv/

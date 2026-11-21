@@ -8,6 +8,10 @@
   "etherscan": {
     "MockUSDC": "https://sepolia.etherscan.io/address/0x178B9bFA3E86a9Ed3F67963e28afBe49BCf45ED2",
     "AgroNFT": "https://sepolia.etherscan.io/address/0xb89Cd470755AD1E25052b57D97af6Fc98b00Dfb2",
-    "LendingPool": "https://sepolia.etherscan.io/address/0x020c06c4d1410B2131e9815c5D25F7Ee90D37a26"
-  }
+    "LendingPool": "https://sepolia.etherscan.io/address/0x020c06c4d1410B2131e9815c5D25F7Ee90D37a26",
+    "AgroToken": "https://sepolia.etherscan.io/address/0xBBa1B54b0b6962F586a9971965811b79b1CdAeB8",
+    "AgroStakingRewards": "https://sepolia.etherscan.io/address/0x154B3f7B2D99E83912267594b8B4aDF76fF58e26"
+  },
+  "AgroToken": "0xBBa1B54b0b6962F586a9971965811b79b1CdAeB8",
+  "AgroStakingRewards": "0x154B3f7B2D99E83912267594b8B4aDF76fF58e26"
 }

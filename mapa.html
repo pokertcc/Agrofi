@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgroFi Intelligence - Cartografia Satélite & Oráculo Geoespacial</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- MapLibre GL JS -->
+  <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
+  <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            agro: {
+              primary: '#00897B',
+              'primary-dark': '#00695C',
+              'primary-light': '#E0F2F1',
+              highlight: '#00E676',
+              bg: '#F7F9F6',
+              card: '#FFFFFF',
+              border: '#E2E8E2',
+              text: '#1A2E20',
+              sub: '#556B5C',
+              alert: '#E67E22'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #F7F9F6;
+      color: #1A2E20;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    .agro-card {
+      background: #FFFFFF;
+      border: 1px solid #E2E8E2;
+      border-radius: 1rem;
+      box-shadow: 0 4px 16px -2px rgba(26, 46, 32, 0.04);
+    }
+    #map {
+      width: 100%;
+      height: 520px;
+      border-radius: 12px;
+    }
+    .map-overlay {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 12px 16px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+      font-size: 11px;
+      max-width: 250px;
+      z-index: 10;
+      border: 1px solid #E2E8E2;
+    }
+    .basemap-btn {
+      background: #F7F9F6;
+      border: 1px solid #E2E8E2;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      color: #1A2E20;
+      transition: all 0.2s;
+    }
+    .basemap-btn.active {
+      background: #00897B;
+      color: #ffffff;
+      border-color: #00695C;
+    }
+  </style>
+</head>
+<body class="bg-[#F7F9F6] text-[#1A2E20] antialiased p-3 sm:p-5 min-h-screen">
+
+  <div class="max-w-7xl mx-auto space-y-5">
+
+    <!-- HEADER -->
+    <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white border border-[#E2E8E2] rounded-2xl p-4 sm:p-5 shadow-sm">
+      <div class="flex items-center space-x-3">
+        <div class="w-12 h-12 rounded-xl bg-[#E0F2F1] border border-[#B2DFDB] flex items-center justify-center text-[#00897B] font-bold text-2xl shadow-xs">
+          🛰️
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-xl font-extrabold tracking-tight text-[#1A2E20]">AgroFi Intelligence</h1>
+            <span class="px-2 py-0.5 text-xs font-bold rounded-full bg-[#E0F2F1] text-[#00897B] border border-[#B2DFDB]">Módulo Geoespacial & ML</span>
+          </div>
+          <p class="text-xs text-[#556B5C]">Sensoriamento Remoto Sentinel-2, Polígonos SICAR e Valoração por Stacking Ensemble</p>
+        </div>
+      </div>
+
+      <!-- NAVEGAÇÃO ENTRE AS PÁGINAS DO PROJETO -->
+      <div class="flex flex-wrap items-center gap-2">
+        <a href="index.html" class="px-3.5 py-2 rounded-xl bg-white hover:bg-[#F7F9F6] text-xs font-bold text-[#1A2E20] border border-[#E2E8E2] transition-colors flex items-center gap-1.5 shadow-xs">
+          <span>🏠</span> Portal
+        </a>
+        <a href="dashboard.html" class="px-3.5 py-2 rounded-xl bg-white hover:bg-[#F7F9F6] text-xs font-bold text-[#00897B] border border-[#B2DFDB] transition-colors flex items-center gap-1.5 shadow-xs">
+          <span>🌾</span> Produtor (RWA)
+        </a>
+        <a href="invista.html" class="px-3.5 py-2 rounded-xl bg-white hover:bg-[#F7F9F6] text-xs font-bold text-[#1A2E20] border border-[#E2E8E2] transition-colors flex items-center gap-1.5 shadow-xs">
+          <span>💵</span> Investir & Staking
+        </a>
+        <a href="changes.html" class="px-3.5 py-2 rounded-xl bg-white hover:bg-[#F7F9F6] text-xs font-bold text-[#D97706] border border-[#FDE68A] transition-colors flex items-center gap-1.5 shadow-xs">
+          <span>⚡</span> Roadmap & Agentes
+        </a>
+      </div>
+    </header>
+
+    <!-- BANNER DE SESSÃO / CONTEXTO DA FAZENDA -->
+    <div id="farm-header-banner" class="agro-card p-4 bg-gradient-to-r from-[#1A2E20] to-[#004D40] text-white flex flex-wrap items-center justify-between gap-4 border-[#00897B]">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="text-xl">🌾</span>
+          <span class="text-[11px] font-bold uppercase tracking-wider bg-white/20 px-2.5 py-0.5 rounded-full text-[#00E676]" id="banner-role">Propriedade Rural Homologada</span>
+          <span class="text-xs text-white/80 font-mono" id="banner-car">CAR: MT-5107925...</span>
+        </div>
+        <div class="text-lg font-extrabold mt-1" id="banner-farm-name">Fazenda Santa Helena — Sorriso/MT</div>
+        <div class="text-xs text-[#E2E8E2] mt-0.5 font-medium" id="banner-sub">Área Útil: 1.420 ha | Bioma: Amazônia | Limite Aprovado: $ 250,000.00 USDC</div>
+      </div>
+      <div class="flex items-center gap-2">
+        <a href="dashboard.html" class="px-4 py-2 rounded-xl bg-[#00E676] hover:bg-[#00C853] text-[#1A2E20] font-extrabold text-xs transition-all shadow-md shadow-[#00E676]/30 flex items-center gap-1.5">
+          <span>🏦</span> Abrir Empréstimo no Painel DeFi ➔
+        </a>
+      </div>
+    </div>
+
+    <!-- MAIN TWO COLUMN WORKBENCH -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+      <!-- SIDEBAR CONTROLS (4 COLS) -->
+      <div class="lg:col-span-4 space-y-4">
+        
+        <!-- SELECTOR DE FAZENDA -->
+        <div class="agro-card p-4 space-y-3">
+          <div class="border-b border-[#E2E8E2] pb-2">
+            <h3 class="text-xs font-bold text-[#00897B] uppercase tracking-wider flex items-center gap-1.5">
+              <span>📍</span> Seleção do Imóvel Rural (CAR)
+            </h3>
+          </div>
+          <select id="select-farm" onchange="onFarmChange(this.value)" class="w-full p-2.5 rounded-xl border border-[#B2DFDB] bg-[#F7F9F6] text-xs font-bold text-[#1A2E20] focus:outline-none focus:border-[#00897B]">
+            <option value="TALHAO-MT-001" selected>Fazenda Santa Helena (Sorriso - MT)</option>
+            <option value="TALHAO-GO-002">Fazenda Boa Esperança (Rio Verde - GO)</option>
+            <option value="TALHAO-MT-003">Agropecuária Chapadão (Sapezal - MT)</option>
+            <option value="TALHAO-BA-004">Fazenda Ouro Verde (LEM - BA)</option>
+          </select>
+          <div class="text-[11px] text-[#556B5C] bg-[#F7F9F6] p-2.5 rounded-lg border border-[#E2E8E2] space-y-1">
+            <div class="flex justify-between"><span>Código CAR:</span><span class="font-mono font-bold text-[#1A2E20]" id="info-car-short">MT-5107925...</span></div>
+            <div class="flex justify-between"><span>Bioma:</span><span class="font-bold text-[#00897B]" id="info-biome">Amazônia</span></div>
+            <div class="flex justify-between"><span>Aptidão Agrícola:</span><span class="font-bold text-[#1A2E20]" id="info-aptitude">Lavoura Boa</span></div>
+            <div class="flex justify-between"><span>Mecanização (SRTM):</span><span class="font-bold text-[#00897B]">100% Plana</span></div>
+          </div>
+        </div>
+
+        <!-- SIMULADOR PARAMÉTRICO DE ESTRESSE CLIMÁTICO -->
+        <div class="agro-card p-4 space-y-3">
+          <div class="border-b border-[#E2E8E2] pb-2">
+            <h3 class="text-xs font-bold text-[#E67E22] uppercase tracking-wider flex items-center gap-1.5">
+              <span>☀️</span> Simulação de Risco Climático
+            </h3>
+            <p class="text-[11px] text-[#556B5C]">Simule choques de estiagem ou safra cheia</p>
+          </div>
+
+          <div class="space-y-2">
+            <div class="flex justify-between text-xs">
+              <span class="text-[#1A2E20] font-bold">Anomalia Hídrica / Vigor NDVI:</span>
+              <span class="font-mono font-bold text-[#00897B]" id="display-anomaly">0% (Normal)</span>
+            </div>
+            <input type="range" id="slider-anomaly" min="-50" max="20" step="5" value="0" oninput="onAnomalyChange(this.value)" class="w-full accent-[#00897B] cursor-pointer">
+            <div class="flex justify-between text-[10px] text-[#556B5C]">
+              <span>-50% (Seca Severa)</span>
+              <span>0% (Histórico)</span>
+              <span>+20% (Safra Recorde)</span>
+            </div>
+          </div>
+
+          <!-- LTV & HEALTH FACTOR CALCULADO -->
+          <div class="p-3 rounded-xl bg-[#F7F9F6] border border-[#E2E8E2] space-y-2 font-mono text-xs">
+            <div class="flex justify-between">
+              <span class="text-[#556B5C]">LTV Dinâmico Resultante:</span>
+              <span class="font-bold text-[#1A2E20]" id="sim-ltv">60.0%</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-[#556B5C]">Health Factor Estimado:</span>
+              <span class="font-bold text-[#00897B]" id="sim-hf">1.50x</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-[#556B5C]">Status Paramétrico:</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-[#E8F5E9] text-[#00897B] border border-[#C8E6C9]" id="sim-status">SOLVENTE</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- BENCHMARK MACHINE LEARNING -->
+        <div class="agro-card p-4 space-y-2.5">
+          <div class="border-b border-[#E2E8E2] pb-2">
+            <h3 class="text-xs font-bold text-[#00897B] uppercase tracking-wider flex items-center gap-1.5">
+              <span>🤖</span> Algoritmo de Valoração
+            </h3>
+          </div>
+          <div class="space-y-1.5 text-xs">
+            <div class="flex justify-between p-2 rounded-lg bg-[#E0F2F1] border border-[#B2DFDB] font-bold text-[#00897B]">
+              <span>🏆 Stacking Ensemble</span>
+              <span>R²: 0.991</span>
+            </div>
+            <div class="flex justify-between p-2 rounded-lg bg-[#F7F9F6] border border-[#E2E8E2] text-[#556B5C]">
+              <span>XGBoost Regressor</span>
+              <span>R²: 0.989</span>
+            </div>
+            <div class="flex justify-between p-2 rounded-lg bg-[#F7F9F6] border border-[#E2E8E2] text-[#556B5C]">
+              <span>LightGBM Regressor</span>
+              <span>R²: 0.987</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- MAIN CONTENT TABS (8 COLS) -->
+      <div class="lg:col-span-8 space-y-4">
+        
+        <!-- KPI METRICS ROW -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div class="agro-card p-3.5">
+            <span class="text-[11px] text-[#556B5C] font-semibold">Área Útil Consolidada</span>
+            <div class="text-lg sm:text-xl font-extrabold text-[#1A2E20] mt-0.5" id="metric-area">1.420 ha</div>
+            <span class="text-[10px] text-[#00897B] font-bold" id="metric-total-area">1.850 ha total</span>
+          </div>
+          <div class="agro-card p-3.5">
+            <span class="text-[11px] text-[#556B5C] font-semibold">Valuation Patrimonial</span>
+            <div class="text-lg sm:text-xl font-extrabold text-[#00897B] mt-0.5" id="metric-valuation">$ 250,000.00</div>
+            <span class="text-[10px] text-[#556B5C]" id="metric-price-ha">USDC / RWA</span>
+          </div>
+          <div class="agro-card p-3.5">
+            <span class="text-[11px] text-[#556B5C] font-semibold">LTV Dinâmico</span>
+            <div class="text-lg sm:text-xl font-extrabold text-[#1A2E20] mt-0.5" id="metric-ltv">60.0%</div>
+            <span class="text-[10px] text-[#00897B] font-bold">Faixa 35% - 65%</span>
+          </div>
+          <div class="agro-card p-3.5">
+            <span class="text-[11px] text-[#556B5C] font-semibold">Health Factor</span>
+            <div class="text-lg sm:text-xl font-extrabold text-[#00897B] mt-0.5" id="metric-hf">1.50x</div>
+            <span class="text-[10px] text-[#00897B] font-bold">Seguro (Solvente)</span>
+          </div>
+        </div>
+
+        <!-- TABS NAV -->
+        <div class="flex border-b border-[#E2E8E2] text-xs font-bold gap-2">
+          <button onclick="switchTab('map')" id="tab-btn-map" class="py-2.5 px-4 text-[#00897B] border-b-2 border-[#00897B] transition-all">
+            🗺️ Cartografia CAR & Satélite
+          </button>
+          <button onclick="switchTab('ndvi')" id="tab-btn-ndvi" class="py-2.5 px-4 text-[#556B5C] hover:text-[#1A2E20] transition-all">
+            📈 Série Temporal NDVI (Sentinel-2)
+          </button>
+          <button onclick="switchTab('montecarlo')" id="tab-btn-montecarlo" class="py-2.5 px-4 text-[#556B5C] hover:text-[#1A2E20] transition-all">
+            🎲 Simulação Monte Carlo (VaR)
+          </button>
+          <button onclick="switchTab('oracle')" id="tab-btn-oracle" class="py-2.5 px-4 text-[#556B5C] hover:text-[#1A2E20] transition-all">
+            ⚡ Payload Oráculo Web3
+          </button>
+        </div>
+
+        <!-- TAB 1: MAPA INTERATIVO MAPLIBRE -->
+        <div id="tab-content-map" class="space-y-3">
+          <div class="relative agro-card p-2 bg-white overflow-hidden">
+            <div id="map"></div>
+            
+            <!-- OVERLAY LEGENDA DO MAPA -->
+            <div class="map-overlay">
+              <h4 class="font-extrabold text-[#1A2E20] text-xs mb-1.5">Camadas Territoriais CAR</h4>
+              <div class="flex items-center gap-2 mb-1 text-[11px] text-[#556B5C]">
+                <div class="w-3.5 h-3.5 rounded bg-emerald-500/60 border border-emerald-600"></div>
+                <span>Área Consolidada / Lavoura</span>
+              </div>
+              <div class="flex items-center gap-2 mb-1 text-[11px] text-[#556B5C]">
+                <div class="w-3.5 h-3.5 rounded bg-blue-500/30 border border-blue-600"></div>
+                <span>Perímetro do Imóvel CAR</span>
+              </div>
+              <div class="flex items-center gap-2 mb-2 text-[11px] text-[#556B5C]">
+                <div class="w-3.5 h-3.5 rounded bg-teal-500/50 border border-teal-700"></div>
+                <span>Reserva Legal & APP</span>
+              </div>
+              <div class="pt-2 border-t border-[#E2E8E2]">
+                <span class="font-bold text-[10px] text-[#556B5C] block mb-1">Modo de Exibição:</span>
+                <button type="button" class="basemap-btn active" id="btn-carto" onclick="switchBasemap('carto')">Vetorial</button>
+                <button type="button" class="basemap-btn" id="btn-sat" onclick="switchBasemap('satellite')">Satélite RGB</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs bg-white p-3.5 rounded-xl border border-[#E2E8E2]">
+            <div>
+              <span class="text-[#556B5C]">Reserva Legal Declarada:</span>
+              <div class="font-bold text-[#1A2E20]" id="info-rl">330 ha (17.8%)</div>
+            </div>
+            <div>
+              <span class="text-[#556B5C]">Área de Preservação (APP):</span>
+              <div class="font-bold text-[#1A2E20]" id="info-app">100 ha</div>
+            </div>
+            <div>
+              <span class="text-[#556B5C]">Score de Conformidade Ambiental:</span>
+              <div class="font-bold text-[#00897B]">100% Conforme</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: SÉRIE TEMPORAL NDVI -->
+        <div id="tab-content-ndvi" class="hidden agro-card p-5 space-y-4">
+          <div class="flex items-center justify-between border-b border-[#E2E8E2] pb-3">
+            <div>
+              <h3 class="text-sm font-bold text-[#1A2E20]">Série Temporal Quinzenal de NDVI (Sentinel-2)</h3>
+              <p class="text-xs text-[#556B5C]">Monitoramento do ciclo fenológico e identificação de anomalias hídricas</p>
+            </div>
+            <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-[#E0F2F1] text-[#00897B] border border-[#B2DFDB]">Safra 2023/2024</span>
+          </div>
+
+          <div class="h-64">
+            <canvas id="ndviChart"></canvas>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs pt-2">
+            <div class="p-2.5 rounded-lg bg-[#F7F9F6] border border-[#E2E8E2]">
+              <span class="text-[#556B5C]">NDVI de Pico (Safra):</span>
+              <div class="text-base font-extrabold text-[#00897B] font-mono">0.881</div>
+            </div>
+            <div class="p-2.5 rounded-lg bg-[#F7F9F6] border border-[#E2E8E2]">
+              <span class="text-[#556B5C]">Z-Score Janela Crítica:</span>
+              <div class="text-base font-extrabold text-[#1A2E20] font-mono">+0.42 σ</div>
+            </div>
+            <div class="p-2.5 rounded-lg bg-[#F7F9F6] border border-[#E2E8E2]">
+              <span class="text-[#556B5C]">Probabilidade de Quebra:</span>
+              <div class="text-base font-extrabold text-[#00897B] font-mono" id="val-failure">4.2%</div>
+            </div>
+            <div class="p-2.5 rounded-lg bg-[#F7F9F6] border border-[#E2E8E2]">
+              <span class="text-[#556B5C]">Estresse Hídrico:</span>
+              <div class="text-base font-extrabold text-[#00897B] font-mono" id="val-stress">Baixo (12%)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 3: SIMULAÇÃO MONTE CARLO -->
+        <div id="tab-content-montecarlo" class="hidden agro-card p-5 space-y-4">
+          <div class="border-b border-[#E2E8E2] pb-3">
+            <h3 class="text-sm font-bold text-[#1A2E20]">Simulação Estocástica de Monte Carlo (5.000 Iterações)</h3>
+            <p class="text-xs text-[#556B5C]">Análise de resiliência do colateral frente a choques severos de clima e mercado</p>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+            <div class="p-3 rounded-xl bg-[#F7F9F6] border border-[#E2E8E2]">
+              <span class="text-[#556B5C]">Capacidade Nominal:</span>
+              <div class="text-base font-extrabold text-[#1A2E20] font-mono" id="mc-nominal">$ 150,000.00</div>
+            </div>
+            <div class="p-3 rounded-xl bg-[#F7F9F6] border border-[#E2E8E2]">
+              <span class="text-[#556B5C]">VaR 95% (1 Ano):</span>
+              <div class="text-base font-extrabold text-[#E67E22] font-mono" id="mc-var95">$ 22,400.00</div>
+            </div>
+            <div class="p-3 rounded-xl bg-[#F7F9F6] border border-[#E2E8E2]">
+              <span class="text-[#556B5C]">VaR 99% (Estresse):</span>
+              <div class="text-base font-extrabold text-red-600 font-mono" id="mc-var99">$ 38,100.00</div>
+            </div>
+            <div class="p-3 rounded-xl bg-[#F7F9F6] border border-[#E2E8E2]">
+              <span class="text-[#556B5C]">Expected Shortfall (CVaR):</span>
+              <div class="text-base font-extrabold text-red-600 font-mono" id="mc-cvar">$ 45,200.00</div>
+            </div>
+          </div>
+
+          <div class="bg-[#F7F9F6] p-4 rounded-xl border border-[#E2E8E2] space-y-2">
+            <h4 class="font-bold text-xs text-[#1A2E20]">Distribuição Quantílica de Colateral:</h4>
+            <div class="grid grid-cols-3 gap-3 text-xs">
+              <div class="p-2.5 rounded-lg bg-white border border-[#E2E8E2]">
+                <span class="text-[#556B5C]">Piso Conservador (Q10):</span>
+                <div class="font-extrabold text-[#E67E22]" id="q10-val">$ 180,000.00</div>
+                <span class="text-[10px] text-[#556B5C]">Margem para liquidação forçada</span>
+              </div>
+              <div class="p-2.5 rounded-lg bg-white border border-[#E2E8E2]">
+                <span class="text-[#556B5C]">Mediana de Mercado (Q50):</span>
+                <div class="font-extrabold text-[#00897B]" id="q50-val">$ 250,000.00</div>
+                <span class="text-[10px] text-[#556B5C]">Preço de referência central</span>
+              </div>
+              <div class="p-2.5 rounded-lg bg-white border border-[#E2E8E2]">
+                <span class="text-[#556B5C]">Teto Otimista (Q90):</span>
+                <div class="font-extrabold text-[#1A2E20]" id="q90-val">$ 295,000.00</div>
+                <span class="text-[10px] text-[#556B5C]">Avaliação máxima de safra cheia</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 4: ORÁCULO WEB3 PAYLOAD -->
+        <div id="tab-content-oracle" class="hidden agro-card p-5 space-y-4">
+          <div class="border-b border-[#E2E8E2] pb-3">
+            <h3 class="text-sm font-bold text-[#1A2E20]">Payload On-Chain do Oráculo Agronômico</h3>
+            <p class="text-xs text-[#556B5C]">Estrutura de dados transmitida ao contrato AgroNFT.sol na Ethereum Sepolia</p>
+          </div>
+
+          <pre id="oracle-json-display" class="bg-[#1A2E20] text-[#00E676] p-4 rounded-xl text-xs font-mono overflow-x-auto"></pre>
+
+          <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+            <button onclick="downloadDossierJson()" class="px-4 py-2.5 rounded-xl bg-[#00897B] hover:bg-[#00695C] text-white font-bold text-xs transition-all shadow-md shadow-[#00897B]/20 flex items-center gap-2">
+              <span>📥</span> Baixar Dossiê Cadastral de Crédito RWA (JSON)
+            </button>
+            <a href="dashboard.html" class="px-4 py-2.5 rounded-xl bg-white hover:bg-[#F7F9F6] text-[#00897B] border border-[#B2DFDB] font-bold text-xs transition-all shadow-xs flex items-center gap-1.5">
+              <span>⚡</span> Transmitir no Painel do Produtor ➔
+            </a>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    const GEOJSON_DATA = {"type": "FeatureCollection", "name": "sicar_car_polygons", "crs": {"type": "name", "properties": {"name": "urn:ogc:def:crs:OGC:1.3:CRS84"}}, "features": [{"type": "Feature", "properties": {"land_id": "TALHAO-MT-001", "car_code": "MT-5107925-8A4F1D9C3E2B4A1F8C2D3E4F5A6B7C8D", "farm_name": "Fazenda Santa Helena", "municipality": "Sorriso", "state": "MT", "biome": "Amaz\u00f4nia", "total_area_ha": 1850.0, "productive_area_ha": 1420.0, "legal_reserve_ha": 330.0, "app_ha": 100.0, "aptitude": "Lavoura - Aptid\u00e3o Boa", "reserve_req_pct": 80.0, "reserve_actual_pct": 17.84, "reserve_deficit_pct": 62.16, "compliance_score": 0.0, "centroid_lon": -55.725, "centroid_lat": -12.545}, "geometry": {"type": "Polygon", "coordinates": [[[-55.7475, -12.5625], [-55.7025, -12.5625], [-55.6995, -12.53625], [-55.7025, -12.5275], [-55.7475, -12.5275], [-55.7475, -12.5625]]]}}, {"type": "Feature", "properties": {"land_id": "TALHAO-GO-002", "car_code": "GO-5218805-4B8C1D2E3F4A5B6C7D8E9F0A1B2C3D4E", "farm_name": "Fazenda Boa Esperan\u00e7a", "municipality": "Rio Verde", "state": "GO", "biome": "Cerrado", "total_area_ha": 1320.0, "productive_area_ha": 1040.0, "legal_reserve_ha": 210.0, "app_ha": 70.0, "aptitude": "Lavoura - Aptid\u00e3o Boa", "reserve_req_pct": 20.0, "reserve_actual_pct": 15.91, "reserve_deficit_pct": 4.09, "compliance_score": 0.918, "centroid_lon": -50.925, "centroid_lat": -17.795}, "geometry": {"type": "Polygon", "coordinates": [[[-50.944, -17.811], [-50.906, -17.811], [-50.903, -17.787], [-50.906, -17.779], [-50.944, -17.779], [-50.944, -17.811]]]}}, {"type": "Feature", "properties": {"land_id": "TALHAO-MT-003", "car_code": "MT-5107875-9C0D1E2F3A4B5C6D7E8F9A0B1C2D3E4F", "farm_name": "Agropecu\u00e1ria Chapad\u00e3o", "municipality": "Sapezal", "state": "MT", "biome": "Cerrado", "total_area_ha": 2400.0, "productive_area_ha": 1520.0, "legal_reserve_ha": 740.0, "app_ha": 140.0, "aptitude": "Lavoura - Aptid\u00e3o Boa", "reserve_req_pct": 35.0, "reserve_actual_pct": 30.83, "reserve_deficit_pct": 4.17, "compliance_score": 0.917, "centroid_lon": -58.815, "centroid_lat": -13.55}, "geometry": {"type": "Polygon", "coordinates": [[[-58.841, -13.57], [-58.789, -13.57], [-58.786, -13.54], [-58.789, -13.53], [-58.841, -13.53], [-58.841, -13.57]]]}}, {"type": "Feature", "properties": {"land_id": "TALHAO-BA-004", "car_code": "BA-2919553-7A1B2C3D4E5F6A7B8C9D0E1F2A3B4C5D", "farm_name": "Fazenda Ouro Verde", "municipality": "Lu\u00eds Eduardo Magalh\u00e3es", "state": "BA", "biome": "Cerrado", "total_area_ha": 1600.0, "productive_area_ha": 1220.0, "legal_reserve_ha": 310.0, "app_ha": 70.0, "aptitude": "Lavoura - Aptid\u00e3o Regular", "reserve_req_pct": 20.0, "reserve_actual_pct": 19.38, "reserve_deficit_pct": 0.62, "compliance_score": 0.988, "centroid_lon": -45.795, "centroid_lat": -12.095}, "geometry": {"type": "Polygon", "coordinates": [[[-45.815, -12.1125], [-45.775, -12.1125], [-45.772, -12.08625], [-45.775, -12.0775], [-45.815, -12.0775], [-45.815, -12.1125]]]}}]};
+    const NDVI_DATA = {"TALHAO-MT-001": [{"date": "2023-09-01", "ndvi": 0.2939, "cloud": 12.0}, {"date": "2023-09-16", "ndvi": 0.2798, "cloud": 6.0}, {"date": "2023-10-01", "ndvi": 0.5969, "cloud": 11.7}, {"date": "2023-10-16", "ndvi": 0.6042, "cloud": 3.1}, {"date": "2023-10-31", "ndvi": 0.5947, "cloud": 15.1}, {"date": "2023-11-15", "ndvi": 0.8418, "cloud": 5.2}, {"date": "2023-11-30", "ndvi": 0.82, "cloud": 7.1}, {"date": "2023-12-15", "ndvi": 0.8806, "cloud": 9.5}, {"date": "2023-12-30", "ndvi": 0.856, "cloud": 5.0}, {"date": "2024-01-14", "ndvi": 0.8786, "cloud": 6.4}, {"date": "2024-01-29", "ndvi": 0.8395, "cloud": 10.3}, {"date": "2024-02-13", "ndvi": 0.7057, "cloud": 11.0}, {"date": "2024-02-28", "ndvi": 0.7435, "cloud": 11.9}, {"date": "2024-03-14", "ndvi": 0.7424, "cloud": 2.9}, {"date": "2024-03-29", "ndvi": 0.7273, "cloud": 13.0}, {"date": "2024-04-13", "ndvi": 0.7935, "cloud": 15.3}, {"date": "2024-04-28", "ndvi": 0.8139, "cloud": 12.9}, {"date": "2024-05-13", "ndvi": 0.553, "cloud": 15.1}, {"date": "2024-05-28", "ndvi": 0.558, "cloud": 15.1}, {"date": "2024-06-12", "ndvi": 0.255, "cloud": 4.1}, {"date": "2024-06-27", "ndvi": 0.265, "cloud": 7.7}, {"date": "2024-07-12", "ndvi": 0.2769, "cloud": 14.9}, {"date": "2024-07-27", "ndvi": 0.2563, "cloud": 4.9}, {"date": "2024-08-11", "ndvi": 0.2595, "cloud": 6.5}, {"date": "2024-08-26", "ndvi": 0.2665, "cloud": 17.0}, {"date": "2024-09-10", "ndvi": 0.2825, "cloud": 15.2}, {"date": "2024-09-25", "ndvi": 0.3009, "cloud": 7.2}, {"date": "2024-10-10", "ndvi": 0.6431, "cloud": 16.6}, {"date": "2024-10-25", "ndvi": 0.6017, "cloud": 7.7}, {"date": "2024-11-09", "ndvi": 0.7815, "cloud": 3.7}, {"date": "2024-11-24", "ndvi": 0.7987, "cloud": 3.6}, {"date": "2024-12-09", "ndvi": 0.9136, "cloud": 16.1}, {"date": "2024-12-24", "ndvi": 0.8502, "cloud": 6.3}, {"date": "2025-01-08", "ndvi": 0.8526, "cloud": 14.5}, {"date": "2025-01-23", "ndvi": 0.9014, "cloud": 5.8}, {"date": "2025-02-07", "ndvi": 0.7055, "cloud": 13.0}, {"date": "2025-02-22", "ndvi": 0.7168, "cloud": 12.1}, {"date": "2025-03-09", "ndvi": 0.7553, "cloud": 3.5}, {"date": "2025-03-24", "ndvi": 0.6952, "cloud": 8.9}, {"date": "2025-04-08", "ndvi": 0.8246, "cloud": 11.1}, {"date": "2025-04-23", "ndvi": 0.8176, "cloud": 12.1}, {"date": "2025-05-08", "ndvi": 0.5508, "cloud": 6.7}, {"date": "2025-05-23", "ndvi": 0.5671, "cloud": 12.0}, {"date": "2025-06-07", "ndvi": 0.2733, "cloud": 2.3}, {"date": "2025-06-22", "ndvi": 0.2979, "cloud": 5.2}, {"date": "2025-07-07", "ndvi": 0.3231, "cloud": 6.2}, {"date": "2025-07-22", "ndvi": 0.2494, "cloud": 11.4}, {"date": "2025-08-06", "ndvi": 0.2725, "cloud": 5.2}, {"date": "2025-08-21", "ndvi": 0.3424, "cloud": 6.0}, {"date": "2025-09-05", "ndvi": 0.3074, "cloud": 2.7}, {"date": "2025-09-20", "ndvi": 0.2813, "cloud": 17.4}, {"date": "2025-10-05", "ndvi": 0.6072, "cloud": 6.8}, {"date": "2025-10-20", "ndvi": 0.6058, "cloud": 16.4}, {"date": "2025-11-04", "ndvi": 0.8037, "cloud": 14.2}, {"date": "2025-11-19", "ndvi": 0.7992, "cloud": 9.9}, {"date": "2025-12-04", "ndvi": 0.8347, "cloud": 8.3}, {"date": "2025-12-19", "ndvi": 0.8748, "cloud": 2.9}, {"date": "2026-01-03", "ndvi": 0.85, "cloud": 2.8}, {"date": "2026-01-18", "ndvi": 0.8442, "cloud": 11.6}, {"date": "2026-02-02", "ndvi": 0.7058, "cloud": 16.6}, {"date": "2026-02-17", "ndvi": 0.7077, "cloud": 5.0}, {"date": "2026-03-04", "ndvi": 0.7785, "cloud": 10.4}, {"date": "2026-03-19", "ndvi": 0.7416, "cloud": 5.9}, {"date": "2026-04-03", "ndvi": 0.8089, "cloud": 7.3}, {"date": "2026-04-18", "ndvi": 0.8229, "cloud": 4.1}, {"date": "2026-05-03", "ndvi": 0.5475, "cloud": 11.7}, {"date": "2026-05-18", "ndvi": 0.5265, "cloud": 2.3}, {"date": "2026-06-02", "ndvi": 0.2594, "cloud": 14.1}, {"date": "2026-06-17", "ndvi": 0.3052, "cloud": 14.0}], "TALHAO-GO-002": [{"date": "2023-09-01", "ndvi": 0.2507, "cloud": 8.4}, {"date": "2023-09-16", "ndvi": 0.282, "cloud": 6.1}, {"date": "2023-10-01", "ndvi": 0.5887, "cloud": 5.5}, {"date": "2023-10-16", "ndvi": 0.5862, "cloud": 4.8}, {"date": "2023-10-31", "ndvi": 0.5946, "cloud": 10.5}, {"date": "2023-11-15", "ndvi": 0.7513, "cloud": 4.6}, {"date": "2023-11-30", "ndvi": 0.8001, "cloud": 16.7}, {"date": "2023-12-15", "ndvi": 0.8926, "cloud": 10.3}, {"date": "2023-12-30", "ndvi": 0.8214, "cloud": 2.1}, {"date": "2024-01-14", "ndvi": 0.8908, "cloud": 6.6}, {"date": "2024-01-29", "ndvi": 0.8077, "cloud": 6.1}, {"date": "2024-02-13", "ndvi": 0.731, "cloud": 2.9}, {"date": "2024-02-28", "ndvi": 0.7167, "cloud": 11.0}, {"date": "2024-03-14", "ndvi": 0.6953, "cloud": 2.8}, {"date": "2024-03-29", "ndvi": 0.7051, "cloud": 2.7}, {"date": "2024-04-13", "ndvi": 0.8336, "cloud": 4.6}, {"date": "2024-04-28", "ndvi": 0.8229, "cloud": 9.0}, {"date": "2024-05-13", "ndvi": 0.4933, "cloud": 4.1}, {"date": "2024-05-28", "ndvi": 0.5753, "cloud": 6.2}, {"date": "2024-06-12", "ndvi": 0.2875, "cloud": 8.7}, {"date": "2024-06-27", "ndvi": 0.2819, "cloud": 5.2}, {"date": "2024-07-12", "ndvi": 0.2862, "cloud": 15.6}, {"date": "2024-07-27", "ndvi": 0.2714, "cloud": 15.9}, {"date": "2024-08-11", "ndvi": 0.2891, "cloud": 7.1}, {"date": "2024-08-26", "ndvi": 0.2874, "cloud": 13.0}, {"date": "2024-09-10", "ndvi": 0.2647, "cloud": 12.6}, {"date": "2024-09-25", "ndvi": 0.2841, "cloud": 6.1}, {"date": "2024-10-10", "ndvi": 0.6177, "cloud": 6.8}, {"date": "2024-10-25", "ndvi": 0.6144, "cloud": 2.9}, {"date": "2024-11-09", "ndvi": 0.7976, "cloud": 5.6}, {"date": "2024-11-24", "ndvi": 0.7698, "cloud": 17.5}, {"date": "2024-12-09", "ndvi": 0.8909, "cloud": 7.5}, {"date": "2024-12-24", "ndvi": 0.9022, "cloud": 15.1}, {"date": "2025-01-08", "ndvi": 0.8792, "cloud": 12.4}, {"date": "2025-01-23", "ndvi": 0.8498, "cloud": 8.7}, {"date": "2025-02-07", "ndvi": 0.6773, "cloud": 2.1}, {"date": "2025-02-22", "ndvi": 0.7107, "cloud": 4.4}, {"date": "2025-03-09", "ndvi": 0.7304, "cloud": 8.9}, {"date": "2025-03-24", "ndvi": 0.7159, "cloud": 9.7}, {"date": "2025-04-08", "ndvi": 0.7692, "cloud": 14.6}, {"date": "2025-04-23", "ndvi": 0.779, "cloud": 3.1}, {"date": "2025-05-08", "ndvi": 0.5576, "cloud": 6.0}, {"date": "2025-05-23", "ndvi": 0.554, "cloud": 7.3}, {"date": "2025-06-07", "ndvi": 0.2743, "cloud": 14.2}, {"date": "2025-06-22", "ndvi": 0.2548, "cloud": 12.2}, {"date": "2025-07-07", "ndvi": 0.2793, "cloud": 10.9}, {"date": "2025-07-22", "ndvi": 0.2682, "cloud": 16.0}, {"date": "2025-08-06", "ndvi": 0.2977, "cloud": 7.1}, {"date": "2025-08-21", "ndvi": 0.254, "cloud": 4.5}, {"date": "2025-09-05", "ndvi": 0.2382, "cloud": 16.4}, {"date": "2025-09-20", "ndvi": 0.2929, "cloud": 5.4}, {"date": "2025-10-05", "ndvi": 0.6091, "cloud": 13.0}, {"date": "2025-10-20", "ndvi": 0.6153, "cloud": 17.8}, {"date": "2025-11-04", "ndvi": 0.8328, "cloud": 17.5}, {"date": "2025-11-19", "ndvi": 0.7938, "cloud": 13.2}, {"date": "2025-12-04", "ndvi": 0.8246, "cloud": 17.5}, {"date": "2025-12-19", "ndvi": 0.8692, "cloud": 13.5}, {"date": "2026-01-03", "ndvi": 0.8797, "cloud": 13.5}, {"date": "2026-01-18", "ndvi": 0.8869, "cloud": 3.6}, {"date": "2026-02-02", "ndvi": 0.7488, "cloud": 3.5}, {"date": "2026-02-17", "ndvi": 0.6918, "cloud": 2.7}, {"date": "2026-03-04", "ndvi": 0.7236, "cloud": 3.0}, {"date": "2026-03-19", "ndvi": 0.7405, "cloud": 2.3}, {"date": "2026-04-03", "ndvi": 0.8175, "cloud": 13.9}, {"date": "2026-04-18", "ndvi": 0.8131, "cloud": 7.1}, {"date": "2026-05-03", "ndvi": 0.578, "cloud": 6.6}, {"date": "2026-05-18", "ndvi": 0.578, "cloud": 4.9}, {"date": "2026-06-02", "ndvi": 0.2852, "cloud": 3.5}, {"date": "2026-06-17", "ndvi": 0.2872, "cloud": 6.5}], "TALHAO-MT-003": [{"date": "2023-09-01", "ndvi": 0.2551, "cloud": 13.8}, {"date": "2023-09-16", "ndvi": 0.2557, "cloud": 3.6}, {"date": "2023-10-01", "ndvi": 0.6092, "cloud": 14.5}, {"date": "2023-10-16", "ndvi": 0.5765, "cloud": 10.6}, {"date": "2023-10-31", "ndvi": 0.6227, "cloud": 9.4}, {"date": "2023-11-15", "ndvi": 0.8379, "cloud": 9.3}, {"date": "2023-11-30", "ndvi": 0.7946, "cloud": 11.7}, {"date": "2023-12-15", "ndvi": 0.8865, "cloud": 2.2}, {"date": "2023-12-30", "ndvi": 0.866, "cloud": 17.2}, {"date": "2024-01-14", "ndvi": 0.8746, "cloud": 8.4}, {"date": "2024-01-29", "ndvi": 0.8211, "cloud": 17.3}, {"date": "2024-02-13", "ndvi": 0.6869, "cloud": 8.5}, {"date": "2024-02-28", "ndvi": 0.7226, "cloud": 12.3}, {"date": "2024-03-14", "ndvi": 0.7712, "cloud": 2.9}, {"date": "2024-03-29", "ndvi": 0.7339, "cloud": 3.9}, {"date": "2024-04-13", "ndvi": 0.8226, "cloud": 8.5}, {"date": "2024-04-28", "ndvi": 0.8285, "cloud": 15.1}, {"date": "2024-05-13", "ndvi": 0.5618, "cloud": 10.4}, {"date": "2024-05-28", "ndvi": 0.5747, "cloud": 12.6}, {"date": "2024-06-12", "ndvi": 0.2769, "cloud": 3.3}, {"date": "2024-06-27", "ndvi": 0.2474, "cloud": 5.8}, {"date": "2024-07-12", "ndvi": 0.2987, "cloud": 8.3}, {"date": "2024-07-27", "ndvi": 0.2654, "cloud": 11.1}, {"date": "2024-08-11", "ndvi": 0.2784, "cloud": 3.9}, {"date": "2024-08-26", "ndvi": 0.304, "cloud": 2.8}, {"date": "2024-09-10", "ndvi": 0.2765, "cloud": 5.0}, {"date": "2024-09-25", "ndvi": 0.2931, "cloud": 12.8}, {"date": "2024-10-10", "ndvi": 0.6315, "cloud": 2.7}, {"date": "2024-10-25", "ndvi": 0.6094, "cloud": 17.6}, {"date": "2024-11-09", "ndvi": 0.7958, "cloud": 11.5}, {"date": "2024-11-24", "ndvi": 0.8262, "cloud": 6.7}, {"date": "2024-12-09", "ndvi": 0.8676, "cloud": 4.7}, {"date": "2024-12-24", "ndvi": 0.8611, "cloud": 15.7}, {"date": "2025-01-08", "ndvi": 0.8501, "cloud": 10.1}, {"date": "2025-01-23", "ndvi": 0.8673, "cloud": 13.0}, {"date": "2025-02-07", "ndvi": 0.6703, "cloud": 11.5}, {"date": "2025-02-22", "ndvi": 0.7131, "cloud": 14.9}, {"date": "2025-03-09", "ndvi": 0.7353, "cloud": 5.7}, {"date": "2025-03-24", "ndvi": 0.7446, "cloud": 17.2}, {"date": "2025-04-08", "ndvi": 0.7826, "cloud": 14.5}, {"date": "2025-04-23", "ndvi": 0.8356, "cloud": 11.7}, {"date": "2025-05-08", "ndvi": 0.5456, "cloud": 13.1}, {"date": "2025-05-23", "ndvi": 0.5621, "cloud": 15.2}, {"date": "2025-06-07", "ndvi": 0.2742, "cloud": 2.7}, {"date": "2025-06-22", "ndvi": 0.294, "cloud": 16.2}, {"date": "2025-07-07", "ndvi": 0.2852, "cloud": 8.6}, {"date": "2025-07-22", "ndvi": 0.2537, "cloud": 11.3}, {"date": "2025-08-06", "ndvi": 0.325, "cloud": 13.6}, {"date": "2025-08-21", "ndvi": 0.2802, "cloud": 12.0}, {"date": "2025-09-05", "ndvi": 0.2835, "cloud": 15.9}, {"date": "2025-09-20", "ndvi": 0.2614, "cloud": 12.9}, {"date": "2025-10-05", "ndvi": 0.5623, "cloud": 9.4}, {"date": "2025-10-20", "ndvi": 0.6153, "cloud": 11.5}, {"date": "2025-11-04", "ndvi": 0.8157, "cloud": 16.8}, {"date": "2025-11-19", "ndvi": 0.7862, "cloud": 4.7}, {"date": "2025-12-04", "ndvi": 0.8806, "cloud": 3.4}, {"date": "2025-12-19", "ndvi": 0.8688, "cloud": 13.6}, {"date": "2026-01-03", "ndvi": 0.8262, "cloud": 4.8}, {"date": "2026-01-18", "ndvi": 0.8584, "cloud": 17.6}, {"date": "2026-02-02", "ndvi": 0.6969, "cloud": 10.1}, {"date": "2026-02-17", "ndvi": 0.714, "cloud": 3.4}, {"date": "2026-03-04", "ndvi": 0.7679, "cloud": 17.0}, {"date": "2026-03-19", "ndvi": 0.7421, "cloud": 4.5}, {"date": "2026-04-03", "ndvi": 0.8252, "cloud": 15.5}, {"date": "2026-04-18", "ndvi": 0.8225, "cloud": 12.9}, {"date": "2026-05-03", "ndvi": 0.548, "cloud": 16.2}, {"date": "2026-05-18", "ndvi": 0.5827, "cloud": 10.4}, {"date": "2026-06-02", "ndvi": 0.268, "cloud": 17.7}, {"date": "2026-06-17", "ndvi": 0.2421, "cloud": 7.8}], "TALHAO-BA-004": [{"date": "2023-09-01", "ndvi": 0.2616, "cloud": 4.3}, {"date": "2023-09-16", "ndvi": 0.2672, "cloud": 3.7}, {"date": "2023-10-01", "ndvi": 0.586, "cloud": 4.0}, {"date": "2023-10-16", "ndvi": 0.6011, "cloud": 6.3}, {"date": "2023-10-31", "ndvi": 0.5667, "cloud": 8.4}, {"date": "2023-11-15", "ndvi": 0.8063, "cloud": 4.0}, {"date": "2023-11-30", "ndvi": 0.835, "cloud": 5.0}, {"date": "2023-12-15", "ndvi": 0.8776, "cloud": 5.6}, {"date": "2023-12-30", "ndvi": 0.8323, "cloud": 6.6}, {"date": "2024-01-14", "ndvi": 0.8894, "cloud": 14.7}, {"date": "2024-01-29", "ndvi": 0.8679, "cloud": 11.1}, {"date": "2024-02-13", "ndvi": 0.6999, "cloud": 10.3}, {"date": "2024-02-28", "ndvi": 0.6714, "cloud": 3.9}, {"date": "2024-03-14", "ndvi": 0.7004, "cloud": 17.3}, {"date": "2024-03-29", "ndvi": 0.7329, "cloud": 9.5}, {"date": "2024-04-13", "ndvi": 0.8184, "cloud": 16.1}, {"date": "2024-04-28", "ndvi": 0.8293, "cloud": 4.5}, {"date": "2024-05-13", "ndvi": 0.5616, "cloud": 3.0}, {"date": "2024-05-28", "ndvi": 0.536, "cloud": 12.0}, {"date": "2024-06-12", "ndvi": 0.2733, "cloud": 13.0}, {"date": "2024-06-27", "ndvi": 0.2884, "cloud": 2.2}, {"date": "2024-07-12", "ndvi": 0.2827, "cloud": 16.4}, {"date": "2024-07-27", "ndvi": 0.265, "cloud": 8.3}, {"date": "2024-08-11", "ndvi": 0.2779, "cloud": 15.6}, {"date": "2024-08-26", "ndvi": 0.2849, "cloud": 8.4}, {"date": "2024-09-10", "ndvi": 0.2676, "cloud": 5.9}, {"date": "2024-09-25", "ndvi": 0.2925, "cloud": 7.8}, {"date": "2024-10-10", "ndvi": 0.5725, "cloud": 10.0}, {"date": "2024-10-25", "ndvi": 0.6003, "cloud": 11.4}, {"date": "2024-11-09", "ndvi": 0.8168, "cloud": 10.6}, {"date": "2024-11-24", "ndvi": 0.7777, "cloud": 17.2}, {"date": "2024-12-09", "ndvi": 0.8875, "cloud": 2.2}, {"date": "2024-12-24", "ndvi": 0.8783, "cloud": 11.6}, {"date": "2025-01-08", "ndvi": 0.9022, "cloud": 11.7}, {"date": "2025-01-23", "ndvi": 0.8737, "cloud": 12.4}, {"date": "2025-02-07", "ndvi": 0.6845, "cloud": 3.7}, {"date": "2025-02-22", "ndvi": 0.7267, "cloud": 8.1}, {"date": "2025-03-09", "ndvi": 0.7033, "cloud": 13.8}, {"date": "2025-03-24", "ndvi": 0.7348, "cloud": 9.1}, {"date": "2025-04-08", "ndvi": 0.8022, "cloud": 14.0}, {"date": "2025-04-23", "ndvi": 0.8224, "cloud": 12.8}, {"date": "2025-05-08", "ndvi": 0.5584, "cloud": 11.3}, {"date": "2025-05-23", "ndvi": 0.5234, "cloud": 9.9}, {"date": "2025-06-07", "ndvi": 0.2729, "cloud": 4.3}, {"date": "2025-06-22", "ndvi": 0.2941, "cloud": 14.1}, {"date": "2025-07-07", "ndvi": 0.2795, "cloud": 5.8}, {"date": "2025-07-22", "ndvi": 0.3009, "cloud": 4.9}, {"date": "2025-08-06", "ndvi": 0.2436, "cloud": 10.9}, {"date": "2025-08-21", "ndvi": 0.2893, "cloud": 7.3}, {"date": "2025-09-05", "ndvi": 0.2476, "cloud": 13.6}, {"date": "2025-09-20", "ndvi": 0.2824, "cloud": 9.1}, {"date": "2025-10-05", "ndvi": 0.5817, "cloud": 5.2}, {"date": "2025-10-20", "ndvi": 0.5898, "cloud": 17.5}, {"date": "2025-11-04", "ndvi": 0.8123, "cloud": 7.5}, {"date": "2025-11-19", "ndvi": 0.7836, "cloud": 8.8}, {"date": "2025-12-04", "ndvi": 0.8795, "cloud": 7.1}, {"date": "2025-12-19", "ndvi": 0.8673, "cloud": 15.7}, {"date": "2026-01-03", "ndvi": 0.8299, "cloud": 17.7}, {"date": "2026-01-18", "ndvi": 0.8388, "cloud": 12.8}, {"date": "2026-02-02", "ndvi": 0.7259, "cloud": 6.9}, {"date": "2026-02-17", "ndvi": 0.712, "cloud": 4.8}, {"date": "2026-03-04", "ndvi": 0.7372, "cloud": 4.7}, {"date": "2026-03-19", "ndvi": 0.6779, "cloud": 6.4}, {"date": "2026-04-03", "ndvi": 0.813, "cloud": 15.1}, {"date": "2026-04-18", "ndvi": 0.8057, "cloud": 7.8}, {"date": "2026-05-03", "ndvi": 0.5799, "cloud": 16.0}, {"date": "2026-05-18", "ndvi": 0.5681, "cloud": 13.6}, {"date": "2026-06-02", "ndvi": 0.282, "cloud": 2.4}, {"date": "2026-06-17", "ndvi": 0.2942, "cloud": 2.9}]};
+    const FARMS_CONFIG = {"admin_wallet": "0xa449e7838fF89EE956174B682449870597e93C71", "farms": [{"land_id": "TALHAO-MT-001", "farm_name": "Fazenda Santa Helena", "car_code": "MT-5107925-8A4F1D9C3E2B4A1F8C2D3E4F5A6B7C8D", "municipality": "Sorriso", "state": "MT", "biome": "Amaz\u00f4nia", "wallet_address": "0xfdb2A29d047A8f10E0BC354b2E45C7Af386D112E", "nft_token_id": 1, "main_crop": "Soja & Milho", "productive_area_ha": 1420.0, "total_area_ha": 1850.0, "owner_name": "Produtor Fazenda Santa Helena", "credit_limit_usd": 250000.0, "current_loan_usd": 150000.0}, {"land_id": "TALHAO-GO-002", "farm_name": "Fazenda Boa Esperan\u00e7a", "car_code": "GO-5218805-4B8C1D2E3F4A5B6C7D8E9F0A1B2C3D4E", "municipality": "Rio Verde", "state": "GO", "biome": "Cerrado", "wallet_address": "0xC7C8931F662D9064ff495508AeA2AfA15E446D80", "nft_token_id": 2, "main_crop": "Gr\u00e3os & Sorgo", "productive_area_ha": 1040.0, "total_area_ha": 1320.0, "owner_name": "Produtor Fazenda Boa Esperan\u00e7a", "credit_limit_usd": 180000.0, "current_loan_usd": 80000.0}, {"land_id": "TALHAO-MT-003", "farm_name": "Agropecu\u00e1ria Chapad\u00e3o", "car_code": "MT-5107875-9C0D1E2F3A4B5C6D7E8F9A0B1C2D3E4F", "municipality": "Sapezal", "state": "MT", "biome": "Cerrado", "wallet_address": "0xFf3b53ca866BCfEC18F1DD3cDff0A03776ab49b5", "nft_token_id": 3, "main_crop": "Algod\u00e3o & Soja", "productive_area_ha": 1520.0, "total_area_ha": 2400.0, "owner_name": "Produtor Agropecu\u00e1ria Chapad\u00e3o", "credit_limit_usd": 320000.0, "current_loan_usd": 200000.0}, {"land_id": "TALHAO-BA-004", "farm_name": "Fazenda Ouro Verde", "car_code": "BA-2919553-7A1B2C3D4E5F6A7B8C9D0E1F2A3B4C5D", "municipality": "Lu\u00eds Eduardo Magalh\u00e3es", "state": "BA", "biome": "Cerrado", "wallet_address": "0x35474822f1A45c0D2C0ddeb4D8Ff53fD8BD29ef7", "nft_token_id": 4, "main_crop": "Soja Irrigada", "productive_area_ha": 1220.0, "total_area_ha": 1600.0, "owner_name": "Produtor Fazenda Ouro Verde", "credit_limit_usd": 210000.0, "current_loan_usd": 95000.0}]};
+
+    let currentFarmId = "TALHAO-MT-001";
+    let currentAnomaly = 0;
+    let mapInstance = null;
+    let chartInstance = null;
+    let currentBasemap = "carto";
+
+    // Inicialização
+    window.addEventListener("load", () => {
+      // Ler parâmetro da URL se existir
+      const urlParams = new URLSearchParams(window.location.search);
+      const farmParam = urlParams.get("farm") || urlParams.get("land_id");
+      if (farmParam && ["TALHAO-MT-001", "TALHAO-GO-002", "TALHAO-MT-003", "TALHAO-BA-004"].includes(farmParam)) {
+        currentFarmId = farmParam;
+        document.getElementById("select-farm").value = farmParam;
+      }
+
+      initMap();
+      initChart();
+      updateFarmDetails();
+    });
+
+    function initMap() {
+      const initialFeature = GEOJSON_DATA.features.find(f => f.properties.land_id === currentFarmId);
+      const center = initialFeature ? [initialFeature.properties.centroid_lon, initialFeature.properties.centroid_lat] : [-55.725, -12.545];
+
+      mapInstance = new maplibregl.Map({
+        container: 'map',
+        style: {
+          version: 8,
+          sources: {
+            'carto-voyager': {
+              type: 'raster',
+              tiles: ['https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png'],
+              tileSize: 256,
+              attribution: 'CartoDB'
+            },
+            'esri-satellite': {
+              type: 'raster',
+              tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
+              tileSize: 256,
+              attribution: 'Esri Satellite'
+            }
+          },
+          layers: [
+            { id: 'carto-layer', type: 'raster', source: 'carto-voyager', layout: { visibility: 'visible' } },
+            { id: 'sat-layer', type: 'raster', source: 'esri-satellite', layout: { visibility: 'none' } }
+          ]
+        },
+        center: center,
+        zoom: 12.2
+      });
+
+      mapInstance.addControl(new maplibregl.NavigationControl(), 'top-right');
+
+      mapInstance.on('load', () => {
+        mapInstance.addSource('sicar-polygons', {
+          type: 'geojson',
+          data: GEOJSON_DATA
+        });
+
+        // Layer de preenchimento dos polígonos
+        mapInstance.addLayer({
+          id: 'sicar-fill',
+          type: 'fill',
+          source: 'sicar-polygons',
+          paint: {
+            'fill-color': [
+              'case',
+              ['==', ['get', 'land_id'], currentFarmId],
+              '#10b981',
+              '#3b82f6'
+            ],
+            'fill-opacity': 0.45
+          }
+        });
+
+        // Layer de borda
+        mapInstance.addLayer({
+          id: 'sicar-line',
+          type: 'line',
+          source: 'sicar-polygons',
+          paint: {
+            'line-color': '#059669',
+            'line-width': 2.5
+          }
+        });
+
+        // Click no polígono abre popup
+        mapInstance.on('click', 'sicar-fill', (e) => {
+          const props = e.features[0].properties;
+          new maplibregl.Popup()
+            .setLngLat(e.lngLat)
+            .setHTML(`
+              <div style="font-family: sans-serif; font-size: 12px; line-height: 1.4;">
+                <b style="color: #00897B; font-size: 14px;">${props.farm_name}</b><br/>
+                <b>Município:</b> ${props.municipality}/${props.state}<br/>
+                <b>Área Útil:</b> ${Number(props.productive_area_ha).toLocaleString()} ha<br/>
+                <b>Reserva Legal:</b> ${Number(props.legal_reserve_ha).toLocaleString()} ha<br/>
+                <b>Aptidão:</b> ${props.aptitude}
+              </div>
+            `)
+            .addTo(mapInstance);
+        });
+      });
+    }
+
+    function switchBasemap(mode) {
+      currentBasemap = mode;
+      document.getElementById('btn-carto').className = mode === 'carto' ? 'basemap-btn active' : 'basemap-btn';
+      document.getElementById('btn-sat').className = mode === 'satellite' ? 'basemap-btn active' : 'basemap-btn';
+
+      if (mapInstance && mapInstance.setLayoutProperty) {
+        mapInstance.setLayoutProperty('carto-layer', 'visibility', mode === 'carto' ? 'visible' : 'none');
+        mapInstance.setLayoutProperty('sat-layer', 'visibility', mode === 'satellite' ? 'visible' : 'none');
+      }
+    }
+
+    function onFarmChange(newFarmId) {
+      currentFarmId = newFarmId;
+      updateFarmDetails();
+
+      const feature = GEOJSON_DATA.features.find(f => f.properties.land_id === currentFarmId);
+      if (feature && mapInstance) {
+        mapInstance.flyTo({
+          center: [feature.properties.centroid_lon, feature.properties.centroid_lat],
+          zoom: 12.2,
+          speed: 1.2
+        });
+
+        if (mapInstance.setPaintProperty) {
+          mapInstance.setPaintProperty('sicar-fill', 'fill-color', [
+            'case',
+            ['==', ['get', 'land_id'], currentFarmId],
+            '#10b981',
+            '#3b82f6'
+          ]);
+        }
+      }
+
+      updateChart();
+    }
+
+    function onAnomalyChange(val) {
+      currentAnomaly = parseFloat(val);
+      const disp = document.getElementById("display-anomaly");
+      if (currentAnomaly < 0) {
+        disp.innerText = `${currentAnomaly}% (Seca/Estresse)`;
+        disp.className = "font-mono font-bold text-red-600";
+      } else if (currentAnomaly > 0) {
+        disp.innerText = `+${currentAnomaly}% (Safra Cheia)`;
+        disp.className = "font-mono font-bold text-[#00E676]";
+      } else {
+        disp.innerText = "0% (Histórico Normal)";
+        disp.className = "font-mono font-bold text-[#00897B]";
+      }
+
+      recalcSimRisk();
+      updateChart();
+    }
+
+    function recalcSimRisk() {
+      let ltv = 60.0;
+      let hf = 1.50;
+      let status = "SOLVENTE";
+
+      if (currentAnomaly <= -35) {
+        ltv = 35.0;
+        hf = 0.88;
+        status = "CRÍTICO (LIQUIDAÇÃO)";
+      } else if (currentAnomaly < 0) {
+        ltv = 45.0;
+        hf = 1.15;
+        status = "ATENÇÃO";
+      } else if (currentAnomaly > 0) {
+        ltv = 65.0;
+        hf = 1.75;
+        status = "EXCELENTE";
+      }
+
+      document.getElementById("sim-ltv").innerText = ltv.toFixed(1) + "%";
+      document.getElementById("sim-hf").innerText = hf.toFixed(2) + "x";
+      
+      const stEl = document.getElementById("sim-status");
+      stEl.innerText = status;
+      if (hf < 1.0) {
+        stEl.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-700 border border-red-300";
+        document.getElementById("sim-hf").className = "font-bold text-red-600";
+      } else if (hf < 1.25) {
+        stEl.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-700 border border-amber-300";
+        document.getElementById("sim-hf").className = "font-bold text-amber-600";
+      } else {
+        stEl.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-[#E8F5E9] text-[#00897B] border border-[#C8E6C9]";
+        document.getElementById("sim-hf").className = "font-bold text-[#00897B]";
+      }
+
+      updateOraclePayload(ltv, hf);
+    }
+
+    function updateFarmDetails() {
+      const feat = GEOJSON_DATA.features.find(f => f.properties.land_id === currentFarmId);
+      if (!feat) return;
+      const p = feat.properties;
+
+      const farmCfg = FARMS_CONFIG.farms.find(f => f.land_id === currentFarmId) || {};
+      const valuation = farmCfg.credit_limit_usd || 250000;
+
+      document.getElementById("banner-farm-name").innerText = `${p.farm_name} — ${p.municipality}/${p.state}`;
+      document.getElementById("banner-car").innerText = `CAR: ${p.car_code.slice(0, 15)}...`;
+      document.getElementById("banner-sub").innerText = `Área Útil: ${p.productive_area_ha.toLocaleString()} ha | Bioma: ${p.biome} | Limite Aprovado: $ ${valuation.toLocaleString()} USDC`;
+
+      document.getElementById("info-car-short").innerText = `${p.car_code.slice(0, 15)}...`;
+      document.getElementById("info-biome").innerText = p.biome;
+      document.getElementById("info-aptitude").innerText = p.aptitude;
+
+      document.getElementById("metric-area").innerText = `${p.productive_area_ha.toLocaleString()} ha`;
+      document.getElementById("metric-total-area").innerText = `${p.total_area_ha.toLocaleString()} ha total`;
+      document.getElementById("metric-valuation").innerText = `$ ${valuation.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+
+      document.getElementById("info-rl").innerText = `${p.legal_reserve_ha.toLocaleString()} ha (${p.reserve_actual_pct.toFixed(1)}%)`;
+      document.getElementById("info-app").innerText = `${p.app_ha.toLocaleString()} ha`;
+
+      document.getElementById("q10-val").innerText = `$ ${(valuation * 0.72).toLocaleString('en-US', {maximumFractionDigits: 0})}`;
+      document.getElementById("q50-val").innerText = `$ ${valuation.toLocaleString('en-US', {maximumFractionDigits: 0})}`;
+      document.getElementById("q90-val").innerText = `$ ${(valuation * 1.18).toLocaleString('en-US', {maximumFractionDigits: 0})}`;
+
+      document.getElementById("mc-nominal").innerText = `$ ${(valuation * 0.60).toLocaleString('en-US', {maximumFractionDigits: 0})}`;
+
+      recalcSimRisk();
+    }
+
+    function initChart() {
+      const ctx = document.getElementById('ndviChart').getContext('2d');
+      const farmNdvi = NDVI_DATA[currentFarmId] || [];
+      const labels = farmNdvi.map(d => d.date);
+      const dataObserved = farmNdvi.map(d => d.ndvi);
+      const dataBaseline = farmNdvi.map(d => 0.65 + Math.sin(d.ndvi * 3) * 0.1);
+
+      chartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'NDVI Observado (Sentinel-2)',
+              data: dataObserved,
+              borderColor: '#00897B',
+              backgroundColor: 'rgba(0, 137, 123, 0.1)',
+              fill: true,
+              tension: 0.3,
+              borderWidth: 2.5
+            },
+            {
+              label: 'Média Histórica (Baseline)',
+              data: dataBaseline,
+              borderColor: '#94a3b8',
+              borderDash: [5, 5],
+              fill: false,
+              tension: 0.3,
+              borderWidth: 1.5
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              min: 0.2,
+              max: 1.0,
+              grid: { color: '#E2E8E2' }
+            },
+            x: {
+              grid: { display: false }
+            }
+          },
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: { font: { weight: 'bold', size: 11 } }
+            }
+          }
+        }
+      });
+    }
+
+    function updateChart() {
+      if (!chartInstance) return;
+      const farmNdvi = NDVI_DATA[currentFarmId] || [];
+      chartInstance.data.labels = farmNdvi.map(d => d.date);
+
+      const anomalyFactor = 1 + (currentAnomaly / 100);
+      chartInstance.data.datasets[0].data = farmNdvi.map(d => Math.max(0.15, Math.min(0.95, d.ndvi * anomalyFactor)));
+      chartInstance.data.datasets[1].data = farmNdvi.map(d => 0.65 + Math.sin(d.ndvi * 3) * 0.1);
+      chartInstance.update();
+    }
+
+    function switchTab(tab) {
+      ['map', 'ndvi', 'montecarlo', 'oracle'].forEach(t => {
+        const btn = document.getElementById(`tab-btn-${t}`);
+        const content = document.getElementById(`tab-content-${t}`);
+        if (t === tab) {
+          btn.className = 'py-2.5 px-4 text-[#00897B] border-b-2 border-[#00897B] font-bold transition-all';
+          content.classList.remove('hidden');
+        } else {
+          btn.className = 'py-2.5 px-4 text-[#556B5C] hover:text-[#1A2E20] font-bold transition-all';
+          content.classList.add('hidden');
+        }
+      });
+
+      if (tab === 'map' && mapInstance) {
+        setTimeout(() => mapInstance.resize(), 100);
+      }
+    }
+
+    function updateOraclePayload(ltv, hf) {
+      const feat = GEOJSON_DATA.features.find(f => f.properties.land_id === currentFarmId);
+      const farmCfg = FARMS_CONFIG.farms.find(f => f.land_id === currentFarmId) || {};
+
+      const payload = {
+        land_id: currentFarmId,
+        car_code: feat ? feat.properties.car_code : "",
+        token_id: farmCfg.nft_token_id || 1,
+        borrower_wallet: farmCfg.wallet_address || "",
+        predicted_value_usdc: farmCfg.credit_limit_usd || 250000,
+        ltv_ratio_bps: Math.round(ltv * 100),
+        health_factor_scaled: Math.round(hf * 10000),
+        status_solvencia: hf >= 1.0 ? "SOLVENTE" : "LIQUIDAVEL",
+        oracle_network: "Ethereum Sepolia (ChainId: 11155111)",
+        sentinel_ndvi_simulated_anomaly_pct: currentAnomaly,
+        smart_contract_target: "0x020c06c4d1410B2131e9815c5D25F7Ee90D37a26",
+        solidity_function: "updateLTVAndHealthFactor(tokenId, ltvBps, healthFactor)"
+      };
+
+      const pre = document.getElementById("oracle-json-display");
+      if (pre) {
+        pre.innerText = JSON.stringify(payload, null, 2);
+      }
+    }
+
+    function downloadDossierJson() {
+      const feat = GEOJSON_DATA.features.find(f => f.properties.land_id === currentFarmId);
+      const farmCfg = FARMS_CONFIG.farms.find(f => f.land_id === currentFarmId) || {};
+      const dossier = {
+        dossier_id: `DOSSIER-${currentFarmId}-${Date.now()}`,
+        generated_at: new Date().toISOString(),
+        farm: farmCfg,
+        sicar_car_metadata: feat ? feat.properties : {},
+        vegetation_ndvi_timeseries: NDVI_DATA[currentFarmId] || [],
+        climate_anomaly_pct: currentAnomaly,
+        defi_oracle_payload: JSON.parse(document.getElementById("oracle-json-display").innerText)
+      };
+
+      const blob = new Blob([JSON.stringify(dossier, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `AgroFi_Dossier_${currentFarmId}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgroFi Protocol - Central de Mudanças & Equipe de Agentes</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            agro: {
+              primary: '#00897B',
+              'primary-dark': '#00695C',
+              'primary-light': '#E0F2F1',
+              highlight: '#00E676',
+              'highlight-dark': '#00C853',
+              bg: '#0B130E',
+              surface: '#121F17',
+              card: '#16281E',
+              border: '#1F382A',
+              text: '#E8F5E9',
+              muted: '#81A58E',
+              alert: '#FFB74D',
+              danger: '#EF5350'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #0B130E;
+      color: #E8F5E9;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #121F17;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #1F382A;
+      border-radius: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #00897B;
+    }
+    .glow-teal {
+      box-shadow: 0 0 25px -5px rgba(0, 137, 123, 0.25);
+    }
+    .glow-green {
+      box-shadow: 0 0 25px -5px rgba(0, 230, 118, 0.25);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-[#00897B] selection:text-white">
+
+  <!-- TOP NAVIGATION -->
+  <header class="border-b border-agro-border bg-agro-surface/90 backdrop-blur sticky top-0 z-50 shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-4">
+      
+      <!-- BRAND -->
+      <div class="flex items-center space-x-3">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-[#00897B] to-[#00E676] flex items-center justify-center text-white font-bold text-2xl shadow-md shadow-[#00897B]/30">
+          🌱
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xl font-extrabold tracking-tight text-agro-text">AgroFi Evolution Hub</span>
+            <span class="px-2.5 py-0.5 text-[10px] font-bold rounded-full bg-[#00897B]/20 text-[#00E676] border border-[#00897B]/40 uppercase tracking-wider">
+              Roadmap & Agentes
+            </span>
+          </div>
+          <p class="text-xs text-agro-muted">Central de Controle de Mudanças & Equipe Multidisciplinar de Agentes</p>
+        </div>
+      </div>
+
+      <!-- STATUS & METRICS -->
+      <div class="hidden lg:flex items-center gap-3 text-xs">
+        <div class="px-3 py-1.5 rounded-xl bg-agro-card border border-agro-border flex items-center gap-2 shadow-xs">
+          <span class="w-2.5 h-2.5 rounded-full bg-[#00E676] animate-pulse"></span>
+          <span class="text-agro-muted">Equipe de Agentes:</span>
+          <span class="font-mono font-bold text-[#00E676]" id="agents-online-count">7 Agentes Prontos</span>
+        </div>
+        <div class="px-3 py-1.5 rounded-xl bg-agro-card border border-agro-border flex items-center gap-2 shadow-xs">
+          <span class="text-agro-muted">Backlog de Mudanças:</span>
+          <span class="font-mono font-bold text-[#00897B]" id="changes-summary-pill">8 Itens (v1.1 a v2.0)</span>
+        </div>
+      </div>
+
+      <!-- ACTION BUTTONS -->
+      <div class="flex items-center gap-2">
+        <button onclick="openNewChangeModal()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-[#00897B] to-[#00695C] hover:from-[#00695C] hover:to-[#004D40] text-white font-bold text-xs transition-all shadow-md shadow-[#00897B]/30 flex items-center gap-1.5">
+          <span>✨</span>
+          <span>Nova Mudança</span>
+        </button>
+        <button onclick="refreshData()" class="px-3 py-2 rounded-xl bg-agro-card hover:bg-agro-surface border border-agro-border text-agro-text font-semibold text-xs transition-all flex items-center gap-1.5">
+          <span id="refresh-icon">🔄</span>
+          <span>Atualizar</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- QUICK LINK BAR TO OTHER LOCAL SERVICES -->
+  <div class="bg-agro-card/60 border-b border-agro-border/70 py-2.5 px-4 text-xs">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-2 text-agro-muted">
+        <span class="font-bold text-agro-text">Ecossistema AgroFi:</span>
+        <span>Acesse rapidamente as outras telas do projeto:</span>
+      </div>
+      <div class="flex flex-wrap items-center gap-2 font-mono">
+        <a href="index.html" class="px-2.5 py-1 rounded-lg bg-agro-surface border border-agro-border hover:border-[#00897B] text-agro-text transition-colors flex items-center gap-1">
+          <span>🏠</span> Início ↗
+        </a>
+        <a href="invista.html" class="px-2.5 py-1 rounded-lg bg-[#D97706]/10 border border-[#D97706]/30 hover:border-[#D97706] text-[#FBBF24] transition-colors flex items-center gap-1 font-bold">
+          <span>🌾</span> Invista & Staking ↗
+        </a>
+        <a href="dashboard.html" class="px-2.5 py-1 rounded-lg bg-agro-surface border border-agro-border hover:border-[#00897B] text-agro-text transition-colors flex items-center gap-1">
+          <span>⚡</span> Painel Produtor ↗
+        </a>
+        <a href="mapa.html" class="px-2.5 py-1 rounded-lg bg-agro-surface border border-agro-border hover:border-[#00897B] text-agro-text transition-colors flex items-center gap-1 font-bold text-[#00897B]">
+          <span>🗺️</span> Oráculo & Mapa ↗
+        </a>
+        <a href="explorer.html" class="px-2.5 py-1 rounded-lg bg-agro-surface border border-agro-border hover:border-[#00897B] text-agro-text transition-colors flex items-center gap-1">
+          <span>🔍</span> AgroFiScan ↗
+        </a>
+        <a href="wallet.html" class="px-2.5 py-1 rounded-lg bg-agro-surface border border-agro-border hover:border-[#00897B] text-agro-text transition-colors flex items-center gap-1">
+          <span>👛</span> Web Wallet ↗
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8 flex-1 w-full">
+
+    <!-- HERO METRICS OVERVIEW -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      
+      <div class="p-5 rounded-2xl bg-agro-surface border border-agro-border flex flex-col justify-between">
+        <div class="flex items-center justify-between">
+          <span class="text-xs uppercase tracking-wider font-bold text-agro-muted">Total de Mudanças</span>
+          <span class="p-2 rounded-xl bg-[#00897B]/10 text-[#00E676] text-sm">📋</span>
+        </div>
+        <div class="mt-3">
+          <div class="text-3xl font-extrabold text-agro-text font-mono" id="stat-total">8</div>
+          <span class="text-xs text-agro-muted">Roadmap v1.1 a v2.0</span>
+        </div>
+      </div>
+
+      <div class="p-5 rounded-2xl bg-agro-surface border border-agro-border flex flex-col justify-between">
+        <div class="flex items-center justify-between">
+          <span class="text-xs uppercase tracking-wider font-bold text-agro-muted">Em Progresso & Revisão</span>
+          <span class="p-2 rounded-xl bg-amber-500/10 text-amber-400 text-sm">⚡</span>
+        </div>
+        <div class="mt-3">
+          <div class="text-3xl font-extrabold text-amber-400 font-mono" id="stat-active">3</div>
+          <span class="text-xs text-agro-muted">Atribuídos a Agentes Especialistas</span>
+        </div>
+      </div>
+
+      <div class="p-5 rounded-2xl bg-agro-surface border border-agro-border flex flex-col justify-between">
+        <div class="flex items-center justify-between">
+          <span class="text-xs uppercase tracking-wider font-bold text-agro-muted">Planejados (Backlog)</span>
+          <span class="p-2 rounded-xl bg-blue-500/10 text-blue-400 text-sm">🎯</span>
+        </div>
+        <div class="mt-3">
+          <div class="text-3xl font-extrabold text-blue-400 font-mono" id="stat-planned">4</div>
+          <span class="text-xs text-agro-muted">Especificações prontas</span>
+        </div>
+      </div>
+
+      <div class="p-5 rounded-2xl bg-agro-surface border border-agro-border flex flex-col justify-between">
+        <div class="flex items-center justify-between">
+          <span class="text-xs uppercase tracking-wider font-bold text-agro-muted">Squad de Agentes</span>
+          <span class="p-2 rounded-xl bg-[#00E676]/10 text-[#00E676] text-sm">👥</span>
+        </div>
+        <div class="mt-3">
+          <div class="text-3xl font-extrabold text-[#00E676] font-mono" id="stat-agents">7</div>
+          <span class="text-xs text-agro-muted">Subagentes Definidos no Sistema</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- TABS -->
+    <div class="flex border-b border-agro-border gap-6 text-sm font-semibold">
+      <button onclick="switchTab('tab-changes')" id="btn-tab-changes" class="pb-3 border-b-2 border-[#00E676] text-[#00E676] flex items-center gap-2">
+        <span>🚀</span> Quadro de Mudanças Futuras
+      </button>
+      <button onclick="switchTab('tab-agents')" id="btn-tab-agents" class="pb-3 border-b-2 border-transparent text-agro-muted hover:text-agro-text flex items-center gap-2">
+        <span>👥</span> Equipe de Agentes AgroFi (7)
+      </button>
+      <button onclick="switchTab('tab-git')" id="btn-tab-git" class="pb-3 border-b-2 border-transparent text-agro-muted hover:text-agro-text flex items-center gap-2">
+        <span>📂</span> Arquivos & Status Git
+      </button>
+    </div>
+
+    <!-- ==================== TAB 1: QUADRO DE MUDANÇAS FUTURAS ==================== -->
+    <div id="tab-changes" class="space-y-6">
+
+      <!-- FILTERS & CONTROLS -->
+      <div class="p-4 rounded-2xl bg-agro-surface border border-agro-border flex flex-wrap items-center justify-between gap-4">
+        
+        <!-- STATUS PILLS -->
+        <div class="flex flex-wrap items-center gap-2 text-xs">
+          <button onclick="filterStatus('TODOS')" class="filter-status-btn px-3 py-1.5 rounded-xl font-bold transition-all bg-[#00897B] text-white" data-status="TODOS">
+            Todos (<span id="count-all">0</span>)
+          </button>
+          <button onclick="filterStatus('Planejado')" class="filter-status-btn px-3 py-1.5 rounded-xl font-medium transition-all bg-agro-card text-agro-muted hover:text-agro-text" data-status="Planejado">
+            Planejados (<span id="count-planned">0</span>)
+          </button>
+          <button onclick="filterStatus('Em Progresso')" class="filter-status-btn px-3 py-1.5 rounded-xl font-medium transition-all bg-agro-card text-agro-muted hover:text-agro-text" data-status="Em Progresso">
+            Em Progresso (<span id="count-progress">0</span>)
+          </button>
+          <button onclick="filterStatus('Em Revisão')" class="filter-status-btn px-3 py-1.5 rounded-xl font-medium transition-all bg-agro-card text-agro-muted hover:text-agro-text" data-status="Em Revisão">
+            Em Revisão (<span id="count-review">0</span>)
+          </button>
+          <button onclick="filterStatus('Concluído')" class="filter-status-btn px-3 py-1.5 rounded-xl font-medium transition-all bg-agro-card text-agro-muted hover:text-agro-text" data-status="Concluído">
+            Concluídos (<span id="count-completed">0</span>)
+          </button>
+        </div>
+
+        <!-- AGENT FILTER & SEARCH -->
+        <div class="flex flex-wrap items-center gap-3">
+          <select id="agent-filter-select" onchange="applyFilters()" class="bg-agro-card border border-agro-border rounded-xl px-3 py-1.5 text-xs text-agro-text focus:outline-none focus:border-[#00897B]">
+            <option value="ALL">Todos os Agentes</option>
+            <option value="agrofi-techlead">Dr. Tech Lead</option>
+            <option value="agrofi-mlops">Eng. ML & MLOps</option>
+            <option value="agrofi-geospatial">Eng. Geoprocessamento GIS</option>
+            <option value="agrofi-agronomist">Dr. Agrônomo</option>
+            <option value="agrofi-web3">Eng. Web3 & Smart Contracts</option>
+            <option value="agrofi-frontend">Eng. Frontend & Cartografia</option>
+            <option value="agrofi-devops">Eng. DevOps & QA</option>
+          </select>
+
+          <input type="text" id="search-input" onkeyup="applyFilters()" placeholder="Buscar por título, ID ou arquivo..." class="bg-agro-card border border-agro-border rounded-xl px-3.5 py-1.5 text-xs text-agro-text placeholder-agro-muted/70 focus:outline-none focus:border-[#00897B] w-64">
+        </div>
+
+      </div>
+
+      <!-- CARDS GRID -->
+      <div id="changes-cards-container" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <!-- Dynamic Cards Injected via JS -->
+      </div>
+
+    </div>
+
+    <!-- ==================== TAB 2: EQUIPE DE AGENTES ==================== -->
+    <div id="tab-agents" class="space-y-6 hidden">
+      <div class="p-6 rounded-2xl bg-gradient-to-r from-agro-surface to-agro-card border border-agro-border">
+        <div class="max-w-3xl space-y-2">
+          <h2 class="text-xl font-bold text-agro-text flex items-center gap-2">
+            <span>👥</span> Squad Multidisciplinar AgroFi
+          </h2>
+          <p class="text-sm text-agro-muted leading-relaxed">
+            Cada agente foi configurado e registrado no sistema Antigravity com papéis, ferramentas de execução e arquivos de domínio específicos, espelhando fielmente a especificação em <code class="text-[#00E676] bg-agro-card px-1.5 py-0.5 rounded">TEAM.md</code>.
+          </p>
+        </div>
+      </div>
+
+      <div id="agents-cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- Dynamic Agents Injected via JS -->
+      </div>
+    </div>
+
+    <!-- ==================== TAB 3: ARQUIVOS & STATUS GIT ==================== -->
+    <div id="tab-git" class="space-y-6 hidden">
+      <div class="p-6 rounded-2xl bg-agro-surface border border-agro-border space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-bold text-agro-text flex items-center gap-2">
+            <span>📂</span> Status dos Arquivos do Projeto & Diffs
+          </h2>
+          <button onclick="loadGitStatus()" class="px-3 py-1.5 rounded-xl bg-agro-card hover:bg-agro-surface border border-agro-border text-xs text-agro-text">
+            Recarregar Status
+          </button>
+        </div>
+        <p class="text-xs text-agro-muted">
+          Acompanhe em tempo real os arquivos criados e modificados pelas tarefas dos agentes autônomos.
+        </p>
+
+        <div id="git-status-content" class="p-4 rounded-xl bg-black/40 border border-agro-border font-mono text-xs text-emerald-400 space-y-2 overflow-x-auto custom-scrollbar">
+          Carregando status do repositório...
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- MODAL: NOVA MUDANÇA -->
+  <div id="new-change-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-agro-surface border border-agro-border rounded-3xl p-6 sm:p-8 max-w-xl w-full space-y-5 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-agro-border pb-4">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">✨</span>
+          <h3 class="text-lg font-bold text-agro-text">Cadastrar Nova Mudança Futura</h3>
+        </div>
+        <button onclick="closeNewChangeModal()" class="text-agro-muted hover:text-agro-text text-xl">&times;</button>
+      </div>
+
+      <form id="new-change-form" onsubmit="handleCreateChange(event)" class="space-y-4 text-xs">
+        <div>
+          <label class="block font-semibold text-agro-muted mb-1">Título da Mudança</label>
+          <input type="text" id="modal-title" required placeholder="Ex: Novo Oráculo de Preços de Commodities da B3" class="w-full bg-agro-card border border-agro-border rounded-xl px-3.5 py-2 text-agro-text placeholder-agro-muted/60 focus:outline-none focus:border-[#00897B]">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-agro-muted mb-1">Agente Líder Responsável</label>
+            <select id="modal-agent" required class="w-full bg-agro-card border border-agro-border rounded-xl px-3 py-2 text-agro-text focus:outline-none focus:border-[#00897B]">
+              <option value="agrofi-techlead">Dr. Tech Lead & Arquiteto</option>
+              <option value="agrofi-mlops">Eng. ML & MLOps</option>
+              <option value="agrofi-geospatial">Eng. Geoprocessamento GIS</option>
+              <option value="agrofi-agronomist">Dr. Agrônomo & Risco</option>
+              <option value="agrofi-web3">Eng. Web3 & Smart Contracts</option>
+              <option value="agrofi-frontend">Eng. Frontend & Cartografia</option>
+              <option value="agrofi-devops">Eng. DevOps & QA</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-agro-muted mb-1">Prioridade</label>
+            <select id="modal-priority" class="w-full bg-agro-card border border-agro-border rounded-xl px-3 py-2 text-agro-text focus:outline-none focus:border-[#00897B]">
+              <option value="Alta">Alta</option>
+              <option value="Crítica">Crítica</option>
+              <option value="Média" selected>Média</option>
+              <option value="Baixa">Baixa</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-agro-muted mb-1">Categoria</label>
+            <input type="text" id="modal-category" placeholder="Ex: Web3 & Oráculos" class="w-full bg-agro-card border border-agro-border rounded-xl px-3.5 py-2 text-agro-text placeholder-agro-muted/60 focus:outline-none focus:border-[#00897B]">
+          </div>
+          <div>
+            <label class="block font-semibold text-agro-muted mb-1">Versão Alvo (Milestone)</label>
+            <input type="text" id="modal-version" placeholder="Ex: v1.3.0" value="v1.2.0" class="w-full bg-agro-card border border-agro-border rounded-xl px-3.5 py-2 text-agro-text placeholder-agro-muted/60 focus:outline-none focus:border-[#00897B]">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-agro-muted mb-1">Descrição Detalhada</label>
+          <textarea id="modal-desc" rows="3" required placeholder="Explique o objetivo e o impacto técnico esperado..." class="w-full bg-agro-card border border-agro-border rounded-xl px-3.5 py-2 text-agro-text placeholder-agro-muted/60 focus:outline-none focus:border-[#00897B]"></textarea>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-agro-muted mb-1">Arquivos Afetados (separados por vírgula)</label>
+          <input type="text" id="modal-files" placeholder="Ex: contracts/AgroFiVault.sol, src/core/schemas.py" class="w-full bg-agro-card border border-agro-border rounded-xl px-3.5 py-2 text-agro-text placeholder-agro-muted/60 focus:outline-none focus:border-[#00897B]">
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-4 border-t border-agro-border">
+          <button type="button" onclick="closeNewChangeModal()" class="px-4 py-2 rounded-xl bg-agro-card hover:bg-agro-surface border border-agro-border text-agro-muted text-xs">Cancelar</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-[#00897B] hover:bg-[#00695C] text-white font-bold text-xs shadow-md shadow-[#00897B]/30">Salvar Mudança</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-agro-border bg-agro-surface/60 py-6 text-xs text-agro-muted text-center mt-12">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <span>🌱</span>
+        <span class="font-bold text-agro-text">AgroFi Autonomous Protocol</span>
+        <span>•</span>
+        <span>Equipe de 7 Agentes Conectada</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <span>Plataforma: <b>Vercel Production</b></span>
+        <span>•</span>
+        <span>Ambiente: <b>Multi-Page Web3 & Oráculo</b></span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- SCRIPT -->
+  <script>
+    let globalChanges = [];
+    let globalAgents = [];
+    let currentStatusFilter = 'TODOS';
+
+    async function loadData() {
+      try {
+        let changesRes = await fetch('/api/changes').then(r => r.json()).catch(() => null);
+        if (!changesRes) {
+          changesRes = await fetch('agents/changes_backlog.json').then(r => r.json()).catch(() => null);
+        }
+        let agentsRes = await fetch('/api/agents').then(r => r.json()).catch(() => null);
+        if (!agentsRes) {
+          agentsRes = await fetch('agents/squad_manifest.json').then(r => r.json()).catch(() => null);
+        }
+
+        if (changesRes && changesRes.changes) {
+          globalChanges = changesRes.changes;
+        } else {
+          // Fallback static data if opened directly without server
+          globalChanges = getStaticFallbackChanges();
+        }
+
+        if (agentsRes && agentsRes.agents) {
+          globalAgents = agentsRes.agents;
+        } else {
+          globalAgents = getStaticFallbackAgents();
+        }
+
+        renderMetrics();
+        renderChanges();
+        renderAgents();
+        loadGitStatus();
+      } catch (err) {
+        console.error("Erro ao carregar dados:", err);
+      }
+    }
+
+    function renderMetrics() {
+      const total = globalChanges.length;
+      const progressCount = globalChanges.filter(c => c.status === 'Em Progresso' || c.status === 'Em Revisão').length;
+      const plannedCount = globalChanges.filter(c => c.status === 'Planejado').length;
+      const completedCount = globalChanges.filter(c => c.status === 'Concluído').length;
+
+      document.getElementById('stat-total').innerText = total;
+      document.getElementById('stat-active').innerText = progressCount;
+      document.getElementById('stat-planned').innerText = plannedCount;
+      document.getElementById('stat-agents').innerText = globalAgents.length || 7;
+
+      document.getElementById('count-all').innerText = total;
+      document.getElementById('count-planned').innerText = plannedCount;
+      document.getElementById('count-progress').innerText = globalChanges.filter(c => c.status === 'Em Progresso').length;
+      document.getElementById('count-review').innerText = globalChanges.filter(c => c.status === 'Em Revisão').length;
+      document.getElementById('count-completed').innerText = completedCount;
+    }
+
+    function renderChanges() {
+      const container = document.getElementById('changes-cards-container');
+      const agentFilter = document.getElementById('agent-filter-select').value;
+      const query = (document.getElementById('search-input').value || '').toLowerCase();
+
+      const filtered = globalChanges.filter(c => {
+        const matchStatus = currentStatusFilter === 'TODOS' || c.status === currentStatusFilter;
+        const matchAgent = agentFilter === 'ALL' || c.lead_agent_id === agentFilter;
+        const matchQuery = !query || 
+          c.title.toLowerCase().includes(query) || 
+          c.id.toLowerCase().includes(query) || 
+          c.description.toLowerCase().includes(query) ||
+          (c.affected_files && c.affected_files.some(f => f.toLowerCase().includes(query)));
+        return matchStatus && matchAgent && matchQuery;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-2 p-12 text-center rounded-2xl bg-agro-surface border border-agro-border text-agro-muted">
+            <span class="text-4xl block mb-2">🔍</span>
+            Nenhuma mudança encontrada com os filtros selecionados.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(c => {
+        const agent = globalAgents.find(a => a.id === c.lead_agent_id) || { name: c.lead_agent_id, icon: '🤖' };
+        
+        let statusBadge = '';
+        if (c.status === 'Concluído') statusBadge = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
+        else if (c.status === 'Em Progresso') statusBadge = 'bg-amber-500/10 text-amber-400 border-amber-500/30';
+        else if (c.status === 'Em Revisão') statusBadge = 'bg-purple-500/10 text-purple-400 border-purple-500/30';
+        else statusBadge = 'bg-blue-500/10 text-blue-400 border-blue-500/30';
+
+        let priorityBadge = '';
+        if (c.priority === 'Crítica') priorityBadge = 'bg-rose-500/15 text-rose-400 border-rose-500/40';
+        else if (c.priority === 'Alta') priorityBadge = 'bg-amber-500/15 text-amber-400 border-amber-500/40';
+        else priorityBadge = 'bg-slate-700/50 text-slate-300 border-slate-600';
+
+        return `
+          <div class="p-6 rounded-2xl bg-agro-surface border border-agro-border hover:border-[#00897B]/60 transition-all flex flex-col justify-between space-y-4 shadow-md">
+            
+            <div class="space-y-3">
+              <!-- TOP BADGES -->
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                  <span class="font-mono text-xs font-bold text-[#00E676] bg-[#00897B]/15 px-2.5 py-0.5 rounded-lg border border-[#00897B]/30">
+                    ${c.id}
+                  </span>
+                  <span class="text-[11px] font-semibold px-2 py-0.5 rounded-md border ${priorityBadge}">
+                    ${c.priority || 'Média'}
+                  </span>
+                  <span class="text-[11px] font-mono text-agro-muted">
+                    ${c.version_target || 'v1.1'}
+                  </span>
+                </div>
+
+                <!-- STATUS DROPDOWN SELECTOR -->
+                <select onchange="updateChangeStatus('${c.id}', this.value)" class="text-xs font-bold px-2.5 py-1 rounded-xl border ${statusBadge} bg-agro-card cursor-pointer focus:outline-none">
+                  <option value="Planejado" ${c.status === 'Planejado' ? 'selected' : ''}>🎯 Planejado</option>
+                  <option value="Em Progresso" ${c.status === 'Em Progresso' ? 'selected' : ''}>⚡ Em Progresso</option>
+                  <option value="Em Revisão" ${c.status === 'Em Revisão' ? 'selected' : ''}>🔍 Em Revisão</option>
+                  <option value="Concluído" ${c.status === 'Concluído' ? 'selected' : ''}>✅ Concluído</option>
+                </select>
+              </div>
+
+              <!-- TITLE & DESC -->
+              <div>
+                <h3 class="text-base font-bold text-agro-text leading-snug">${c.title}</h3>
+                <p class="text-xs text-agro-muted mt-1.5 leading-relaxed">${c.description}</p>
+              </div>
+
+              <!-- LEAD AGENT BADGE -->
+              <div class="flex items-center gap-2 pt-2">
+                <span class="text-xs text-agro-muted">Agente Líder:</span>
+                <span class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-lg bg-agro-card border border-agro-border text-agro-text">
+                  <span>${agent.icon || '🤖'}</span>
+                  <span>${agent.name || c.lead_agent_id}</span>
+                </span>
+              </div>
+
+              <!-- ACCEPTANCE CRITERIA -->
+              ${c.acceptance_criteria ? `
+                <div class="pt-2">
+                  <span class="text-[11px] font-bold text-agro-muted uppercase tracking-wider block mb-1">Critérios de Aceite:</span>
+                  <ul class="space-y-1 text-xs text-agro-text/90">
+                    ${c.acceptance_criteria.map(crit => `
+                      <li class="flex items-start gap-1.5">
+                        <span class="text-[#00E676] text-xs">✔</span>
+                        <span>${crit}</span>
+                      </li>
+                    `).join('')}
+                  </ul>
+                </div>
+              ` : ''}
+
+              <!-- AFFECTED FILES -->
+              ${c.affected_files && c.affected_files.length > 0 ? `
+                <div class="pt-2">
+                  <span class="text-[11px] font-bold text-agro-muted uppercase tracking-wider block mb-1.5">Arquivos Impactados:</span>
+                  <div class="flex flex-wrap gap-1.5 font-mono text-[11px]">
+                    ${c.affected_files.map(f => `
+                      <span class="px-2 py-0.5 rounded bg-agro-card border border-agro-border text-emerald-300">
+                        ${f}
+                      </span>
+                    `).join('')}
+                  </div>
+                </div>
+              ` : ''}
+            </div>
+
+            <!-- PROGRESS BAR -->
+            <div class="pt-3 border-t border-agro-border/70 space-y-1.5">
+              <div class="flex items-center justify-between text-[11px] text-agro-muted font-mono">
+                <span>Progresso Técnico</span>
+                <span class="font-bold text-[#00E676]">${c.progress_pct || 0}%</span>
+              </div>
+              <div class="w-full bg-agro-card h-2 rounded-full overflow-hidden border border-agro-border">
+                <div class="bg-gradient-to-r from-[#00897B] to-[#00E676] h-full rounded-full transition-all duration-500" style="width: ${c.progress_pct || 0}%"></div>
+              </div>
+            </div>
+
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderAgents() {
+      const container = document.getElementById('agents-cards-container');
+      if (!globalAgents || globalAgents.length === 0) return;
+
+      container.innerHTML = globalAgents.map(a => {
+        const tasks = globalChanges.filter(c => c.lead_agent_id === a.id);
+        const activeTasks = tasks.filter(t => t.status === 'Em Progresso' || t.status === 'Em Revisão');
+
+        return `
+          <div class="p-6 rounded-2xl bg-agro-surface border border-agro-border hover:border-[#00897B] transition-all flex flex-col justify-between space-y-4 shadow-lg">
+            
+            <div class="space-y-3">
+              <div class="flex items-start justify-between gap-3">
+                <div class="flex items-center space-x-3">
+                  <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr ${a.color || 'from-teal-600 to-emerald-700'} flex items-center justify-center text-white font-bold text-2xl shadow-md">
+                    ${a.icon || '🤖'}
+                  </div>
+                  <div>
+                    <h3 class="text-sm font-bold text-agro-text">${a.name}</h3>
+                    <p class="text-[11px] text-agro-muted">${a.title}</p>
+                  </div>
+                </div>
+                <span class="text-[10px] font-mono px-2 py-0.5 rounded-full border ${a.badge_color || 'bg-teal-500/10 text-teal-400 border-teal-500/30'}">
+                  ${a.status || 'Ativo'}
+                </span>
+              </div>
+
+              <div class="text-xs text-agro-muted bg-agro-card p-3 rounded-xl border border-agro-border/70 leading-relaxed">
+                <b>Foco Principal:</b> ${a.key_focus}
+              </div>
+
+              <div>
+                <span class="text-[10px] font-bold text-agro-muted uppercase tracking-wider block mb-1">Arquivos de Domínio:</span>
+                <div class="flex flex-wrap gap-1 font-mono text-[10px]">
+                  ${(a.domain_files || []).map(f => `
+                    <span class="px-1.5 py-0.5 rounded bg-agro-card border border-agro-border text-emerald-400/90">${f}</span>
+                  `).join('')}
+                </div>
+              </div>
+
+              <div>
+                <span class="text-[10px] font-bold text-agro-muted uppercase tracking-wider block mb-1">Ferramentas Habilitadas:</span>
+                <div class="flex flex-wrap gap-1 text-[10px]">
+                  ${(a.tools || []).map(t => `
+                    <span class="px-1.5 py-0.5 rounded bg-[#00897B]/10 text-emerald-300 border border-[#00897B]/20">${t}</span>
+                  `).join('')}
+                </div>
+              </div>
+            </div>
+
+            <!-- TASK STATUS IN FOOTER -->
+            <div class="pt-3 border-t border-agro-border/70 flex items-center justify-between text-xs">
+              <span class="text-agro-muted">Tarefas Ativas:</span>
+              <span class="font-mono font-bold ${activeTasks.length > 0 ? 'text-amber-400' : 'text-[#00E676]'}">
+                ${activeTasks.length} em andamento (${tasks.length} total)
+              </span>
+            </div>
+
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function loadGitStatus() {
+      const container = document.getElementById('git-status-content');
+      try {
+        const res = await fetch('/api/git-status').then(r => r.json());
+        if (res && res.status) {
+          container.innerHTML = `
+            <div class="text-agro-muted font-bold mb-2">Branch Atual: <span class="text-[#00E676]">${res.branch || 'main'}</span></div>
+            <pre class="whitespace-pre-wrap">${res.status || 'Nenhuma modificação pendente.'}</pre>
+          `;
+        } else {
+          container.innerText = "Repositório git sincronizado e limpo.";
+        }
+      } catch (e) {
+        container.innerText = "Status Git disponível ao executar via serve_changes.py.";
+      }
+    }
+
+    async function updateChangeStatus(changeId, newStatus) {
+      try {
+        await fetch(`/api/changes/${changeId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus })
+        });
+        const change = globalChanges.find(c => c.id === changeId);
+        if (change) {
+          change.status = newStatus;
+          if (newStatus === 'Concluído') change.progress_pct = 100;
+          else if (newStatus === 'Em Progresso' && change.progress_pct === 0) change.progress_pct = 30;
+        }
+        renderMetrics();
+        renderChanges();
+      } catch (err) {
+        console.error("Erro ao atualizar status:", err);
+      }
+    }
+
+    async function handleCreateChange(event) {
+      event.preventDefault();
+      const filesStr = document.getElementById('modal-files').value;
+      const filesArr = filesStr ? filesStr.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+      const newChange = {
+        id: 'CHG-' + String(globalChanges.length + 1).padStart(3, '0'),
+        title: document.getElementById('modal-title').value,
+        lead_agent_id: document.getElementById('modal-agent').value,
+        priority: document.getElementById('modal-priority').value,
+        category: document.getElementById('modal-category').value || 'Geral',
+        version_target: document.getElementById('modal-version').value || 'v1.2.0',
+        description: document.getElementById('modal-desc').value,
+        affected_files: filesArr,
+        status: 'Planejado',
+        progress_pct: 0,
+        acceptance_criteria: ['Especificação técnica validada pelo Agente Líder']
+      };
+
+      try {
+        await fetch('/api/changes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newChange)
+        });
+      } catch (e) {
+        console.warn("Salvando localmente na memória:", e);
+      }
+
+      globalChanges.unshift(newChange);
+      closeNewChangeModal();
+      renderMetrics();
+      renderChanges();
+    }
+
+    function switchTab(tabId) {
+      ['tab-changes', 'tab-agents', 'tab-git'].forEach(id => {
+        document.getElementById(id).classList.add('hidden');
+      });
+      document.getElementById(tabId).classList.remove('hidden');
+
+      const tabs = {
+        'tab-changes': 'btn-tab-changes',
+        'tab-agents': 'btn-tab-agents',
+        'tab-git': 'btn-tab-git'
+      };
+
+      Object.entries(tabs).forEach(([tId, bId]) => {
+        const btn = document.getElementById(bId);
+        if (tId === tabId) {
+          btn.className = 'pb-3 border-b-2 border-[#00E676] text-[#00E676] flex items-center gap-2 font-semibold text-sm';
+        } else {
+          btn.className = 'pb-3 border-b-2 border-transparent text-agro-muted hover:text-agro-text flex items-center gap-2 font-semibold text-sm';
+        }
+      });
+    }
+
+    function filterStatus(status) {
+      currentStatusFilter = status;
+      document.querySelectorAll('.filter-status-btn').forEach(btn => {
+        if (btn.getAttribute('data-status') === status) {
+          btn.className = 'filter-status-btn px-3 py-1.5 rounded-xl font-bold transition-all bg-[#00897B] text-white';
+        } else {
+          btn.className = 'filter-status-btn px-3 py-1.5 rounded-xl font-medium transition-all bg-agro-card text-agro-muted hover:text-agro-text';
+        }
+      });
+      renderChanges();
+    }
+
+    function applyFilters() {
+      renderChanges();
+    }
+
+    function openNewChangeModal() {
+      document.getElementById('new-change-modal').classList.remove('hidden');
+    }
+
+    function closeNewChangeModal() {
+      document.getElementById('new-change-modal').classList.add('hidden');
+    }
+
+    function refreshData() {
+      const icon = document.getElementById('refresh-icon');
+      icon.classList.add('animate-spin');
+      loadData().then(() => {
+        setTimeout(() => icon.classList.remove('animate-spin'), 600);
+      });
+    }
+
+    function getStaticFallbackChanges() {
+      return [
+        {
+                "id": "CHG-008",
+                "title": "Central de Mudanças & Painel da Equipe de Agentes",
+                "category": "Frontend & Orquestração",
+                "version_target": "v1.1.0",
+                "status": "Concluído",
+                "priority": "Alta",
+                "progress_pct": 100,
+                "lead_agent_id": "agrofi-frontend",
+                "support_agents": [
+                        "agrofi-techlead",
+                        "agrofi-devops"
+                ],
+                "description": "Criação de tela interativa (changes.html) para monitoramento em tempo real de futuras alterações, status de tarefas dos agentes, histórico Git e links do ecossistema.",
+                "affected_files": [
+                        "changes.html",
+                        "serve_changes.py",
+                        "agents/squad_manifest.json",
+                        "agents/changes_backlog.json",
+                        "index.html"
+                ],
+                "acceptance_criteria": [
+                        "Tela carregando em changes.html com interface responsiva Tailwind",
+                        "Visualização de todos os 7 agentes com especialidades e status",
+                        "Quadro Kanban de mudanças futuras com filtros por status, agente e prioridade",
+                        "Endpoints REST /api/changes, /api/agents e /api/git-status ativos"
+                ]
+        },
+        {
+                "id": "CHG-002",
+                "title": "Ingestão de Radar Sentinel-1 (SAR) para Detecção sob Nuvens",
+                "category": "Sensoriamento Remoto & GIS",
+                "version_target": "v1.2.0",
+                "status": "Em Progresso",
+                "priority": "Alta",
+                "progress_pct": 65,
+                "lead_agent_id": "agrofi-geospatial",
+                "support_agents": [
+                        "agrofi-agronomist",
+                        "agrofi-mlops"
+                ],
+                "description": "Incorporação de dados SAR banda C (retroespalhamento VV/VH) do satélite Sentinel-1 para manter o monitoramento de biomassa em dias com cobertura densa de nuvens no Cerrado e Matopiba.",
+                "affected_files": [
+                        "src/etl/sentinel_sar.py",
+                        "src/etl/sentinel_ndvi.py",
+                        "src/core/schemas.py"
+                ],
+                "acceptance_criteria": [
+                        "Download de granulados GRD Sentinel-1 via STAC API",
+                        "Calibração radiométrica sigma0 e correção de terreno com SRTM",
+                        "Índice de Vegetação por Radar (RVI) integrado ao vetor de features"
+                ]
+        },
+        {
+                "id": "CHG-003",
+                "title": "Calibração de Incerteza Conformal (Conformal Prediction) no Stacking",
+                "category": "Machine Learning & Risco",
+                "version_target": "v1.2.0",
+                "status": "Em Progresso",
+                "priority": "Média",
+                "progress_pct": 40,
+                "lead_agent_id": "agrofi-mlops",
+                "support_agents": [
+                        "agrofi-techlead"
+                ],
+                "description": "Substituição de intervalos empíricos de quantis por Conformal Prediction com garantia estatística de cobertura de 90% para valoração de terras em regiões com escassez de negócios imobiliários.",
+                "affected_files": [
+                        "src/models/valuation_regressor.py",
+                        "src/models/conformal_risk.py"
+                ],
+                "acceptance_criteria": [
+                        "Garantia de cobertura >= 90% em split temporal de teste",
+                        "Largura média do intervalo reduzida em pelo menos 12%",
+                        "Compatibilidade retroativa com a saída Q10/Q50/Q90"
+                ]
+        },
+        {
+                "id": "CHG-006",
+                "title": "Testes Automatizados de Liquidação On-Chain em Nó Anvil no CI/CD",
+                "category": "DevOps & QA",
+                "version_target": "v1.1.0",
+                "status": "Em Revisão",
+                "priority": "Alta",
+                "progress_pct": 85,
+                "lead_agent_id": "agrofi-devops",
+                "support_agents": [
+                        "agrofi-web3"
+                ],
+                "description": "Pipeline automatizado no GitHub Actions que sobe nó local Anvil, faz deploy dos contratos e simula liquidação forçada acionada pelo Oracle Keeper ao injetar choque de seca de 60%.",
+                "affected_files": [
+                        ".github/workflows/e2e-liquidation.yml",
+                        "middleware/stress_test.py",
+                        "run_tests.py"
+                ],
+                "acceptance_criteria": [
+                        "Execução autônoma em contêiner Linux no GitHub Actions",
+                        "Liquidação bem sucedida registrada e verificada via RPC Anvil",
+                        "Emissão de log estruturado e recibo AgroFiScan gerado"
+                ]
+        },
+        {
+                "id": "CHG-001",
+                "title": "Expansão de Oráculo para Redes L2 (Arbitrum & Base)",
+                "category": "Web3 & Smart Contracts",
+                "version_target": "v1.3.0",
+                "status": "Planejado",
+                "priority": "Crítica",
+                "progress_pct": 10,
+                "lead_agent_id": "agrofi-web3",
+                "support_agents": [
+                        "agrofi-techlead"
+                ],
+                "description": "Deploy dos vaults colateralizados e oráculos na Arbitrum One e Base Sepolia, reduzindo o custo de transação de atualização de LTV em 95% em relação à mainnet Ethereum.",
+                "affected_files": [
+                        "contracts/AgroFiVault.sol",
+                        "contracts/LendingPool.sol",
+                        "foundry.toml",
+                        "script/DeployL2.s.sol"
+                ],
+                "acceptance_criteria": [
+                        "Gas por atualização de valoração < 65.000 unidades",
+                        "Oráculo compatível com Chainlink Data Feeds L2 Sequencer Uptime",
+                        "Contratos verificados no Arbiscan e Basescan"
+                ]
+        },
+        {
+                "id": "CHG-004",
+                "title": "Integração com ZARC (Zoneamento Agrícola de Risco Climático)",
+                "category": "Agronomia & Risco",
+                "version_target": "v1.3.0",
+                "status": "Planejado",
+                "priority": "Média",
+                "progress_pct": 0,
+                "lead_agent_id": "agrofi-agronomist",
+                "support_agents": [
+                        "agrofi-geospatial",
+                        "agrofi-mlops"
+                ],
+                "description": "Conexão com a base oficial de dados do ZARC da Embrapa / MAPA por município, tipo de solo (AD1, AD2, AD3) e ciclo de cultivar para cálculo estocástico de perda de safra.",
+                "affected_files": [
+                        "src/etl/zarc_ingestor.py",
+                        "src/models/risk_engine.py",
+                        "data/zarc_municipalities.json"
+                ],
+                "acceptance_criteria": [
+                        "Mapeamento automático de janelas de plantio favoráveis por município",
+                        "Penalização automática do LTV para plantios fora da janela ZARC",
+                        "Exibição da classe de solo e risco agronômico no dossiê cadastral"
+                ]
+        },
+        {
+                "id": "CHG-005",
+                "title": "Renderizador 3D de Relevo e Mapas de Calor de NDVI no Streamlit",
+                "category": "Frontend & Cartografia",
+                "version_target": "v1.2.0",
+                "status": "Planejado",
+                "priority": "Média",
+                "progress_pct": 15,
+                "lead_agent_id": "agrofi-frontend",
+                "support_agents": [
+                        "agrofi-geospatial"
+                ],
+                "description": "Incorporação de visualização de terreno 3D (Hillshade + Malha TIN) no componente MapLibre GL JS para análise de curvas de nível e áreas mecanizáveis em tempo real.",
+                "affected_files": [
+                        "src/visualization/maplibre_component.py",
+                        "app.py"
+                ],
+                "acceptance_criteria": [
+                        "Camada 3D Terrain ativável por toggle no dashboard Streamlit",
+                        "Renderização de colinas e talhões com elevação exagerada (1.5x) fluida em WebGL",
+                        "Legenda interativa de declividade percentual"
+                ]
+        },
+        {
+                "id": "CHG-007",
+                "title": "Suporte a Múltiplos Tokens RWA com Padrão ERC-3643 (Identity)",
+                "category": "Web3 & Governança",
+                "version_target": "v2.0.0",
+                "status": "Planejado",
+                "priority": "Baixa",
+                "progress_pct": 0,
+                "lead_agent_id": "agrofi-web3",
+                "support_agents": [
+                        "agrofi-techlead"
+                ],
+                "description": "Migração opcional do AgroLandNFT para o padrão ERC-3643 (T-REX) permitindo conformidade regulatória com CVM e investidores qualificados através de verificação de identidade OnchainID.",
+                "affected_files": [
+                        "contracts/AgroLandTREX.sol",
+                        "contracts/IdentityRegistry.sol"
+                ],
+                "acceptance_criteria": [
+                        "Transferência condicionada a verificação de KYC/AML no registro",
+                        "Emissão de títulos de dívida agrícola tokenizados (CRA e CPR-Fácil)",
+                        "Auditoria formal de segurança do protocolo"
+                ]
+        }
+];
+    }
+
+    function getStaticFallbackAgents() {
+      return [
+        {
+                "id": "agrofi-techlead",
+                "name": "Dr. Arquiteto Tech Lead",
+                "title": "Tech Lead & Arquiteto de Software",
+                "icon": "🏛️",
+                "color": "from-teal-600 to-emerald-700",
+                "badge_color": "bg-teal-500/10 text-teal-400 border-teal-500/30",
+                "status": "Ativo & Monitorando",
+                "stream": "Governança & Arquitetura",
+                "system_subagent": "agrofi-techlead",
+                "key_focus": "Arquitetura global, latência de oráculos (<200ms), contrato Web3CollateralPayload e segurança.",
+                "domain_files": [
+                        "src/core/schemas.py",
+                        "src/api/service.py",
+                        "src/api/oracle_keeper.py",
+                        "TEAM.md"
+                ],
+                "tools": [
+                        "read_file",
+                        "edit_file",
+                        "write_file",
+                        "run_command",
+                        "mcp_tools",
+                        "invoke_subagent"
+                ],
+                "responsibilities": [
+                        "Governança de padrões de código e Clean Architecture",
+                        "Garantia de conformidade entre Ingestão, ML e Smart Contracts",
+                        "Supervisão de segurança de dados e oráculos off-chain"
+                ]
+        },
+        {
+                "id": "agrofi-mlops",
+                "name": "Eng. ML & MLOps",
+                "title": "Engenheiro de Machine Learning & MLOps",
+                "icon": "🤖",
+                "color": "from-purple-600 to-indigo-700",
+                "badge_color": "bg-purple-500/10 text-purple-400 border-purple-500/30",
+                "status": "Pronto para Tarefas",
+                "stream": "Data Science & AI",
+                "system_subagent": "agrofi-mlops",
+                "key_focus": "Modelos de valoração (LightGBM/XGBoost/Stacking), Regressão Quantílica Q10/Q50/Q90 e Monte Carlo (5.000 runs).",
+                "domain_files": [
+                        "src/models/valuation_regressor.py",
+                        "src/models/risk_engine.py",
+                        "models_store/"
+                ],
+                "tools": [
+                        "read_file",
+                        "edit_file",
+                        "write_file",
+                        "run_command"
+                ],
+                "responsibilities": [
+                        "Treinamento, calibração e métricas R² >= 0.98",
+                        "Geração de quantis estocásticos (Q10 piso de liquidação rápida)",
+                        "Simulação de Monte Carlo, VaR 95% e CVaR 95% sob choque climático",
+                        "Monitoramento de data drift e concept drift territorial"
+                ]
+        },
+        {
+                "id": "agrofi-geospatial",
+                "name": "Eng. Geoprocessamento GIS",
+                "title": "Engenheiro de Geoprocessamento & Sensoriamento Remoto",
+                "icon": "🛰️",
+                "color": "from-blue-600 to-cyan-700",
+                "badge_color": "bg-blue-500/10 text-blue-400 border-blue-500/30",
+                "status": "Pronto para Tarefas",
+                "stream": "Stream Geoespacial",
+                "system_subagent": "agrofi-geospatial",
+                "key_focus": "Polígonos SICAR, séries temporais Sentinel-2 (NDVI/NDWI), rasters SRTM DEM e GeoPandas.",
+                "domain_files": [
+                        "src/etl/sicar_ingestor.py",
+                        "src/etl/srtm_processor.py",
+                        "src/etl/sentinel_ndvi.py",
+                        "src/etl/vtn_ingestor.py"
+                ],
+                "tools": [
+                        "read_file",
+                        "edit_file",
+                        "write_file",
+                        "run_command"
+                ],
+                "responsibilities": [
+                        "Higienização geométrica e cálculo de áreas úteis consolidadas (CAR)",
+                        "Extração de métricas de declividade média e mecanização agrícola",
+                        "Processamento temporal de índices espectrais (NDVI quinzenal)",
+                        "Detecção de estresse vegetativo em janelas críticas de safra"
+                ]
+        },
+        {
+                "id": "agrofi-agronomist",
+                "name": "Dr. Engenheiro Agrônomo",
+                "title": "Engenheiro Agrônomo & Risco Agroclimático",
+                "icon": "🌾",
+                "color": "from-amber-600 to-yellow-600",
+                "badge_color": "bg-amber-500/10 text-amber-400 border-amber-500/30",
+                "status": "Pronto para Tarefas",
+                "stream": "Inteligência Agronômica",
+                "system_subagent": "agrofi-agronomist",
+                "key_focus": "Fenologia de safras, balanço hídrico, ZARC Embrapa, quebra de produtividade e Código Florestal.",
+                "domain_files": [
+                        "src/etl/sentinel_ndvi.py",
+                        "src/models/risk_engine.py",
+                        "data/farms_sicar.geojson"
+                ],
+                "tools": [
+                        "read_file",
+                        "edit_file",
+                        "write_file",
+                        "run_command"
+                ],
+                "responsibilities": [
+                        "Validação de estágios fenológicos (floração/enchimento de grãos)",
+                        "Parametrização agronômica da curva de sensibilidade a estresse hídrico",
+                        "Auditoria de conformidade ambiental (Reserva Legal e APP)",
+                        "Calibração de risco regional de produtividade em sacas/ha"
+                ]
+        },
+        {
+                "id": "agrofi-web3",
+                "name": "Eng. Web3 & Smart Contracts",
+                "title": "Engenheiro Web3 & Smart Contracts",
+                "icon": "⚡",
+                "color": "from-emerald-600 to-teal-800",
+                "badge_color": "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
+                "status": "Pronto para Tarefas",
+                "stream": "Blockchain & DeFi",
+                "system_subagent": "agrofi-web3",
+                "key_focus": "Solidity 0.8.20, AgroFiVault, AgroLandNFT, LendingPool, Sepolia, Anvil e liquidação paramétrica.",
+                "domain_files": [
+                        "contracts/AgroFiVault.sol",
+                        "contracts/AgroLandNFT.sol",
+                        "contracts/LendingPool.sol",
+                        "contracts/MockUSDC.sol",
+                        "middleware/",
+                        "integrar_oraculo.py"
+                ],
+                "tools": [
+                        "read_file",
+                        "edit_file",
+                        "write_file",
+                        "run_command"
+                ],
+                "responsibilities": [
+                        "Desenvolvimento e auditoria de contratos inteligentes (ERC-721 e ERC-20)",
+                        "Garantia dos limites matemáticos de LTV (3.500 a 6.500 bps)",
+                        "Execução de liquidação paramétrica automatizada quando Health Factor < 1.0",
+                        "Deploy e testes de integração em Anvil e Sepolia Testnet"
+                ]
+        },
+        {
+                "id": "agrofi-frontend",
+                "name": "Eng. Frontend & Cartografia",
+                "title": "Engenheiro Frontend & Cartografia Interativa",
+                "icon": "🗺️",
+                "color": "from-cyan-600 to-blue-700",
+                "badge_color": "bg-cyan-500/10 text-cyan-400 border-cyan-500/30",
+                "status": "Ativo & Desenvolvendo",
+                "stream": "Visualização & UX",
+                "system_subagent": "agrofi-frontend",
+                "key_focus": "Streamlit (app.py), MapLibre GL JS, TailwindCSS, portais Web3 e visualizador de mudanças.",
+                "domain_files": [
+                        "app.py",
+                        "index.html",
+                        "dashboard.html",
+                        "explorer.html",
+                        "wallet.html",
+                        "changes.html",
+                        "src/visualization/maplibre_component.py"
+                ],
+                "tools": [
+                        "read_file",
+                        "edit_file",
+                        "write_file",
+                        "run_command"
+                ],
+                "responsibilities": [
+                        "Renderização geoespacial com MapLibre GL JS e Mapbox Tiles",
+                        "Interface Streamlit com sliders de choque hídrico em tempo real",
+                        "Páginas Web3 com conexão de carteiras (Rabby/MetaMask) e assinatura EIP-191",
+                        "Telas dedicadas para visualização de mudanças e telemetria"
+                ]
+        },
+        {
+                "id": "agrofi-devops",
+                "name": "Eng. DevOps, SRE & QA",
+                "title": "Engenheiro DevOps, SRE & QA",
+                "icon": "🛡️",
+                "color": "from-rose-600 to-red-700",
+                "badge_color": "bg-rose-500/10 text-rose-400 border-rose-500/30",
+                "status": "Pronto para Tarefas",
+                "stream": "Confiabilidade & Infra",
+                "system_subagent": "agrofi-devops",
+                "key_focus": "Bateria de testes pytest (11/11 aprovados), estabilidade FastAPI, CI/CD e saúde de nós RPC.",
+                "domain_files": [
+                        "run_tests.py",
+                        "step_by_step_test.py",
+                        "pytest.ini",
+                        "tests/",
+                        "test/"
+                ],
+                "tools": [
+                        "read_file",
+                        "edit_file",
+                        "write_file",
+                        "run_command"
+                ],
+                "responsibilities": [
+                        "Execução de baterias de testes unitários e de integração",
+                        "Monitoramento contínuo dos nós locais Anvil e RPC Sepolia",
+                        "Garantia de 99.95% de uptime nos endpoints do oráculo",
+                        "Automação de scripts de inicialização e gestão de dependências"
+                ]
+        }
+];
+    }
+
+    // Inicialização
+    window.addEventListener('DOMContentLoaded', loadData);
+  </script>
+
+</body>
+</html>

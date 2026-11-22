@@ -101,9 +101,9 @@
           <span>🌾</span>
           <span>Invista</span>
         </a>
-        <a href="http://localhost:8085" target="_blank" class="hidden sm:flex px-3.5 py-2 rounded-xl bg-[#00897B]/10 hover:bg-[#00897B]/20 text-[#00897B] border border-[#00897B]/30 font-bold text-xs transition-all items-center gap-1.5 shadow-xs" title="Visualizar Futuras Mudanças & Equipe de Agentes">
+        <a href="changes.html" class="hidden sm:flex px-3.5 py-2 rounded-xl bg-[#00897B]/10 hover:bg-[#00897B]/20 text-[#00897B] border border-[#00897B]/30 font-bold text-xs transition-all items-center gap-1.5 shadow-xs" title="Visualizar Futuras Mudanças & Equipe de Agentes">
           <span>🚀</span>
-          <span>Mudanças (:8085)</span>
+          <span>Mudanças</span>
         </a>
       </div>
 
@@ -153,8 +153,8 @@
           <button onclick="connectMetaMask()" class="px-4 py-3 rounded-xl bg-[#F7F9F6] hover:bg-[#E2E8E2] border border-[#E2E8E2] text-[#1A2E20] font-semibold text-xs sm:text-sm transition-all flex items-center gap-2">
             <span>🦊</span> Conectar MetaMask
           </button>
-          <a href="http://localhost:8085" target="_blank" class="px-4 py-3 rounded-xl bg-gradient-to-r from-[#00897B] to-[#00E676] text-white font-bold text-xs sm:text-sm transition-all shadow-md shadow-[#00897B]/25 flex items-center gap-2">
-            <span>🚀</span> Central de Mudanças & Squad (:8085)
+          <a href="changes.html" class="px-4 py-3 rounded-xl bg-gradient-to-r from-[#00897B] to-[#00E676] text-white font-bold text-xs sm:text-sm transition-all shadow-md shadow-[#00897B]/25 flex items-center gap-2">
+            <span>🚀</span> Central de Mudanças & Squad
           </a>
         </div>
       </div>
@@ -228,7 +228,7 @@
           </h2>
           <p class="text-xs text-[#556B5C]">
             Selecione uma fazenda abaixo para conectar sua carteira Web3 e abrir o Dashboard de Inteligência Geoespacial em 
-            <code class="text-[#00897B] font-mono font-bold">localhost:8501</code>.
+            <code class="text-[#00897B] font-mono font-bold">mapa.html</code>.
           </p>
         </div>
         <span class="text-xs px-3 py-1 rounded-full bg-white border border-[#E2E8E2] text-[#556B5C] font-semibold shadow-xs">
@@ -488,16 +488,16 @@
         <div class="p-5 rounded-2xl bg-[#F7F9F6] border border-[#E2E8E2] space-y-2">
           <div class="flex items-center gap-2">
             <span class="w-6 h-6 rounded-full bg-[#00897B] text-white font-bold flex items-center justify-center text-xs">4</span>
-            <h3 class="font-bold text-sm text-[#1A2E20]">Como Funciona o Redirecionamento (8080 ➔ 8501)</h3>
+            <h3 class="font-bold text-sm text-[#1A2E20]">Como Funciona o Acesso ao Painel Geoespacial</h3>
           </div>
           <p class="text-[#556B5C] leading-relaxed">
             Ao conectar a carteira pelo botão principal ou pelo card da fazenda, a aplicação faz o repasse transparente dos parâmetros via URL:
           </p>
           <div class="bg-white p-2.5 rounded-xl border border-[#E2E8E2] font-mono text-[11px] text-[#00897B] font-bold shadow-xs">
-            http://localhost:8501/?land_id=TALHAO-MT-001&wallet=0x7099...
+            mapa.html?land_id=TALHAO-MT-001&wallet=0x7099...
           </div>
           <p class="text-[#556B5C] text-[11px] pt-1">
-            O Streamlit lê os parâmetros nativamente, seleciona automaticamente a fazenda correta no mapa MapLibre GL JS, 
+            O painel interativo lê os parâmetros nativamente, seleciona automaticamente a fazenda correta no mapa MapLibre GL JS, 
             exibe o selo de carteira conectada e atualiza os limites de crédito.
           </p>
         </div>
@@ -514,7 +514,7 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
         <!-- CARD 1 -->
-        <a href="http://localhost:8501" target="_blank" class="agro-card agro-card-hover rounded-2xl p-5 block space-y-2 group">
+        <a href="mapa.html" class="agro-card agro-card-hover rounded-2xl p-5 block space-y-2 group">
           <div class="w-10 h-10 rounded-xl bg-[#E0F2F1] text-[#00897B] flex items-center justify-center text-xl font-bold border border-[#B2DFDB]">
             🗺️
           </div>
@@ -524,7 +524,7 @@
           <p class="text-xs text-[#556B5C]">
             Cartografia vetorial MapLibre GL JS, fenologia NDVI Sentinel-2, modelos ML de valoração e Monte Carlo.
           </p>
-          <span class="text-[11px] font-mono text-[#00897B] font-bold block pt-1">localhost:8501 ↗</span>
+          <span class="text-[11px] font-mono text-[#00897B] font-bold block pt-1">mapa.html ↗</span>
         </a>
 
         <!-- CARD 2 -->
@@ -1284,23 +1284,20 @@
     }
 
     function launchStreamlitDashboard() {
-      if (!currentSession) return;
-      // Se estiver em ambiente local, abre o Streamlit (:8501)
-      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        let targetUrl = `http://localhost:8501/?wallet=${encodeURIComponent(currentSession.wallet)}`;
-        if (currentSession.signature) {
-          targetUrl += `&sig=${encodeURIComponent(currentSession.signature.slice(0, 24))}`;
-        }
-        if (currentSession.isAdmin) {
-          targetUrl += `&role=admin`;
-        } else {
-          targetUrl += `&land_id=${encodeURIComponent(currentSession.landId)}`;
-        }
-        window.location.href = targetUrl;
-      } else {
-        // Em produção / Vercel, abre o Dashboard integrado
-        redirectToDashboard(currentSession.landId);
+      if (!currentSession) {
+        window.location.href = "mapa.html";
+        return;
       }
+      let targetUrl = `mapa.html?wallet=${encodeURIComponent(currentSession.wallet)}`;
+      if (currentSession.signature) {
+        targetUrl += `&sig=${encodeURIComponent(currentSession.signature.slice(0, 24))}`;
+      }
+      if (currentSession.isAdmin) {
+        targetUrl += `&role=admin`;
+      } else {
+        targetUrl += `&land_id=${encodeURIComponent(currentSession.landId || '')}`;
+      }
+      window.location.href = targetUrl;
     }
 
     // Atualiza barra de navegação com dados da sessão e botão de deslogar

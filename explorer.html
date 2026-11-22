@@ -83,7 +83,7 @@
         <span class="text-xs text-slate-400">Rede Blockchain</span>
         <div class="text-base font-bold font-mono text-white mt-1 flex items-center gap-2">
           <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-          Anvil (ID: 31337)
+          Sepolia (11155111)
         </div>
       </div>
       <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800 shadow">
@@ -99,9 +99,9 @@
         </div>
       </div>
       <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800 shadow">
-        <span class="text-xs text-slate-400">Nó Local RPC</span>
+        <span class="text-xs text-slate-400">Sepolia RPC</span>
         <div class="text-base font-bold font-mono text-cyan-400 mt-1 truncate">
-          127.0.0.1:8545
+          publicnode.com
         </div>
       </div>
     </div>
@@ -228,18 +228,21 @@
   </footer>
 
   <script>
-    const RPC_URL = "http://127.0.0.1:8545";
+    const RPC_URL = "https://ethereum-sepolia-rpc.publicnode.com";
     const KNOWN_CONTRACTS = {
-      "0x5fbdb2315678afecb367f032d93f642f64180aa3": "MockUSDC (ERC-20)",
-      "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512": "AgroNFT (ERC-721)",
-      "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0": "LendingPool (DeFi)"
+      "0x178b9bfa3e86a9ed3f67963e28afbe49bcf45ed2": "MockUSDC (ERC-20)",
+      "0xb89cd470755ad1e25052b57d97af6fc98b00dfb2": "AgroNFT (ERC-721)",
+      "0x020c06c4d1410b2131e9815c5d25f7ee90d37a26": "LendingPool (DeFi)",
+      "0xbba1b54b0b6962f586a9971965811b79b1cdaeb8": "AgroToken ($AGRO)",
+      "0x154b3f7b2d99e83912267594b8b4adf76ff58e26": "AgroStakingRewards"
     };
 
     const KNOWN_ACCOUNTS = {
-      "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266": "Admin / Oracle",
-      "0x70997970c51812dc3a010c7d01b50e0d17dc79c8": "Produtor Rural",
-      "0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc": "Credor (Lender)",
-      "0x90f79bf6eb2c4f870365e785982e1f101e93b906": "Liquidador"
+      "0xa449e7838ff89ee956174b682449870597e93c71": "Admin Master / Deployer",
+      "0xfdb2a29d047a8f10e0bc354b2e45c7af386d112e": "🌾 Fazenda Santa Helena (MT)",
+      "0xc7c8931f662d9064ff495508aea2afa15e446d80": "🌽 Fazenda Boa Esperança (GO)",
+      "0xff3b53ca866bcfec18f1dd3cdff0a03776ab49b5": "🌿 Agropecuária Chapadão (MT)",
+      "0x35474822f1a45c0d2c0ddeb4d8ff53fd8bd29ef7": "🌱 Fazenda Ouro Verde (BA)"
     };
 
     async function rpcCall(method, params = []) {

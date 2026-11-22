@@ -634,6 +634,67 @@
     </div>
   </div>
 
+  <!-- MODAL: VINCULAR NOVA CARTEIRA A UMA FAZENDA -->
+  <div id="link-wallet-modal" class="fixed inset-0 bg-[#1A2E20]/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white border border-[#E2E8E2] rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
+      <div class="flex items-center justify-between border-b border-[#E2E8E2] pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-2xl bg-[#E0F2F1] text-[#00897B] flex items-center justify-center font-bold text-xl border border-[#B2DFDB]">
+            🌾
+          </div>
+          <div>
+            <h3 class="font-extrabold text-base text-[#1A2E20]">Vincular Carteira à Fazenda</h3>
+            <p class="text-xs text-[#556B5C]">Selecione a propriedade rural para operar</p>
+          </div>
+        </div>
+        <button onclick="closeLinkWalletModal()" class="text-[#556B5C] hover:text-[#1A2E20] text-lg px-2 font-bold">✕</button>
+      </div>
+
+      <div class="p-3.5 rounded-2xl bg-[#F7F9F6] border border-[#E2E8E2] text-xs space-y-1">
+        <span class="text-[#556B5C] font-semibold block">Sua Carteira Conectada:</span>
+        <span id="link-modal-wallet" class="font-mono font-bold text-[#00897B] break-all block">0x...</span>
+      </div>
+
+      <div class="space-y-2">
+        <label class="text-xs font-bold text-[#1A2E20] block">Escolha a Fazenda para gerenciar crédito & colateral:</label>
+        <div class="grid grid-cols-1 gap-2">
+          <button onclick="confirmWalletLink('TALHAO-MT-001', 'Fazenda Santa Helena')" class="p-3 rounded-xl border border-[#E2E8E2] hover:border-[#00897B] hover:bg-[#E0F2F1]/30 text-left transition-all flex items-center justify-between group">
+            <div>
+              <div class="font-bold text-xs text-[#1A2E20] group-hover:text-[#00897B]">🌾 Fazenda Santa Helena (TALHAO-MT-001)</div>
+              <div class="text-[11px] text-[#556B5C]">Sorriso - MT • Soja & Milho • Limite $250k</div>
+            </div>
+            <span class="text-xs text-[#00897B] font-bold">Vincular ➔</span>
+          </button>
+          <button onclick="confirmWalletLink('TALHAO-GO-002', 'Fazenda Boa Esperança')" class="p-3 rounded-xl border border-[#E2E8E2] hover:border-[#00897B] hover:bg-[#E0F2F1]/30 text-left transition-all flex items-center justify-between group">
+            <div>
+              <div class="font-bold text-xs text-[#1A2E20] group-hover:text-[#00897B]">🌽 Fazenda Boa Esperança (TALHAO-GO-002)</div>
+              <div class="text-[11px] text-[#556B5C]">Rio Verde - GO • Grãos & Sorgo • Limite $180k</div>
+            </div>
+            <span class="text-xs text-[#00897B] font-bold">Vincular ➔</span>
+          </button>
+          <button onclick="confirmWalletLink('TALHAO-MT-003', 'Agropecuária Chapadão')" class="p-3 rounded-xl border border-[#E2E8E2] hover:border-[#00897B] hover:bg-[#E0F2F1]/30 text-left transition-all flex items-center justify-between group">
+            <div>
+              <div class="font-bold text-xs text-[#1A2E20] group-hover:text-[#00897B]">🌿 Agropecuária Chapadão (TALHAO-MT-003)</div>
+              <div class="text-[11px] text-[#556B5C]">Sapezal - MT • Algodão & Soja • Limite $320k</div>
+            </div>
+            <span class="text-xs text-[#00897B] font-bold">Vincular ➔</span>
+          </button>
+          <button onclick="confirmWalletLink('TALHAO-BA-004', 'Fazenda Ouro Verde')" class="p-3 rounded-xl border border-[#E2E8E2] hover:border-[#00897B] hover:bg-[#E0F2F1]/30 text-left transition-all flex items-center justify-between group">
+            <div>
+              <div class="font-bold text-xs text-[#1A2E20] group-hover:text-[#00897B]">🌱 Fazenda Ouro Verde (TALHAO-BA-004)</div>
+              <div class="text-[11px] text-[#556B5C]">LEM - BA • Soja Irrigada • Limite $210k</div>
+            </div>
+            <span class="text-xs text-[#00897B] font-bold">Vincular ➔</span>
+          </button>
+        </div>
+      </div>
+      
+      <button onclick="closeLinkWalletModal()" class="w-full py-2 text-center text-xs text-[#556B5C] hover:text-[#1A2E20] transition-colors font-medium">
+        Cancelar
+      </button>
+    </div>
+  </div>
+
   <!-- MODAL: ASSINATURA CRIPTOGRÁFICA (EIP-191) -->
   <div id="sign-modal" class="fixed inset-0 bg-[#1A2E20]/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white border border-[#E2E8E2] rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
@@ -965,7 +1026,7 @@
       }
     }
 
-    // Verificador de Autorização Estrita de Carteiras (Gatekeeper de Whitelist)
+    // Verificador de Autorização de Carteiras (Whitelist Homologada + Vinculações Dinâmicas)
     function isWalletAuthorized(address) {
       if (!address || typeof address !== "string") {
         return { authorized: false, role: null, farm: null, reason: "Endereço inválido" };
@@ -977,18 +1038,62 @@
         return { authorized: true, role: "admin", farm: null, name: "Administrador Master" };
       }
 
-      // 2. Fazendas Cadastradas
+      // 2. Fazendas Cadastradas Padrão
       const farm = FARMS.find(f => f.wallet.toLowerCase() === addrLower);
       if (farm) {
         return { authorized: true, role: "farmer", farm: farm, name: farm.farmName };
       }
 
+      // 3. Carteiras Vinculadas Dinamicamente pelo Usuário
+      try {
+        const customBindings = JSON.parse(localStorage.getItem("agrofi_wallet_bindings") || "{}");
+        const linkedLandId = customBindings[addrLower];
+        if (linkedLandId) {
+          const linkedFarm = FARMS.find(f => f.landId === linkedLandId);
+          if (linkedFarm) {
+            return { authorized: true, role: "farmer", farm: linkedFarm, name: `${linkedFarm.farmName} (Sua Carteira)`, isLinked: true };
+          }
+        }
+      } catch(e) {}
+
       return {
         authorized: false,
         role: null,
         farm: null,
-        reason: "Esta carteira não possui vínculo com nenhuma propriedade rural cadastrada nem com a administração do protocolo."
+        reason: "Esta carteira ainda não está vinculada a nenhuma propriedade rural cadastrada."
       };
+    }
+
+    let pendingLinkWallet = null;
+
+    function openLinkFarmModal(userWallet, signature) {
+      pendingLinkWallet = { wallet: userWallet, signature: signature };
+      const el = document.getElementById("link-modal-wallet");
+      if (el) el.innerText = userWallet;
+      const modal = document.getElementById("link-wallet-modal");
+      if (modal) modal.classList.remove("hidden");
+    }
+
+    function closeLinkWalletModal() {
+      const modal = document.getElementById("link-wallet-modal");
+      if (modal) modal.classList.add("hidden");
+      pendingLinkWallet = null;
+    }
+
+    function confirmWalletLink(landId, farmName) {
+      if (!pendingLinkWallet) return;
+      const userWallet = pendingLinkWallet.wallet;
+      const sig = pendingLinkWallet.signature;
+
+      try {
+        const customBindings = JSON.parse(localStorage.getItem("agrofi_wallet_bindings") || "{}");
+        customBindings[userWallet.toLowerCase()] = landId;
+        localStorage.setItem("agrofi_wallet_bindings", JSON.stringify(customBindings));
+      } catch(e) {}
+
+      closeLinkWalletModal();
+      showToast(`🌾 Carteira vinculada à ${farmName}!`, "success");
+      finalizeLogin(landId, userWallet, farmName, `Produtor (${farmName})`, false, sig);
     }
 
     // Tratamento unificado de endereço conectado com requisição de assinatura real
@@ -1005,26 +1110,20 @@
         showToast(`Solicitando assinatura na extensão ${providerName}...`, "info");
         const sig = await requestSignatureFromProvider(provider, userWallet, authData.message);
 
-        // 3. QUANDO ASSINADA: Verifica se a carteira é cadastrada
+        // 3. QUANDO ASSINADA: Verifica se a carteira já possui vínculo
         const authCheck = isWalletAuthorized(userWallet);
 
         if (!authCheck.authorized) {
-          // RECUSADO SE NÃO FOR CADASTRADO
-          showToast("⛔ Acesso Recusado: Carteira não cadastrada.", "error");
-          alert(
-            `⛔ ACESSO RECUSADO!\n\n` +
-            `A assinatura foi concluída com sucesso pela carteira:\n${userWallet}\n\n` +
-            `Porém, esta carteira NÃO possui cadastro no Protocolo AgroFi.\n\n` +
-            `Apenas as carteiras homologadas das 4 fazendas e o Administrador Master (${ADMIN_MASTER.slice(0, 10)}...${ADMIN_MASTER.slice(-6)}) possuem permissão de acesso.\n\n` +
-            `O acesso ao sistema foi bloqueado.`
-          );
+          // Oferece a vinculação imediata à fazenda escolhida!
+          showToast("🌾 Nova carteira detectada! Vincule a uma fazenda para continuar.", "info");
+          openLinkFarmModal(userWallet, sig);
           return;
         }
 
-        // Se for cadastrada, autoriza e redireciona
+        // Se for cadastrada ou já vinculada, autoriza e redireciona
         const landId = authCheck.role === "admin" ? "ALL" : authCheck.farm.landId;
         const farmName = authCheck.role === "admin" ? "Administrador Master" : authCheck.farm.farmName;
-        const owner = authCheck.role === "admin" ? "Administrador Master do Protocolo" : authCheck.farm.owner;
+        const owner = authCheck.role === "admin" ? "Administrador Master do Protocolo" : (authCheck.farm.owner || `Produtor ${farmName}`);
 
         finalizeLogin(landId, userWallet, farmName, owner, authCheck.role === "admin", sig);
 
@@ -1179,28 +1278,29 @@
       showToast(`✅ Carteira autorizada e autenticada! Redirecionando...`, "success");
 
       setTimeout(() => {
-        let targetUrl = `http://localhost:8501/?wallet=${encodeURIComponent(wallet)}&sig=${encodeURIComponent(signature.slice(0, 24))}`;
-        if (isAdmin) {
-          targetUrl += `&role=admin`;
-        } else {
-          targetUrl += `&land_id=${encodeURIComponent(landId)}`;
-        }
-        window.location.href = targetUrl;
-      }, 850);
+        // Redireciona diretamente para o Dashboard Web3 nativo
+        redirectToDashboard(landId);
+      }, 700);
     }
 
     function launchStreamlitDashboard() {
       if (!currentSession) return;
-      let targetUrl = `http://localhost:8501/?wallet=${encodeURIComponent(currentSession.wallet)}`;
-      if (currentSession.signature) {
-        targetUrl += `&sig=${encodeURIComponent(currentSession.signature.slice(0, 24))}`;
-      }
-      if (currentSession.isAdmin) {
-        targetUrl += `&role=admin`;
+      // Se estiver em ambiente local, abre o Streamlit (:8501)
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        let targetUrl = `http://localhost:8501/?wallet=${encodeURIComponent(currentSession.wallet)}`;
+        if (currentSession.signature) {
+          targetUrl += `&sig=${encodeURIComponent(currentSession.signature.slice(0, 24))}`;
+        }
+        if (currentSession.isAdmin) {
+          targetUrl += `&role=admin`;
+        } else {
+          targetUrl += `&land_id=${encodeURIComponent(currentSession.landId)}`;
+        }
+        window.location.href = targetUrl;
       } else {
-        targetUrl += `&land_id=${encodeURIComponent(currentSession.landId)}`;
+        // Em produção / Vercel, abre o Dashboard integrado
+        redirectToDashboard(currentSession.landId);
       }
-      window.location.href = targetUrl;
     }
 
     // Atualiza barra de navegação com dados da sessão e botão de deslogar
@@ -1285,8 +1385,7 @@
         redirectToDashboard(landId);
         return;
       }
-      showToast(`Conecte sua carteira via Rabby ou MetaMask para acessar os dados da ${farmName}.`, "info");
-      openWalletModal();
+      promptSignature(landId, wallet, farmName, ownerName || ("Produtor " + farmName), false);
     }
 
     function redirectToDashboard(landId) {

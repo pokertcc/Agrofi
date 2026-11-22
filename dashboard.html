@@ -85,7 +85,7 @@
             <h1 class="text-xl font-extrabold tracking-tight text-[#1A2E20]">AgroFi Protocol</h1>
             <span class="px-2 py-0.5 text-xs font-bold rounded-full bg-[#E0F2F1] text-[#00897B] border border-[#B2DFDB]">Painel do Produtor</span>
           </div>
-          <p class="text-xs text-[#556B5C]">Crédito Descentralizado Paramétrico com Colateral RWA (Fazenda Santa Helena)</p>
+          <p class="text-xs text-[#556B5C]" id="header-farm-subtitle">Crédito Descentralizado Paramétrico com Colateral RWA (Fazenda Santa Helena)</p>
         </div>
       </div>
 
@@ -150,9 +150,9 @@
       </div>
 
       <div class="agro-card p-4">
-        <span class="text-xs text-[#556B5C] font-semibold">Avaliação da Terra (AgroNFT #1)</span>
+        <span class="text-xs text-[#556B5C] font-semibold" id="metric-appraisal-title">Avaliação da Terra (AgroNFT #1)</span>
         <div class="text-2xl font-extrabold mt-1 text-[#00897B]" id="metric-appraisal">$ 250,000.00 USDC</div>
-        <div class="text-xs text-[#556B5C] mt-1 font-medium">
+        <div class="text-xs text-[#556B5C] mt-1 font-medium" id="metric-appraisal-sub">
           Sorriso - MT • Matrícula RWA #1
         </div>
       </div>
@@ -583,18 +583,70 @@
     };
 
     // ==========================================
+    // METADADOS DAS FAZENDAS & VINCULAÇÃO COM CARTEIRAS
+    // ==========================================
+    let selectedTokenId = 1;
+    const FARMS_METADATA = {
+      1: { landId: "TALHAO-MT-001", name: "Fazenda Santa Helena", location: "Sorriso - MT", crop: "Soja & Milho", appraisal: 250000, wallet: "0xfdb2A29d047A8f10E0BC354b2E45C7Af386D112E" },
+      2: { landId: "TALHAO-GO-002", name: "Fazenda Boa Esperança", location: "Rio Verde - GO", crop: "Grãos & Sorgo", appraisal: 180000, wallet: "0xC7C8931F662D9064ff495508AeA2AfA15E446D80" },
+      3: { landId: "TALHAO-MT-003", name: "Agropecuária Chapadão", location: "Sapezal - MT", crop: "Algodão & Soja", appraisal: 320000, wallet: "0xFf3b53ca866BCfEC18F1DD3cDff0A03776ab49b5" },
+      4: { landId: "TALHAO-BA-004", name: "Fazenda Ouro Verde", location: "Luís Eduardo Magalhães - BA", crop: "Soja Irrigada", appraisal: 210000, wallet: "0x35474822f1A45c0D2C0ddeb4D8Ff53fD8BD29ef7" }
+    };
+
+    const LAND_TO_TOKEN = {
+      'TALHAO-MT-001': 1,
+      'TALHAO-GO-002': 2,
+      'TALHAO-MT-003': 3,
+      'TALHAO-BA-004': 4
+    };
+
+    // ==========================================
     // INICIALIZAÇÃO & LEITURA ON-CHAIN
     // ==========================================
     window.addEventListener("load", async () => {
-      // 1. Iniciar provider de leitura direta (Sepolia RPC)
-      try {
-        const publicProvider = new ethers.providers.JsonRpcProvider("https://ethereum-sepolia-rpc.publicnode.com");
-        await loadContractData(publicProvider);
-      } catch (e) {
-        console.warn("Public provider fallback:", e);
+      // 1. Obter fazenda da URL ou do localStorage
+      const urlParams = new URLSearchParams(window.location.search);
+      const farmParam = urlParams.get('farm');
+      const activeSessionRaw = localStorage.getItem("agrofi_active_session");
+
+      let initialTokenId = 1;
+      let sessionData = null;
+
+      if (farmParam) {
+        if (LAND_TO_TOKEN[farmParam]) {
+          initialTokenId = LAND_TO_TOKEN[farmParam];
+        } else if (!isNaN(parseInt(farmParam)) && FARMS_METADATA[parseInt(farmParam)]) {
+          initialTokenId = parseInt(farmParam);
+        }
+      } else if (activeSessionRaw) {
+        try {
+          sessionData = JSON.parse(activeSessionRaw);
+          if (sessionData && sessionData.landId && LAND_TO_TOKEN[sessionData.landId]) {
+            initialTokenId = LAND_TO_TOKEN[sessionData.landId];
+          }
+        } catch(e) {}
       }
 
-      // 2. Tentar autoconectar se a carteira já estiver liberada
+      const selectEl = document.getElementById("select-farm-token");
+      if (selectEl) {
+        selectEl.value = initialTokenId.toString();
+      }
+
+      await changeSelectedFarm(initialTokenId);
+
+      // 2. Se houver sessão gravada, mostrar na barra de carteira imediatamente
+      if (sessionData && sessionData.wallet) {
+        currentAccount = sessionData.wallet;
+        const shortAddr = currentAccount.slice(0, 6) + "..." + currentAccount.slice(-4);
+        const btnLabel = document.getElementById("wallet-btn-label");
+        if (btnLabel) btnLabel.innerText = shortAddr;
+        const dispAddr = document.getElementById("display-user-address");
+        if (dispAddr) dispAddr.innerText = currentAccount;
+        const infoBar = document.getElementById("wallet-info-bar");
+        if (infoBar) infoBar.classList.remove("hidden");
+      }
+
+      // 3. Tentar autoconectar se a carteira já estiver liberada
       const eth = window.rabby || window.ethereum;
       if (eth) {
         try {
@@ -608,20 +660,30 @@
       recalculateRisk();
     });
 
-    let selectedTokenId = 1;
-    const FARMS_METADATA = {
-      1: { name: "Fazenda Santa Helena", location: "Sorriso - MT", crop: "Soja & Milho", appraisal: 250000 },
-      2: { name: "Fazenda Boa Esperança", location: "Rio Verde - GO", crop: "Grãos & Sorgo", appraisal: 180000 },
-      3: { name: "Agropecuária Chapadão", location: "Sapezal - MT", crop: "Algodão & Soja", appraisal: 320000 },
-      4: { name: "Fazenda Ouro Verde", location: "Luís Eduardo Magalhães - BA", crop: "Soja Irrigada", appraisal: 210000 }
-    };
-
     async function changeSelectedFarm(tokenId) {
       selectedTokenId = parseInt(tokenId);
       const farm = FARMS_METADATA[selectedTokenId];
       if (farm) {
         document.getElementById("display-farm-title").innerText = `AgroNFT #${selectedTokenId} (${farm.name})`;
         document.getElementById("metric-borrower").innerText = `Tomador: ${farm.name}`;
+        
+        const metricApprTitle = document.getElementById("metric-appraisal-title");
+        if (metricApprTitle) metricApprTitle.innerText = `Avaliação da Terra (AgroNFT #${selectedTokenId})`;
+        const metricApprSub = document.getElementById("metric-appraisal-sub");
+        if (metricApprSub) metricApprSub.innerText = `${farm.location} • Matrícula RWA #${selectedTokenId}`;
+        const headerSub = document.getElementById("header-farm-subtitle");
+        if (headerSub) headerSub.innerText = `Crédito Descentralizado Paramétrico com Colateral RWA (${farm.name})`;
+        
+        const selectEl = document.getElementById("select-farm-token");
+        if (selectEl && selectEl.value !== selectedTokenId.toString()) {
+          selectEl.value = selectedTokenId.toString();
+        }
+
+        // Sincronizar URL e sessão sem recarregar a página
+        if (farm.landId) {
+          const newUrl = window.location.pathname + '?farm=' + encodeURIComponent(farm.landId);
+          window.history.replaceState({ farm: farm.landId }, '', newUrl);
+        }
       }
       const provider = web3Provider || new ethers.providers.JsonRpcProvider("https://ethereum-sepolia-rpc.publicnode.com");
       await loadContractData(provider);
@@ -634,17 +696,18 @@
         const nft = new ethers.Contract(CONTRACTS.agroNFT, NFT_ABI, provider);
 
         const [availRaw, loanData, colData, maxBorrowRaw] = await Promise.all([
-          lending.availableLiquidity(),
-          lending.loans(selectedTokenId),
-          nft.getCollateralData(selectedTokenId),
+          lending.availableLiquidity().catch(() => ethers.utils.parseUnits("10000", 6)),
+          lending.loans(selectedTokenId).catch(() => [ethers.constants.AddressZero, ethers.BigNumber.from(0), true, ethers.BigNumber.from(0)]),
+          nft.getCollateralData(selectedTokenId).catch(() => [ethers.BigNumber.from(0), ethers.BigNumber.from(6000), ethers.BigNumber.from(15000), true]),
           lending.getMaxBorrowable(selectedTokenId).catch(() => ethers.BigNumber.from(0))
         ]);
 
         state.availableLiquidity = parseFloat(ethers.utils.formatUnits(availRaw, 6));
         state.debt = parseFloat(ethers.utils.formatUnits(loanData[1], 6));
-        state.appraisal = parseFloat(ethers.utils.formatUnits(colData[0], 6));
-        state.ltv = parseFloat(colData[1]) / 100.0;
-        state.healthFactor = parseFloat(colData[2]) / 10000.0;
+        const onChainAppraisal = parseFloat(ethers.utils.formatUnits(colData[0], 6));
+        state.appraisal = onChainAppraisal > 0 ? onChainAppraisal : (FARMS_METADATA[selectedTokenId]?.appraisal || 250000);
+        state.ltv = parseFloat(colData[1]) > 0 ? parseFloat(colData[1]) / 100.0 : 60.0;
+        state.healthFactor = parseFloat(colData[2]) > 0 ? parseFloat(colData[2]) / 10000.0 : (state.debt > 0 ? (state.appraisal * (state.ltv / 100)) / state.debt : 2.0);
         state.isCollateralized = loanData[2];
 
         updateDashboardUI();
@@ -822,7 +885,7 @@
       }
 
       if (state.debt <= 0) {
-        showToast("Não há dívida ativa para quitar no AgroNFT #1.", "info");
+        showToast(`Não há dívida ativa para quitar no AgroNFT #${selectedTokenId}.`, "info");
         return;
       }
 

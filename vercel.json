@@ -5,7 +5,7 @@
     { "source": "/mapa", "destination": "/mapa.html" },
     { "source": "/dashboard", "destination": "/dashboard.html" },
     { "source": "/invista", "destination": "/invista.html" },
-    { "source": "/changes", "destination": "/changes.html" },
+    { "source": "/detalhes-fazenda", "destination": "/detalhes-fazenda.html" },
     { "source": "/explorer", "destination": "/explorer.html" },
     { "source": "/wallet", "destination": "/wallet.html" }
   ]

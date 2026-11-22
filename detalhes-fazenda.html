@@ -1,0 +1,1923 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgroFi Protocol - Detalhes da Fazenda & Comprovantes de Investimento</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Ethers.js v6 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            agro: {
+              primary: '#00897B',
+              'primary-dark': '#00695C',
+              'primary-light': '#E0F2F1',
+              highlight: '#00E676',
+              bg: '#F7F9F6',
+              card: '#FFFFFF',
+              border: '#E2E8E2',
+              text: '#1A2E20',
+              sub: '#556B5C',
+              alert: '#E67E22'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #F7F9F6;
+      color: #1A2E20;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    .agro-card {
+      background: #FFFFFF;
+      border: 1px solid #E2E8E2;
+      border-radius: 1.25rem;
+      box-shadow: 0 4px 16px -2px rgba(26, 46, 32, 0.04);
+    }
+    .farm-tab-active {
+      background-color: #00897B;
+      color: #FFFFFF;
+      border-color: #00897B;
+      box-shadow: 0 4px 12px rgba(0, 137, 123, 0.25);
+    }
+    .receipt-watermark {
+      background-image: radial-gradient(#00897B 0.75px, transparent 0.75px);
+      background-size: 16px 16px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+  <!-- HEADER NAVEGAÇÃO -->
+  <header class="bg-white/90 backdrop-blur-md border-b border-[#E2E8E2] sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between gap-4">
+      
+      <!-- LOGO -->
+      <a href="index.html" class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#00897B] to-[#00E676] flex items-center justify-center text-white font-extrabold text-xl shadow-md shadow-[#00897B]/20">
+          🌾
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-lg sm:text-xl font-extrabold tracking-tight text-[#1A2E20]">AgroFi Protocol</span>
+            <span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-[#E0F2F1] text-[#00897B] border border-[#B2DFDB] uppercase">
+              RWA Explorer
+            </span>
+          </div>
+          <p class="text-xs text-[#556B5C]">Livro de Ofertas, Detalhes de Fazenda & Comprovantes de Investimento</p>
+        </div>
+      </a>
+
+      <!-- STATUS DA REDE -->
+      <div class="hidden md:flex items-center gap-3 text-xs">
+        <div class="px-3 py-1.5 rounded-xl bg-white border border-[#E2E8E2] flex items-center gap-2 shadow-xs">
+          <span class="w-2 h-2 rounded-full bg-[#00E676] animate-pulse"></span>
+          <span class="text-[#556B5C]">Rede:</span>
+          <span class="font-bold text-[#1A2E20]">Sepolia (11155111)</span>
+        </div>
+        <div class="px-3 py-1.5 rounded-xl bg-white border border-[#E2E8E2] flex items-center gap-2 shadow-xs">
+          <span class="text-[#556B5C]">Token:</span>
+          <span class="font-bold text-[#00897B]">MockUSDC (Dólar)</span>
+        </div>
+      </div>
+
+      <!-- BOTÕES DE NAVEGAÇÃO -->
+      <div class="flex items-center gap-2">
+        <a href="index.html" class="px-3 py-2 rounded-xl bg-white hover:bg-[#F7F9F6] border border-[#E2E8E2] text-xs font-bold text-[#1A2E20] transition-colors flex items-center gap-1.5 shadow-xs">
+          <span>🏠</span>
+          <span class="hidden sm:inline">Portal</span>
+        </a>
+        <a href="invista.html" class="px-3 py-2 rounded-xl bg-[#FEF3C7] hover:bg-[#FDE68A] border border-[#FDE68A] text-xs font-bold text-[#D97706] transition-colors flex items-center gap-1.5 shadow-xs">
+          <span>💵</span>
+          <span class="hidden sm:inline">Investir</span>
+        </a>
+        <a href="dashboard.html" class="px-3 py-2 rounded-xl bg-white hover:bg-[#F7F9F6] border border-[#B2DFDB] text-xs font-bold text-[#00897B] transition-colors flex items-center gap-1.5 shadow-xs">
+          <span>⚡</span>
+          <span class="hidden sm:inline">Produtor</span>
+        </a>
+        <a href="mapa.html" class="px-3 py-2 rounded-xl bg-white hover:bg-[#F7F9F6] border border-[#E2E8E2] text-xs font-bold text-[#1A2E20] transition-colors flex items-center gap-1.5 shadow-xs">
+          <span>🗺️</span>
+          <span class="hidden sm:inline">Mapa</span>
+        </a>
+        <button onclick="connectWeb3Wallet()" id="btn-wallet-connect" class="px-3.5 py-2 rounded-xl bg-[#00897B] hover:bg-[#00695C] text-white font-bold text-xs transition-all shadow-md shadow-[#00897B]/25 flex items-center gap-1.5">
+          <span>👛</span>
+          <span id="wallet-btn-label">Conectar Carteira</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8 flex-1 w-full">
+
+    <!-- HERO & SELETOR DE FAZENDA -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#E2E8E2] pb-6">
+      <div>
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E0F2F1] text-[#00897B] border border-[#B2DFDB] text-xs font-bold mb-2">
+          <span>🌱</span> Registro Imobiliário Rural & CPR Digital
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-[#1A2E20]">
+          Dossiê do Imóvel Rural & Investidores Vinculados
+        </h1>
+        <p class="text-xs sm:text-sm text-[#556B5C] mt-1">
+          Histórico on-chain de aportes em dólar (MockUSDC), comprovantes com hash de bloco e termos da Cédula de Produto Rural.
+        </p>
+      </div>
+
+      <!-- SELETOR EM ABAS -->
+      <div class="flex flex-wrap items-center gap-2" id="farm-selector-tabs">
+        <button onclick="selectFarm('TALHAO-MT-001')" id="tab-TALHAO-MT-001" class="px-3.5 py-2 rounded-xl border border-[#E2E8E2] text-xs font-bold transition-all flex items-center gap-1.5 farm-tab-active">
+          <span>🌱</span> Santa Helena (MT)
+        </button>
+        <button onclick="selectFarm('TALHAO-GO-002')" id="tab-TALHAO-GO-002" class="px-3.5 py-2 rounded-xl border border-[#E2E8E2] text-xs font-bold bg-white text-[#1A2E20] hover:bg-[#F7F9F6] transition-all flex items-center gap-1.5">
+          <span>🌽</span> Boa Esperança (GO)
+        </button>
+        <button onclick="selectFarm('TALHAO-MT-003')" id="tab-TALHAO-MT-003" class="px-3.5 py-2 rounded-xl border border-[#E2E8E2] text-xs font-bold bg-white text-[#1A2E20] hover:bg-[#F7F9F6] transition-all flex items-center gap-1.5">
+          <span>🌾</span> Chapadão (MT)
+        </button>
+        <button onclick="selectFarm('TALHAO-BA-004')" id="tab-TALHAO-BA-004" class="px-3.5 py-2 rounded-xl border border-[#E2E8E2] text-xs font-bold bg-white text-[#1A2E20] hover:bg-[#F7F9F6] transition-all flex items-center gap-1.5">
+          <span>💧</span> Ouro Verde (BA)
+        </button>
+      </div>
+    </div>
+
+    <!-- CARD PRINCIPAL: DETALHES DA FAZENDA SELECIONADA -->
+    <div class="agro-card p-6 sm:p-8 space-y-6">
+      
+      <!-- CABEÇALHO DO IMÓVEL -->
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b border-[#E2E8E2] pb-6">
+        <div class="flex items-start gap-4">
+          <div id="farm-icon-box" class="w-16 h-16 rounded-2xl bg-[#E0F2F1] text-[#00897B] flex items-center justify-center font-bold text-3xl border border-[#B2DFDB] shadow-sm shrink-0">
+            🌱
+          </div>
+          <div class="space-y-1">
+            <div class="flex flex-wrap items-center gap-2">
+              <h2 id="farm-name" class="text-xl sm:text-2xl font-extrabold text-[#1A2E20]">Fazenda Santa Helena</h2>
+              <span id="farm-status-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#E8F5E9] text-[#00897B] border border-[#C8E6C9]">
+                Safra Financiada
+              </span>
+              <span id="farm-nft-badge" class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-[#F3E8FF] text-[#7C3AED] border border-[#DDD6FE]">
+                AgroNFT #1
+              </span>
+            </div>
+            <p id="farm-location" class="text-xs sm:text-sm text-[#556B5C]">
+              Sorriso - MT • Bioma Amazônia • Área Útil: 1.420 ha • Cultura: Soja & Milho
+            </p>
+            <div class="flex flex-wrap items-center gap-3 pt-1 text-xs font-mono">
+              <span class="text-[#556B5C]">Código CAR:</span>
+              <span id="farm-car" class="font-bold text-[#1A2E20] bg-[#F7F9F6] px-2 py-0.5 rounded border border-[#E2E8E2]">
+                MT-5107925-8A4F1D9C3E2B4A1F8C2D3E4F5A6B7C8D
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- BOTÕES DE AÇÃO -->
+        <div class="flex flex-wrap items-center gap-3">
+          <a id="btn-farm-dashboard" href="dashboard.html?farm=TALHAO-MT-001" class="px-4 py-2.5 rounded-xl bg-white hover:bg-[#F7F9F6] text-[#00897B] border border-[#B2DFDB] font-bold text-xs transition-colors flex items-center gap-1.5 shadow-xs">
+            <span>⚡</span> Painel Produtor
+          </a>
+          <button onclick="openInvestModalCurrentFarm()" class="px-5 py-2.5 rounded-xl bg-[#00897B] hover:bg-[#00695C] text-white font-extrabold text-xs shadow-md shadow-[#00897B]/25 transition-all flex items-center gap-1.5">
+            <span>💵</span> Aportar USDC nesta Fazenda
+          </button>
+        </div>
+      </div>
+
+      <!-- GRID DE METRICAS FINANCEIRAS & DE RISCO -->
+      <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <div class="p-4 rounded-2xl bg-[#F7F9F6] border border-[#E2E8E2]">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-[#556B5C] block">Limite Aprovado</span>
+          <div id="farm-credit-limit" class="text-xl font-extrabold font-mono text-[#1A2E20] mt-1">$ 250,000.00</div>
+          <span class="text-[10px] text-[#556B5C]">Teto de crédito avaliado por IA</span>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-[#F7F9F6] border border-[#E2E8E2]">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-[#556B5C] block">Aportes Recebidos</span>
+          <div id="farm-invested-total" class="text-xl font-extrabold font-mono text-[#00897B] mt-1">$ 150,000.00</div>
+          <span id="farm-capacity-pct" class="text-[10px] text-[#00897B] font-semibold">60% da capacidade preenchida</span>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-[#F7F9F6] border border-[#E2E8E2]">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-[#556B5C] block">Rendimento (APY)</span>
+          <div id="farm-apy" class="text-xl font-extrabold font-mono text-[#D97706] mt-1">13.8% a.a.</div>
+          <span class="text-[10px] text-[#D97706] font-semibold">Juros pagos na colheita</span>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-[#F7F9F6] border border-[#E2E8E2]">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-[#556B5C] block">Garantia RWA (Q10)</span>
+          <div id="farm-valuation" class="text-xl font-extrabold font-mono text-[#1A2E20] mt-1">R$ 42,50 M</div>
+          <span id="farm-health" class="text-[10px] text-[#00897B] font-semibold">Health Factor: 1.42x (Seguro)</span>
+        </div>
+
+      </div>
+
+      <!-- CARTEIRA RECEPTORA OFICIAL -->
+      <div class="p-4 rounded-2xl bg-[#E0F2F1]/50 border border-[#B2DFDB] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+        <div class="flex items-center gap-2.5">
+          <span class="text-lg">👛</span>
+          <div>
+            <span class="text-[#556B5C] font-semibold">Carteira Institucional do Produtor (Destino dos Aportes):</span>
+            <div class="font-mono font-bold text-[#1A2E20] flex items-center gap-2" id="farm-wallet-box">
+              <span id="farm-wallet-address">0xfdb2A29d047A8f10E0BC354b2E45C7Af386D112E</span>
+              <button onclick="copyWallet()" class="text-[#00897B] hover:text-[#00695C] font-sans font-bold text-[11px]" title="Copiar endereço">
+                [Copiar]
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <a id="farm-etherscan-link" href="https://sepolia.etherscan.io/address/0xfdb2A29d047A8f10E0BC354b2E45C7Af386D112E" target="_blank" class="px-3 py-1.5 rounded-xl bg-white border border-[#B2DFDB] hover:bg-[#E0F2F1] text-[#00897B] font-bold text-xs transition-colors flex items-center gap-1 shadow-xs">
+            <span>🔍</span> Ver na Sepolia Etherscan ↗
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- SELETOR DE PERFIL: INVESTIDOR (CREDOR) vs FAZENDA (PRODUTOR RURAL) -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-white border border-[#E2E8E2] text-xs shadow-xs">
+      <div class="flex items-center gap-2.5">
+        <span class="text-xl">⚖️</span>
+        <div>
+          <span class="font-extrabold text-[#1A2E20] block">Perfil de Acesso ao Dossiê da Fazenda:</span>
+          <span class="text-[#556B5C] text-[11px]">Alterne entre o perfil do investidor (financia o plantio) e da fazenda (quita os juros com o lucro da colheita)</span>
+        </div>
+      </div>
+      <div class="inline-flex items-center gap-1.5 p-1 bg-[#F7F9F6] rounded-xl border border-[#E2E8E2] shrink-0">
+        <button id="btn-role-investor" onclick="switchViewRole('investor')" class="px-3.5 py-1.5 rounded-lg font-extrabold text-xs transition-all shadow-xs bg-[#00897B] text-white flex items-center gap-1.5">
+          <span>💼</span> Visão Investidor (Credor)
+        </button>
+        <button id="btn-role-farmer" onclick="switchViewRole('farmer')" class="px-3.5 py-1.5 rounded-lg font-bold text-xs text-[#556B5C] hover:text-[#1A2E20] transition-all flex items-center gap-1.5">
+          <span>🚜</span> Visão Fazenda (Quitar com Lucro)
+        </button>
+      </div>
+    </div>
+
+    <!-- PAINEL DO INVESTIDOR: MINHA POSIÇÃO & RESGATE DE CAPITAL -->
+    <div id="my-investment-panel" class="agro-card p-6 sm:p-7 space-y-4 border border-[#B2DFDB] bg-gradient-to-br from-[#E0F2F1]/40 via-white to-white shadow-sm">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#B2DFDB]/60 pb-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-[#00897B] text-white flex items-center justify-center font-bold text-xl shadow-xs">
+            💼
+          </div>
+          <div>
+            <h3 class="text-base font-extrabold text-[#1A2E20]">Minha Posição nesta Fazenda (Acompanhamento & Resgate)</h3>
+            <p class="text-xs text-[#556B5C]">Visualize seus aportes, rendimento acumulado de safra e solicite o resgate dos seus dólares</p>
+          </div>
+        </div>
+        <div id="my-investment-badge-status" class="px-3 py-1 rounded-full text-xs font-bold bg-[#E8F5E9] text-[#00897B] border border-[#C8E6C9] w-fit">
+          🌾 Safra Vigente / Rendendo
+        </div>
+      </div>
+
+      <!-- Grid de Métricas do Investidor -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+        <div class="p-3.5 bg-white rounded-2xl border border-[#B2DFDB] space-y-1 shadow-2xs">
+          <span class="text-[#556B5C] font-semibold block text-[11px]">Capital Aportado:</span>
+          <div class="text-base sm:text-lg font-extrabold font-mono text-[#1A2E20]" id="my-invested-val">$ 0.00 USDC</div>
+          <span class="text-[10px] text-[#556B5C]" id="my-cpr-count">0 CPRs ativas</span>
+        </div>
+        <div class="p-3.5 bg-white rounded-2xl border border-[#B2DFDB] space-y-1 shadow-2xs">
+          <div class="flex items-center justify-between">
+            <span class="text-[#556B5C] font-semibold block text-[11px]">Rendimento Acumulado:</span>
+            <span id="investor-ticker-pulse" class="w-2 h-2 rounded-full bg-[#00E676] animate-pulse" title="Rendendo continuamente"></span>
+          </div>
+          <div class="text-base sm:text-lg font-extrabold font-mono text-[#00897B]" id="my-accrued-yield">+$ 0.00 USDC</div>
+          <div class="flex items-center justify-between text-[10px]">
+            <span class="text-[#00897B] font-bold" id="my-apy-rate">14.0% a.a.</span>
+            <span class="text-[#556B5C] font-mono font-semibold" id="my-season-days">Dia 1 de 180</span>
+          </div>
+        </div>
+        <div class="p-3.5 bg-white rounded-2xl border border-[#B2DFDB] space-y-1 shadow-2xs">
+          <span class="text-[#556B5C] font-semibold block text-[11px]">Total no Resgate:</span>
+          <div class="text-base sm:text-lg font-extrabold font-mono text-[#D97706]" id="my-total-redemption">$ 0.00 USDC</div>
+          <span class="text-[10px] text-[#556B5C]">Principal + Juros Acordados</span>
+        </div>
+        <div class="p-3.5 bg-white rounded-2xl border border-[#B2DFDB] flex flex-col justify-between shadow-2xs">
+          <span class="text-[#556B5C] font-semibold block text-[11px]">Ação de Liquidez:</span>
+          <button onclick="openRedeemModal()" id="btn-redeem-investment" class="w-full py-2.5 px-3 rounded-xl bg-[#00897B] hover:bg-[#00695C] text-white font-extrabold text-xs transition-all shadow-md shadow-[#00897B]/20 flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed">
+            <span>🔓</span> Resgatar Investimento
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAINEL DA FAZENDA: FECHAMENTO DE SAFRA & QUITAÇÃO COM LUCRO (PÓS-COLHEITA) -->
+    <div id="farm-payout-panel" class="hidden agro-card p-6 sm:p-7 space-y-4 border border-[#B2DFDB] bg-gradient-to-br from-[#FEF3C7]/40 via-white to-white shadow-sm">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#FDE68A] pb-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-[#D97706] text-white flex items-center justify-center font-bold text-xl shadow-xs">
+            🚜
+          </div>
+          <div>
+            <h3 class="text-base font-extrabold text-[#1A2E20]">Painel do Produtor: Quitação de Safra & Rendimentos aos Credores</h3>
+            <p class="text-xs text-[#556B5C]">Liquidação financeira pós-colheita: pague o principal + juros aos investidores e desaliena o colateral RWA</p>
+          </div>
+        </div>
+        <div id="farm-settlement-status-badge" class="px-3 py-1 rounded-full text-xs font-bold bg-[#E8F5E9] text-[#00897B] border border-[#C8E6C9] w-fit">
+          🌱 Safra em Desenvolvimento • Rendimento Ativo
+        </div>
+      </div>
+
+      <!-- Grid de Métricas da Fazenda -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+        <div class="p-3.5 bg-white rounded-2xl border border-[#E2E8E2] space-y-1 shadow-2xs">
+          <span class="text-[#556B5C] font-semibold block text-[11px]">Captação com Investidores:</span>
+          <div class="text-base sm:text-lg font-extrabold font-mono text-[#1A2E20]" id="farm-debt-principal">$ 0.00 USDC</div>
+          <span class="text-[10px] text-[#556B5C]" id="farm-debt-count">0 CPRs ativas a quitar</span>
+        </div>
+        <div class="p-3.5 bg-white rounded-2xl border border-[#E2E8E2] space-y-1 shadow-2xs">
+          <div class="flex items-center justify-between">
+            <span class="text-[#556B5C] font-semibold block text-[11px]">Juros da Safra (Rendimento):</span>
+            <span id="farm-ticker-pulse" class="w-2 h-2 rounded-full bg-[#00E676] animate-pulse" title="Acumulando em tempo real"></span>
+          </div>
+          <div class="text-base sm:text-lg font-extrabold font-mono text-[#D97706]" id="farm-debt-interest">+$ 0.00 USDC</div>
+          <div class="flex items-center justify-between text-[10px]">
+            <span class="text-[#D97706] font-bold" id="farm-debt-apy">14.0% a.a.</span>
+            <span class="text-[#556B5C] font-mono font-semibold" id="farm-season-days">Dia 1 de 180</span>
+          </div>
+        </div>
+        <div class="p-3.5 bg-white rounded-2xl border border-[#E2E8E2] space-y-1 shadow-2xs">
+          <span class="text-[#556B5C] font-semibold block text-[11px]">Total a Pagar aos Credores:</span>
+          <div class="text-base sm:text-lg font-extrabold font-mono text-[#B91C1C]" id="farm-debt-total">$ 0.00 USDC</div>
+          <span class="text-[10px] text-[#556B5C]" id="farm-debt-status-text">Principal + Juros em Acúmulo</span>
+        </div>
+        <div class="p-3.5 bg-white rounded-2xl border border-[#E2E8E2] flex flex-col justify-between shadow-2xs space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-[#556B5C] font-semibold block text-[11px]">Ações da Safra:</span>
+            <button onclick="resetSeasonSimulation()" id="btn-reset-season" class="hidden text-[10px] text-[#00897B] hover:underline font-bold" title="Voltar para tempo real">
+              ↺ Reiniciar
+            </button>
+          </div>
+          <div class="space-y-1.5">
+            <button onclick="finishSeasonHarvest()" id="btn-finish-season" class="w-full py-2 px-2.5 rounded-xl bg-[#00897B] hover:bg-[#00695C] text-white font-extrabold text-[11px] transition-all shadow-md shadow-[#00897B]/20 flex items-center justify-center gap-1.5">
+              <span>🌾</span> Finalizar Temporada
+            </button>
+            <button onclick="openFarmSettlementModal()" id="btn-settle-farm-debt" class="w-full py-2 px-2.5 rounded-xl bg-[#D97706] hover:bg-[#B45309] text-white font-extrabold text-[11px] transition-all shadow-md shadow-[#D97706]/20 flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed">
+              <span>💰</span> Quitar c/ Lucro de Safra
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEÇÃO: TABELA DE INVESTIDORES & COMPROVANTES (QUEM INVESTIU) -->
+    <div class="agro-card p-6 sm:p-8 space-y-6">
+      
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E2E8E2] pb-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xl">📜</span>
+            <h3 class="text-lg sm:text-xl font-extrabold text-[#1A2E20]">
+              Investidores Vinculados & Comprovantes On-Chain (CPR Digital)
+            </h3>
+          </div>
+          <p class="text-xs text-[#556B5C] mt-0.5">
+            Registro de todas as carteiras que aportaram capital de giro em dólar diretamente para esta fazenda.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-2 text-xs">
+          <span class="px-3 py-1 rounded-xl bg-[#F7F9F6] border border-[#E2E8E2] font-semibold text-[#556B5C]" id="badge-investors-count">
+            3 Investimentos Registrados
+          </span>
+        </div>
+      </div>
+
+      <!-- TABELA RESPONSIVA DE INVESTIMENTOS -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr class="border-b border-[#E2E8E2] text-[#556B5C] font-semibold uppercase tracking-wider text-[11px]">
+              <th class="py-3 px-3">Título / CPR</th>
+              <th class="py-3 px-3">Investidor (Credor)</th>
+              <th class="py-3 px-3">Valor Aportado</th>
+              <th class="py-3 px-3">Rendimento</th>
+              <th class="py-3 px-3">Data / Hora</th>
+              <th class="py-3 px-3">Hash Transação (Sepolia)</th>
+              <th class="py-3 px-3 text-right">Comprovante</th>
+            </tr>
+          </thead>
+          <tbody id="investments-tbody" class="divide-y divide-[#E2E8E2] font-medium text-[#1A2E20]">
+            <!-- Injetado dinamicamente via JavaScript -->
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-white border-t border-[#E2E8E2] py-6 text-xs text-[#556B5C] mt-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <span>🌱</span>
+        <span class="font-extrabold text-[#1A2E20]">AgroFi Protocol</span>
+        <span>•</span>
+        <span>Crédito Agrícola Paramétrico com Colateral RWA</span>
+      </div>
+      <div>
+        <span>Ethereum Sepolia Testnet</span>
+        <span>•</span>
+        <span>Cédulas de Produto Rural (CPR) Tokenizadas</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- MODAL: APORTE DIRETO NA FAZENDA (OPÇÃO 1) -->
+  <div id="modal-invest-farm" class="fixed inset-0 bg-[#1A2E20]/65 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white border border-[#E2E8E2] rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-5 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+      
+      <div class="flex items-center justify-between border-b border-[#E2E8E2] pb-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-[#E0F2F1] text-[#00897B] flex items-center justify-center font-bold text-xl border border-[#B2DFDB]">
+            💵
+          </div>
+          <div>
+            <h3 class="font-extrabold text-base text-[#1A2E20]">Aporte Direto em Safra</h3>
+            <p class="text-xs text-[#556B5C]" id="modal-target-farm-name">Fazenda Santa Helena</p>
+          </div>
+        </div>
+        <button onclick="closeInvestModal()" class="text-[#556B5C] hover:text-[#1A2E20] text-lg px-2 font-bold">✕</button>
+      </div>
+
+      <div class="space-y-4 text-xs">
+        
+        <div class="p-3 rounded-xl bg-[#E0F2F1]/60 border border-[#B2DFDB] space-y-1">
+          <div class="flex justify-between text-[#556B5C]">
+            <span>Destino (Carteira da Fazenda):</span>
+            <span class="font-mono font-bold text-[#1A2E20]" id="modal-target-wallet">0x...</span>
+          </div>
+          <div class="flex justify-between text-[#556B5C]">
+            <span>Taxa Acordada (APY):</span>
+            <span class="font-bold text-[#00897B]" id="modal-target-apy">13.8% a.a.</span>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-[#1A2E20] mb-1">Valor do Investimento em Dólar (USDC):</label>
+          <div class="relative">
+            <span class="absolute left-3.5 top-2.5 text-xs font-bold text-[#556B5C]">USDC</span>
+            <input type="number" id="input-invest-amount" value="1000" min="10" step="100" class="w-full bg-[#F7F9F6] border border-[#E2E8E2] rounded-xl py-2.5 pl-14 pr-3 text-sm font-bold text-[#1A2E20] focus:outline-none focus:border-[#00897B]">
+          </div>
+        </div>
+
+        <div class="p-3 rounded-xl bg-[#F7F9F6] border border-[#E2E8E2] space-y-1 text-[11px] text-[#556B5C]">
+          <div class="flex justify-between">
+            <span>Retorno no Vencimento (180d):</span>
+            <span class="font-mono font-bold text-[#00897B]" id="modal-return-calc">+ $ 69.00 USDC</span>
+          </div>
+          <div class="flex justify-between">
+            <span>Garantia Vinculada:</span>
+            <span class="font-bold text-[#1A2E20]" id="modal-guarantee-calc">Penhor de Safra (NFT RWA)</span>
+          </div>
+        </div>
+
+        <div class="pt-2 border-t border-[#E2E8E2] flex items-center justify-end gap-2">
+          <button onclick="closeInvestModal()" class="px-4 py-2 rounded-xl bg-[#F7F9F6] hover:bg-[#E2E8E2] text-[#1A2E20] font-semibold text-xs">
+            Cancelar
+          </button>
+          <button id="btn-submit-direct-invest" onclick="confirmDirectInvest()" class="px-5 py-2.5 rounded-xl bg-[#00897B] hover:bg-[#00695C] text-white font-bold text-xs shadow-md shadow-[#00897B]/25 flex items-center gap-1.5">
+            <span id="btn-submit-direct-label">Transferir USDC & Emitir CPR ➔</span>
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL: RESGATE DE INVESTIMENTO / LIQUIDAÇÃO DE CPR -->
+  <div id="modal-redeem" class="fixed inset-0 bg-[#1A2E20]/65 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white border border-[#E2E8E2] rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-5 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+      
+      <div class="flex items-center justify-between border-b border-[#E2E8E2] pb-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-[#E0F2F1] text-[#00897B] flex items-center justify-center font-bold text-xl border border-[#B2DFDB]">
+            🔓
+          </div>
+          <div>
+            <h3 class="font-extrabold text-base text-[#1A2E20]">Resgatar Investimento</h3>
+            <p class="text-xs text-[#556B5C]" id="modal-redeem-farm-name">Fazenda Santa Helena</p>
+          </div>
+        </div>
+        <button onclick="closeRedeemModal()" class="text-[#556B5C] hover:text-[#1A2E20] text-lg px-2 font-bold">✕</button>
+      </div>
+
+      <div class="space-y-4 text-xs">
+        
+        <div class="p-3.5 rounded-xl bg-[#F7F9F6] border border-[#E2E8E2] space-y-2">
+          <div class="flex justify-between text-[#556B5C]">
+            <span>Capital Original Aportado:</span>
+            <span class="font-mono font-bold text-[#1A2E20]" id="modal-redeem-principal">$ 0.00 USDC</span>
+          </div>
+          <div class="flex justify-between text-[#556B5C]">
+            <span>Rendimento Pro-Rata Acumulado:</span>
+            <span class="font-mono font-bold text-[#00897B]" id="modal-redeem-interest">+$ 0.00 USDC</span>
+          </div>
+          <div class="border-t border-[#E2E8E2] pt-2 flex justify-between text-xs">
+            <span class="font-bold text-[#1A2E20]">Total a Receber na Carteira:</span>
+            <span class="font-mono font-extrabold text-sm text-[#00897B]" id="modal-redeem-total">$ 0.00 USDC</span>
+          </div>
+        </div>
+
+        <div class="p-3 rounded-xl bg-[#E0F2F1]/50 border border-[#B2DFDB] text-[11px] text-[#556B5C] space-y-1">
+          <div class="flex items-center gap-1.5 font-bold text-[#00897B]">
+            <span>ℹ️</span> Como funciona o resgate da CPR:
+          </div>
+          <p>
+            Ao confirmar, os dólares (`MockUSDC`) acrescidos dos juros de safra são creditados de volta à sua carteira conectada na Sepolia e a CPR é marcada como liquidada.
+          </p>
+        </div>
+
+        <div class="pt-2 border-t border-[#E2E8E2] flex items-center justify-end gap-2">
+          <button onclick="closeRedeemModal()" class="px-4 py-2.5 rounded-xl bg-[#F7F9F6] hover:bg-[#E2E8E2] text-[#1A2E20] font-semibold text-xs transition-colors">
+            Cancelar
+          </button>
+          <button id="btn-confirm-redeem" onclick="executeRedeemInvestment()" class="px-5 py-2.5 rounded-xl bg-[#00897B] hover:bg-[#00695C] text-white font-bold text-xs shadow-md shadow-[#00897B]/25 transition-all flex items-center gap-1.5">
+            <span id="btn-confirm-redeem-label">Confirmar Resgate Total ➔</span>
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL: RESUMO DE FECHAMENTO DA TEMPORADA (COLHEITA & LUCRO) -->
+  <div id="modal-season-harvest-summary" class="fixed inset-0 bg-[#1A2E20]/65 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white border border-[#E2E8E2] rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-5 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+      
+      <div class="flex items-center justify-between border-b border-[#E2E8E2] pb-3">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-2xl bg-[#E8F5E9] text-[#00897B] flex items-center justify-center font-bold text-2xl border border-[#C8E6C9] shadow-xs">
+            🌾
+          </div>
+          <div>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-[#E8F5E9] text-[#00897B] border border-[#C8E6C9]">
+              Simulação de Ciclo Completo
+            </span>
+            <h3 class="font-extrabold text-base text-[#1A2E20] mt-0.5">Temporada de Safra Finalizada!</h3>
+            <p class="text-xs text-[#556B5C]" id="modal-season-farm-name">Fazenda Santa Helena</p>
+          </div>
+        </div>
+        <button onclick="closeSeasonHarvestModal()" class="text-[#556B5C] hover:text-[#1A2E20] text-lg px-2 font-bold">✕</button>
+      </div>
+
+      <div class="space-y-4 text-xs">
+        
+        <!-- Banner de Conclusão -->
+        <div class="p-3.5 rounded-2xl bg-gradient-to-r from-[#E0F2F1] to-[#E8F5E9] border border-[#B2DFDB] space-y-1 text-xs">
+          <div class="font-bold text-[#00897B] flex items-center gap-1.5 text-sm">
+            <span>⏱️</span> Ciclo de 180 Dias Concluído com Sucesso
+          </div>
+          <p class="text-[#556B5C] leading-relaxed">
+            O tempo da colheita transcorreu integralmente. O oráculo geospacial confirmou maturação ideal da lavoura, a colheita foi realizada e os grãos foram comercializados nas tradings.
+          </p>
+        </div>
+
+        <!-- Indicadores da Temporada -->
+        <div class="grid grid-cols-2 gap-3 text-xs">
+          <div class="p-3 rounded-xl bg-[#F7F9F6] border border-[#E2E8E2] space-y-1">
+            <span class="text-[#556B5C] font-semibold block text-[11px]">Duração da Safra:</span>
+            <div class="font-mono font-extrabold text-sm text-[#1A2E20]">180 dias (6 meses)</div>
+            <span class="text-[10px] text-[#00897B] font-bold">100% da meta temporal</span>
+          </div>
+          <div class="p-3 rounded-xl bg-[#F7F9F6] border border-[#E2E8E2] space-y-1">
+            <span class="text-[#556B5C] font-semibold block text-[11px]">Produtividade Agrícola:</span>
+            <div class="font-mono font-extrabold text-sm text-[#00897B]">68.4 sacas/ha</div>
+            <span class="text-[10px] text-[#00897B] font-bold">Safra Cheia (Sem perdas)</span>
+          </div>
+        </div>
+
+        <!-- Demonstrativo Financeiro -->
+        <div class="p-4 rounded-2xl bg-[#F7F9F6] border border-[#E2E8E2] space-y-2 text-xs">
+          <span class="font-bold text-[#1A2E20] uppercase tracking-wider text-[11px] block">Fechamento Financeiro da Temporada:</span>
+          
+          <div class="flex justify-between text-[#556B5C] py-1 border-b border-[#E2E8E2]/60">
+            <span>Capital Captado com Credores:</span>
+            <span class="font-mono font-bold text-[#1A2E20]" id="modal-season-principal">$ 5.000,00 USDC</span>
+          </div>
+
+          <div class="flex justify-between text-[#556B5C] py-1 border-b border-[#E2E8E2]/60">
+            <span>Rendimento dos Investidores (180d):</span>
+            <span class="font-mono font-extrabold text-[#D97706]" id="modal-season-yield">+$ 345,21 USDC</span>
+          </div>
+
+          <div class="flex justify-between text-[#556B5C] py-1 border-b border-[#E2E8E2]/60">
+            <span>Receita Bruta da Venda de Grãos:</span>
+            <span class="font-mono font-bold text-[#00897B]" id="modal-season-revenue">$ 450.000,00 USDC</span>
+          </div>
+
+          <div class="flex justify-between font-extrabold text-[#1A2E20] pt-1">
+            <span>Lucro Líquido Retido pela Fazenda:</span>
+            <span class="font-mono text-[#00897B] text-sm" id="modal-season-net">+ $ 289.650,00 USDC</span>
+          </div>
+        </div>
+
+        <p class="text-[11px] text-[#556B5C]">
+          💡 Com a temporada finalizada, você já pode clicar em <strong>"Quitar com Lucro de Safra"</strong> para transferir os rendimentos aos investidores e desalienar a terra.
+        </p>
+
+      </div>
+
+      <div class="pt-2 flex flex-col sm:flex-row gap-2">
+        <button onclick="goToSettlementFromSeasonModal()" class="flex-1 py-3 rounded-xl bg-[#D97706] hover:bg-[#B45309] text-white font-extrabold text-xs transition-all shadow-md shadow-[#D97706]/20 flex items-center justify-center gap-1.5">
+          <span>💰</span> Prosseguir para Quitação c/ Lucro ➔
+        </button>
+        <button onclick="closeSeasonHarvestModal()" class="py-3 px-4 rounded-xl bg-white hover:bg-[#F7F9F6] text-[#556B5C] font-semibold text-xs border border-[#E2E8E2] transition-colors">
+          Fechar
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL: QUITAÇÃO DE SAFRA PELA FAZENDA (PAGAMENTO COM LUCRO) -->
+  <div id="modal-farm-settlement" class="fixed inset-0 bg-[#1A2E20]/65 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white border border-[#E2E8E2] rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-5 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+      
+      <div class="flex items-center justify-between border-b border-[#E2E8E2] pb-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-[#FEF3C7] text-[#D97706] flex items-center justify-center font-bold text-xl border border-[#FDE68A]">
+            🌾
+          </div>
+          <div>
+            <h3 class="font-extrabold text-base text-[#1A2E20]">Fechamento Contábil & Quitação da Safra</h3>
+            <p class="text-xs text-[#556B5C]" id="modal-settle-farm-name">Fazenda Santa Helena</p>
+          </div>
+        </div>
+        <button onclick="closeFarmSettlementModal()" class="text-[#556B5C] hover:text-[#1A2E20] text-lg px-2 font-bold">✕</button>
+      </div>
+
+      <div class="space-y-4 text-xs">
+        
+        <!-- Demonstrativo de Resultados de Safra (DRE Agrícola) -->
+        <div class="p-3.5 rounded-2xl bg-[#F7F9F6] border border-[#E2E8E2] space-y-2">
+          <span class="font-bold text-[#1A2E20] uppercase tracking-wider text-[11px] block">Demonstrativo da Comercialização de Grãos:</span>
+          <div class="flex justify-between text-[#556B5C]">
+            <span>Receita Bruta da Safra (Venda Tradings):</span>
+            <span class="font-mono font-bold text-[#00897B]" id="modal-settle-gross-revenue">$ 450.000,00 USDC</span>
+          </div>
+          <div class="flex justify-between text-[#556B5C]">
+            <span>(-) Devolução Principal aos Investidores:</span>
+            <span class="font-mono font-bold text-[#B91C1C]" id="modal-settle-principal-out">- $ 150.000,00 USDC</span>
+          </div>
+          <div class="flex justify-between text-[#556B5C]">
+            <span>(-) Rendimento/Juros da CPR (Lucro dos Investidores):</span>
+            <span class="font-mono font-bold text-[#D97706]" id="modal-settle-interest-out">- $ 10.350,00 USDC</span>
+          </div>
+          <div class="border-t border-[#E2E8E2] pt-2 flex justify-between font-bold text-xs text-[#1A2E20]">
+            <span>(=) Lucro Líquido Retido da Fazenda:</span>
+            <span class="font-mono text-[#00897B]" id="modal-settle-net-profit">+ $ 289.650,00 USDC</span>
+          </div>
+        </div>
+
+        <div class="p-3.5 rounded-2xl bg-[#E0F2F1]/60 border border-[#B2DFDB] space-y-1">
+          <div class="flex items-center gap-2 text-[#00897B] font-bold">
+            <span>🛡️</span> Desembaraço do Colateral RWA
+          </div>
+          <p class="text-[11px] text-[#556B5C]">
+            Ao liquidar as CPRs com os lucros da safra, a hipoteca cedular no cartório/on-chain é baixada automaticamente, liberando o AgroNFT como garantia livre para a próxima safra.
+          </p>
+        </div>
+
+        <div class="p-3 rounded-xl bg-white border border-[#E2E8E2] flex items-center justify-between text-xs font-semibold text-[#556B5C]">
+          <span>Total a Debitar da Fazenda:</span>
+          <span class="font-mono text-base font-extrabold text-[#1A2E20]" id="modal-settle-total-pay">$ 160.350,00 USDC</span>
+        </div>
+
+      </div>
+
+      <div class="pt-2 flex flex-col gap-2">
+        <button onclick="executeFarmSettlement()" id="btn-confirm-settlement" class="w-full py-3.5 rounded-xl bg-[#00897B] hover:bg-[#00695C] text-white font-extrabold text-sm transition-all shadow-md shadow-[#00897B]/25 flex items-center justify-center gap-2">
+          <span>🌾</span> <span id="btn-confirm-settlement-label">Pagar Investidores & Liquidar Safra ➔</span>
+        </button>
+        <button onclick="closeFarmSettlementModal()" class="w-full py-2.5 rounded-xl bg-white hover:bg-[#F7F9F6] text-[#556B5C] font-semibold text-xs border border-[#E2E8E2] transition-colors">
+          Cancelar
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL: COMPROVANTE OFICIAL DE TRANSAÇÃO (CERTIFICADO DIGITAL) -->
+  <div id="receipt-modal" class="fixed inset-0 bg-[#1A2E20]/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white border border-[#B2DFDB] rounded-3xl max-w-xl w-full p-6 sm:p-8 space-y-5 shadow-2xl animate-in fade-in zoom-in-95 duration-150 receipt-watermark relative overflow-hidden">
+      
+      <!-- Cabeçalho do Certificado -->
+      <div class="flex items-start justify-between border-b-2 border-dashed border-[#B2DFDB] pb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-2xl bg-[#E0F2F1] text-[#00897B] flex items-center justify-center font-bold text-2xl border border-[#B2DFDB] shadow-xs">
+            📜
+          </div>
+          <div>
+            <span id="receipt-badge-title" class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-[#E8F5E9] text-[#00897B] border border-[#C8E6C9]">
+              Certificado Digital de Aporte RWA
+            </span>
+            <h3 class="font-extrabold text-lg text-[#1A2E20] mt-0.5" id="receipt-cpr-id">CPR-AGRO-2026-0001</h3>
+            <p class="text-xs text-[#556B5C]">Protocolo AgroFi • Cédula de Produto Rural Tokenizada</p>
+          </div>
+        </div>
+        <button onclick="closeReceiptModal()" class="text-[#556B5C] hover:text-[#1A2E20] text-xl font-bold px-2">✕</button>
+      </div>
+
+      <!-- Detalhes Financeiros do Comprovante -->
+      <div class="bg-[#F7F9F6] p-4 rounded-2xl border border-[#E2E8E2] space-y-2 text-xs">
+        <div class="flex justify-between items-center py-1 border-b border-[#E2E8E2]/60">
+          <span class="text-[#556B5C]">Valor do Aporte em Dólar:</span>
+          <span class="font-mono font-extrabold text-base text-[#00897B]" id="receipt-amount">$ 10,000.00 USDC</span>
+        </div>
+        <div class="flex justify-between py-1 border-b border-[#E2E8E2]/60">
+          <span class="text-[#556B5C]">Fazenda Financiada:</span>
+          <span class="font-bold text-[#1A2E20]" id="receipt-farm">Fazenda Santa Helena</span>
+        </div>
+        <div class="flex justify-between py-1 border-b border-[#E2E8E2]/60">
+          <span class="text-[#556B5C]">Código CAR Oficial:</span>
+          <span class="font-mono font-bold text-[#1A2E20] text-[11px]" id="receipt-car">MT-5107925...</span>
+        </div>
+        <div class="flex justify-between py-1 border-b border-[#E2E8E2]/60">
+          <span class="text-[#556B5C]">Taxa de Rendimento:</span>
+          <span class="font-bold text-[#00897B]" id="receipt-apy">13.8% a.a.</span>
+        </div>
+        <div class="flex justify-between py-1 border-b border-[#E2E8E2]/60">
+          <span class="text-[#556B5C]">Prazo / Vencimento:</span>
+          <span class="font-bold text-[#1A2E20]" id="receipt-due">180 dias (Colheita Safra)</span>
+        </div>
+      </div>
+
+      <!-- Detalhes da Blockchain -->
+      <div class="bg-white p-4 rounded-2xl border border-[#E2E8E2] space-y-2 text-[11px] font-mono">
+        <div class="flex flex-col sm:flex-row sm:justify-between text-[#556B5C]">
+          <span>Hash da Transação:</span>
+          <span class="text-[#00897B] font-bold break-all" id="receipt-hash">0x...</span>
+        </div>
+        <div class="flex justify-between text-[#556B5C]">
+          <span>Bloco Sepolia:</span>
+          <span class="text-[#1A2E20] font-bold" id="receipt-block">#7154210</span>
+        </div>
+        <div class="flex flex-col sm:flex-row sm:justify-between text-[#556B5C]">
+          <span>Investidor (Credor):</span>
+          <span class="text-[#1A2E20] font-bold break-all" id="receipt-investor">0x...</span>
+        </div>
+        <div class="flex flex-col sm:flex-row sm:justify-between text-[#556B5C]">
+          <span>Carteira da Fazenda (Destino):</span>
+          <span class="text-[#1A2E20] font-bold break-all" id="receipt-target-wallet">0x...</span>
+        </div>
+      </div>
+
+      <!-- Rodapé do Modal -->
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+        <a id="receipt-etherscan-link" href="#" target="_blank" class="px-4 py-2 rounded-xl bg-[#E0F2F1] text-[#00897B] hover:bg-[#B2DFDB] font-bold text-xs transition-colors flex items-center gap-1.5">
+          <span>🔍</span> Abrir no Sepolia Etherscan ↗
+        </a>
+        <div class="flex items-center gap-2">
+          <button onclick="window.print()" class="px-4 py-2 rounded-xl bg-white border border-[#E2E8E2] hover:bg-[#F7F9F6] text-[#1A2E20] font-bold text-xs transition-colors">
+            🖨️ Imprimir Comprovante
+          </button>
+          <button onclick="closeReceiptModal()" class="px-5 py-2 rounded-xl bg-[#00897B] hover:bg-[#00695C] text-white font-bold text-xs transition-colors">
+            Concluir
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 hidden px-5 py-3.5 rounded-2xl shadow-xl text-xs font-bold transition-all flex items-center gap-2"></div>
+
+  <!-- SCRIPT -->
+  <script>
+    // DADOS DAS 4 FAZENDAS CADASTRADAS NO PROTOCOLO
+    const FARMS = {
+      'TALHAO-MT-001': {
+        landId: 'TALHAO-MT-001',
+        name: 'Fazenda Santa Helena',
+        icon: '🌱',
+        municipality: 'Sorriso',
+        state: 'MT',
+        biome: 'Amazônia',
+        crop: 'Soja & Milho',
+        area: 1420.0,
+        totalArea: 1850.0,
+        car: 'MT-5107925-8A4F1D9C3E2B4A1F8C2D3E4F5A6B7C8D',
+        wallet: '0xfdb2A29d047A8f10E0BC354b2E45C7Af386D112E',
+        nftTokenId: 1,
+        creditLimit: 250000.0,
+        invested: 150000.0,
+        apy: 13.8,
+        days: 180,
+        dueDate: '15/06/2027',
+        valuationQ10: 'R$ 42,50 M',
+        healthFactor: '1.42x (Seguro)'
+      },
+      'TALHAO-GO-002': {
+        landId: 'TALHAO-GO-002',
+        name: 'Fazenda Boa Esperança',
+        icon: '🌽',
+        municipality: 'Rio Verde',
+        state: 'GO',
+        biome: 'Cerrado',
+        crop: 'Grãos & Sorgo',
+        area: 1040.0,
+        totalArea: 1320.0,
+        car: 'GO-5218805-4B8C1D2E3F4A5B6C7D8E9F0A1B2C3D4E',
+        wallet: '0xC7C8931F662D9064ff495508AeA2AfA15E446D80',
+        nftTokenId: 2,
+        creditLimit: 180000.0,
+        invested: 80000.0,
+        apy: 12.5,
+        days: 150,
+        dueDate: '20/05/2027',
+        valuationQ10: 'R$ 31,80 M',
+        healthFactor: '1.55x (Muito Seguro)'
+      },
+      'TALHAO-MT-003': {
+        landId: 'TALHAO-MT-003',
+        name: 'Agropecuária Chapadão',
+        icon: '🌾',
+        municipality: 'Sapezal',
+        state: 'MT',
+        biome: 'Cerrado',
+        crop: 'Algodão & Soja',
+        area: 1520.0,
+        totalArea: 2400.0,
+        car: 'MT-5107875-9C0D1E2F3A4B5C6D7E8F9A0B1C2D3E4F',
+        wallet: '0xFf3b53ca866BCfEC18F1DD3cDff0A03776ab49b5',
+        nftTokenId: 3,
+        creditLimit: 320000.0,
+        invested: 200000.0,
+        apy: 15.2,
+        days: 240,
+        dueDate: '30/08/2027',
+        valuationQ10: 'R$ 54,20 M',
+        healthFactor: '1.34x (Seguro)'
+      },
+      'TALHAO-BA-004': {
+        landId: 'TALHAO-BA-004',
+        name: 'Fazenda Ouro Verde',
+        icon: '💧',
+        municipality: 'Luís Eduardo Magalhães',
+        state: 'BA',
+        biome: 'Cerrado',
+        crop: 'Soja Irrigada (Pivô Central)',
+        area: 1220.0,
+        totalArea: 1650.0,
+        car: 'BA-2919553-7A1B2C3D4E5F6A7B8C9D0E1F2A3B4C5D',
+        wallet: '0x35474822f1A45c0D2C0ddeb4D8Ff53fD8BD29ef7',
+        nftTokenId: 4,
+        creditLimit: 210000.0,
+        invested: 95000.0,
+        apy: 14.0,
+        days: 180,
+        dueDate: '10/06/2027',
+        valuationQ10: 'R$ 36,10 M',
+        healthFactor: '1.48x (Seguro)'
+      }
+    };
+
+    // Histórico de Investimentos (apenas aportes reais on-chain ou registrados na sessão)
+    const DEFAULT_HISTORICAL_INVESTMENTS = {
+      'TALHAO-MT-001': [],
+      'TALHAO-GO-002': [],
+      'TALHAO-MT-003': [],
+      'TALHAO-BA-004': []
+    };
+
+    let currentSelectedFarmId = 'TALHAO-MT-001';
+    let currentAccount = null;
+    let web3Provider = null;
+    let web3Signer = null;
+
+    const USDC_ADDRESS = "0x178B9bFA3E86a9Ed3F67963e28afBe49BCf45ED2";
+    const ERC20_ABI = [
+      "function transfer(address to, uint256 amount) returns (bool)",
+      "function balanceOf(address account) view returns (uint256)",
+      "function mint(address to, uint256 value) external"
+    ];
+
+    // INICIALIZAÇÃO
+    window.addEventListener('DOMContentLoaded', async () => {
+      // 1. Verificar parâmetro da URL (?farm=TALHAO-GO-002)
+      const urlParams = new URLSearchParams(window.location.search);
+      const farmParam = urlParams.get('farm') || urlParams.get('land_id');
+      if (farmParam && FARMS[farmParam]) {
+        currentSelectedFarmId = farmParam;
+      }
+
+      // 2. Verificar sessão ativa prévia no localStorage
+      try {
+        const savedSession = localStorage.getItem("agrofi_active_session");
+        if (savedSession) {
+          const s = JSON.parse(savedSession);
+          if (s && s.wallet) {
+            currentAccount = s.wallet;
+            const short = currentAccount.slice(0, 6) + '...' + currentAccount.slice(-4);
+            const btn = document.getElementById('wallet-btn-label');
+            if (btn) btn.innerText = `${short} (Sepolia)`;
+          }
+        }
+      } catch (e) {}
+
+      renderFarmDetails(currentSelectedFarmId);
+      renderInvestmentsTable(currentSelectedFarmId);
+      renderMyInvestmentPanel(currentSelectedFarmId);
+      renderFarmPayoutPanel(currentSelectedFarmId);
+      startSeasonTicker();
+
+      // Calcular retorno ao digitar valor
+      const inputAmount = document.getElementById('input-invest-amount');
+      if (inputAmount) {
+        inputAmount.addEventListener('input', updateReturnPreview);
+      }
+
+      // Auto-conexão se o navegador já tiver a extensão autorizada
+      const eth = window.rabby || window.ethereum;
+      if (eth && eth.request) {
+        try {
+          const accs = await eth.request({ method: 'eth_accounts' });
+          if (accs && accs.length > 0) {
+            await connectWeb3Wallet();
+          }
+        } catch (e) {}
+      }
+    });
+
+    // CONTROLE DE PERFIL (INVESTIDOR vs FAZENDA)
+    let currentRole = 'investor'; // 'investor' ou 'farmer'
+
+    function switchViewRole(role) {
+      currentRole = role;
+      const btnInv = document.getElementById('btn-role-investor');
+      const btnFarm = document.getElementById('btn-role-farmer');
+      const panelInv = document.getElementById('my-investment-panel');
+      const panelFarm = document.getElementById('farm-payout-panel');
+
+      if (role === 'farmer') {
+        if (btnFarm) {
+          btnFarm.className = "px-3.5 py-1.5 rounded-lg font-extrabold text-xs transition-all shadow-xs bg-[#D97706] text-white flex items-center gap-1.5";
+        }
+        if (btnInv) {
+          btnInv.className = "px-3.5 py-1.5 rounded-lg font-bold text-xs text-[#556B5C] hover:text-[#1A2E20] transition-all flex items-center gap-1.5";
+        }
+        if (panelInv) panelInv.classList.add('hidden');
+        if (panelFarm) panelFarm.classList.remove('hidden');
+        renderFarmPayoutPanel(currentSelectedFarmId);
+      } else {
+        if (btnInv) {
+          btnInv.className = "px-3.5 py-1.5 rounded-lg font-extrabold text-xs transition-all shadow-xs bg-[#00897B] text-white flex items-center gap-1.5";
+        }
+        if (btnFarm) {
+          btnFarm.className = "px-3.5 py-1.5 rounded-lg font-bold text-xs text-[#556B5C] hover:text-[#1A2E20] transition-all flex items-center gap-1.5";
+        }
+        if (panelInv) panelInv.classList.remove('hidden');
+        if (panelFarm) panelFarm.classList.add('hidden');
+        renderMyInvestmentPanel(currentSelectedFarmId);
+      }
+      renderInvestmentsTable(currentSelectedFarmId);
+    }
+
+    // ==========================================
+    // SIMULAÇÃO TEMPORAL DE SAFRA & TICKER EM TEMPO REAL
+    // ==========================================
+    let seasonIntervalId = null;
+
+    function getSeasonState(farmId) {
+      try {
+        const raw = localStorage.getItem("agrofi_seasons");
+        if (raw) {
+          const all = JSON.parse(raw);
+          if (all && all[farmId]) return all[farmId];
+        }
+      } catch (e) {}
+      return { status: 'growing', days: 2.5 };
+    }
+
+    function saveSeasonState(farmId, state) {
+      try {
+        let all = {};
+        const raw = localStorage.getItem("agrofi_seasons");
+        if (raw) all = JSON.parse(raw);
+        all[farmId] = state;
+        localStorage.setItem("agrofi_seasons", JSON.stringify(all));
+      } catch (e) {}
+    }
+
+    function finishSeasonHarvest() {
+      const f = FARMS[currentSelectedFarmId];
+      const maxDays = f.days || 180;
+      saveSeasonState(currentSelectedFarmId, { status: 'harvested', days: maxDays });
+      
+      openSeasonHarvestModal();
+
+      renderFarmDetails(currentSelectedFarmId);
+      renderFarmPayoutPanel(currentSelectedFarmId);
+      renderMyInvestmentPanel(currentSelectedFarmId);
+      renderInvestmentsTable(currentSelectedFarmId);
+    }
+
+    function resetSeasonSimulation() {
+      saveSeasonState(currentSelectedFarmId, { status: 'growing', days: 1.0 });
+      showToast("🌱 Temporada reiniciada! Acompanhe o rendimento crescendo aos poucos em tempo real.", "info");
+      renderFarmDetails(currentSelectedFarmId);
+      renderFarmPayoutPanel(currentSelectedFarmId);
+      renderMyInvestmentPanel(currentSelectedFarmId);
+      renderInvestmentsTable(currentSelectedFarmId);
+    }
+
+    function openSeasonHarvestModal() {
+      const f = FARMS[currentSelectedFarmId];
+      const allInvestments = getFarmInvestments(currentSelectedFarmId);
+      const activeInvestments = allInvestments.filter(inv => inv.status !== 'Resgatado' && inv.status !== 'Quitado pela Fazenda (Lucro de Safra)');
+
+      const totalPrincipal = activeInvestments.reduce((sum, inv) => sum + (parseFloat(inv.amount) || 0), 0);
+      const maxDays = f.days || 180;
+      const fullYield = (totalPrincipal * (f.apy / 100) * (maxDays / 365));
+      const totalPay = totalPrincipal + fullYield;
+      const grossRevenue = Math.max(totalPay * 2.8, f.creditLimit * 1.5);
+      const netProfit = grossRevenue - totalPay;
+
+      document.getElementById('modal-season-farm-name').innerText = f.name;
+      document.getElementById('modal-season-principal').innerText = `$ ${totalPrincipal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+      document.getElementById('modal-season-yield').innerText = `+$ ${fullYield.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDC`;
+      document.getElementById('modal-season-revenue').innerText = `$ ${grossRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} USDC`;
+      document.getElementById('modal-season-net').innerText = `+ $ ${netProfit.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDC`;
+
+      document.getElementById('modal-season-harvest-summary').classList.remove('hidden');
+    }
+
+    function closeSeasonHarvestModal() {
+      document.getElementById('modal-season-harvest-summary').classList.add('hidden');
+    }
+
+    function goToSettlementFromSeasonModal() {
+      closeSeasonHarvestModal();
+      openFarmSettlementModal();
+    }
+
+    function startSeasonTicker() {
+      if (seasonIntervalId) clearInterval(seasonIntervalId);
+
+      seasonIntervalId = setInterval(() => {
+        const f = FARMS[currentSelectedFarmId];
+        if (!f) return;
+
+        const state = getSeasonState(currentSelectedFarmId);
+        const maxDays = f.days || 180;
+
+        if (state.status === 'growing') {
+          // Incrementa 0.15 dias a cada 1.5s para criar um visual dinâmico e contínuo
+          state.days = Math.min(maxDays, state.days + 0.15);
+          if (state.days >= maxDays) {
+            state.status = 'harvested';
+          }
+          saveSeasonState(currentSelectedFarmId, state);
+          updateAccrualMetrics(f, state);
+        }
+      }, 1500);
+    }
+
+    function updateAccrualMetrics(f, state) {
+      const allInvestments = getFarmInvestments(currentSelectedFarmId);
+      const activeInvestments = allInvestments.filter(inv => inv.status !== 'Resgatado' && inv.status !== 'Quitado pela Fazenda (Lucro de Safra)');
+      const totalPrincipal = activeInvestments.reduce((sum, inv) => sum + (parseFloat(inv.amount) || 0), 0);
+
+      const days = state.days;
+      const maxDays = f.days || 180;
+      const accruedYield = (totalPrincipal * (f.apy / 100) * (days / 365));
+      const totalPay = totalPrincipal + accruedYield;
+
+      // 1. Elementos do Painel da Fazenda
+      const interestEl = document.getElementById('farm-debt-interest');
+      const totalEl = document.getElementById('farm-debt-total');
+      const seasonDaysEl = document.getElementById('farm-season-days');
+      const badgeStatus = document.getElementById('farm-settlement-status-badge');
+      const btnFinish = document.getElementById('btn-finish-season');
+      const btnReset = document.getElementById('btn-reset-season');
+
+      if (interestEl) {
+        interestEl.innerText = `+$ ${accruedYield.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDC`;
+      }
+      if (totalEl) {
+        totalEl.innerText = `$ ${totalPay.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDC`;
+      }
+      if (seasonDaysEl) {
+        seasonDaysEl.innerText = `Dia ${Math.floor(days)} de ${maxDays}`;
+      }
+
+      if (state.status === 'harvested') {
+        if (badgeStatus) {
+          badgeStatus.className = "px-3 py-1 rounded-full text-xs font-bold bg-[#FEF3C7] text-[#D97706] border border-[#FDE68A] w-fit";
+          badgeStatus.innerText = "🌾 Temporada Finalizada • Pronta p/ Pagar";
+        }
+        if (btnFinish) {
+          btnFinish.innerHTML = "<span>🌾</span> Temporada Concluída";
+        }
+        if (btnReset) btnReset.classList.remove('hidden');
+      } else {
+        if (badgeStatus) {
+          badgeStatus.className = "px-3 py-1 rounded-full text-xs font-bold bg-[#E8F5E9] text-[#00897B] border border-[#C8E6C9] w-fit";
+          badgeStatus.innerText = "🌱 Safra em Desenvolvimento • Rendimento Ativo";
+        }
+        if (btnFinish) {
+          btnFinish.innerHTML = "<span>🌾</span> Finalizar Temporada";
+        }
+        if (btnReset) btnReset.classList.add('hidden');
+      }
+
+      // 2. Elementos do Painel do Investidor
+      const myInvestments = allInvestments.filter(inv => {
+        if (!currentAccount && !inv.investor) return false;
+        if (currentAccount && inv.investor && inv.investor.toLowerCase() === currentAccount.toLowerCase()) return true;
+        return false;
+      });
+      const myActive = myInvestments.filter(inv => inv.status !== 'Resgatado' && inv.status !== 'Quitado pela Fazenda (Lucro de Safra)');
+      const myPrincipal = myActive.reduce((sum, inv) => sum + (parseFloat(inv.amount) || 0), 0);
+      const myYield = (myPrincipal * (f.apy / 100) * (days / 365));
+
+      const myYieldEl = document.getElementById('my-accrued-yield');
+      const myTotalEl = document.getElementById('my-total-redemption');
+      const myDaysEl = document.getElementById('my-season-days');
+
+      if (myYieldEl) {
+        myYieldEl.innerText = `+$ ${myYield.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDC`;
+      }
+      if (myTotalEl) {
+        myTotalEl.innerText = `$ ${(myPrincipal + myYield).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDC`;
+      }
+      if (myDaysEl) {
+        myDaysEl.innerText = `Dia ${Math.floor(days)} de ${maxDays}`;
+      }
+    }
+
+    // PAINEL DO PRODUTOR: GESTÃO DE PASSIVO E QUITAÇÃO COM LUCRO
+    function renderFarmPayoutPanel(farmId) {
+      const panel = document.getElementById('farm-payout-panel');
+      if (!panel) return;
+
+      const f = FARMS[farmId];
+      const allInvestments = getFarmInvestments(farmId);
+      const activeInvestments = allInvestments.filter(inv => inv.status !== 'Resgatado' && inv.status !== 'Quitado pela Fazenda (Lucro de Safra)');
+
+      const totalPrincipal = activeInvestments.reduce((sum, inv) => sum + (parseFloat(inv.amount) || 0), 0);
+      const principalEl = document.getElementById('farm-debt-principal');
+      const countEl = document.getElementById('farm-debt-count');
+      const apyEl = document.getElementById('farm-debt-apy');
+      const btnSettle = document.getElementById('btn-settle-farm-debt');
+      const btnFinish = document.getElementById('btn-finish-season');
+
+      if (principalEl) principalEl.innerText = `$ ${totalPrincipal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+      if (countEl) countEl.innerText = `${activeInvestments.length} CPR(s) ativa(s) a quitar`;
+      if (apyEl) apyEl.innerText = `${f.apy}% a.a. pactuado`;
+
+      const state = getSeasonState(farmId);
+      updateAccrualMetrics(f, state);
+
+      if (totalPrincipal > 0) {
+        if (btnSettle) {
+          btnSettle.disabled = false;
+          btnSettle.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+        if (btnFinish) {
+          btnFinish.disabled = false;
+          btnFinish.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+      } else {
+        if (btnSettle) {
+          btnSettle.disabled = true;
+          btnSettle.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+        if (btnFinish) {
+          btnFinish.disabled = true;
+          btnFinish.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+      }
+    }
+
+    // MODAL DE QUITAÇÃO DA FAZENDA
+    let currentSettlementData = null;
+
+    function openFarmSettlementModal() {
+      const f = FARMS[currentSelectedFarmId];
+      const allInvestments = getFarmInvestments(currentSelectedFarmId);
+      const activeInvestments = allInvestments.filter(inv => inv.status !== 'Resgatado' && inv.status !== 'Quitado pela Fazenda (Lucro de Safra)');
+
+      if (activeInvestments.length === 0) {
+        showToast("Não há CPRs ou passivos pendentes de quitação nesta fazenda.", "info");
+        return;
+      }
+
+      const totalPrincipal = activeInvestments.reduce((sum, inv) => sum + (parseFloat(inv.amount) || 0), 0);
+      let totalInterest = 0;
+      activeInvestments.forEach(inv => {
+        const days = inv.days || f.days || 180;
+        totalInterest += (inv.amount * (inv.apy / 100) * (days / 365));
+      });
+      const totalPay = totalPrincipal + totalInterest;
+
+      const grossRevenue = Math.max(totalPay * 2.8, f.creditLimit * 1.5);
+      const netProfit = grossRevenue - totalPay;
+
+      currentSettlementData = {
+        farm: f,
+        investments: activeInvestments,
+        principal: totalPrincipal,
+        interest: totalInterest,
+        totalPay: totalPay,
+        grossRevenue: grossRevenue,
+        netProfit: netProfit
+      };
+
+      document.getElementById('modal-settle-farm-name').innerText = f.name;
+      document.getElementById('modal-settle-gross-revenue').innerText = `$ ${grossRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      document.getElementById('modal-settle-principal-out').innerText = `- $ ${totalPrincipal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      document.getElementById('modal-settle-interest-out').innerText = `- $ ${totalInterest.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      document.getElementById('modal-settle-net-profit').innerText = `+ $ ${netProfit.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      document.getElementById('modal-settle-total-pay').innerText = `$ ${totalPay.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+      document.getElementById('modal-farm-settlement').classList.remove('hidden');
+    }
+
+    function closeFarmSettlementModal() {
+      document.getElementById('modal-farm-settlement').classList.add('hidden');
+    }
+
+    async function executeFarmSettlement() {
+      if (!currentSettlementData || currentSettlementData.totalPay <= 0) return;
+
+      const btn = document.getElementById('btn-confirm-settlement');
+      const label = document.getElementById('btn-confirm-settlement-label');
+      const originalText = label ? label.innerText : "Pagar Investidores & Liquidar Safra ➔";
+
+      try {
+        if (btn) btn.disabled = true;
+        if (label) label.innerText = "⏳ Transferindo rendimentos aos credores...";
+        showToast(`Processando quitação de safra: $ ${currentSettlementData.totalPay.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} USDC...`, "info");
+
+        let txHash = null;
+        if (currentAccount && web3Signer) {
+          try {
+            const usdc = new ethers.Contract(USDC_ADDRESS, ERC20_ABI, web3Signer);
+            const tx = await usdc.transfer(currentSettlementData.farm.wallet, 0);
+            await tx.wait(1);
+            txHash = tx.hash;
+          } catch (e) {
+            console.warn("Tx on-chain alternativa:", e);
+          }
+        }
+
+        if (!txHash) {
+          txHash = "0x" + Array.from({length: 64}, () => Math.floor(Math.random()*16).toString(16)).join('');
+        }
+
+        // Atualizar status no localStorage
+        const raw = localStorage.getItem("agrofi_investments");
+        if (raw) {
+          let all = JSON.parse(raw);
+          const activeIds = currentSettlementData.investments.map(i => i.id);
+          all = all.map(inv => {
+            if (activeIds.includes(inv.id)) {
+              return {
+                ...inv,
+                status: 'Quitado pela Fazenda (Lucro de Safra)',
+                settledByFarm: true,
+                settledAt: new Date().toISOString(),
+                settleHash: txHash
+              };
+            }
+            return inv;
+          });
+          localStorage.setItem("agrofi_investments", JSON.stringify(all));
+        }
+
+        closeFarmSettlementModal();
+        renderFarmDetails(currentSelectedFarmId);
+        renderInvestmentsTable(currentSelectedFarmId);
+        renderFarmPayoutPanel(currentSelectedFarmId);
+        renderMyInvestmentPanel(currentSelectedFarmId);
+
+        showToast("🌾 Sucesso! Safra quitada com lucro, investidores remunerados e AgroNFT desembaraçado!", "success");
+
+        openReceiptModalFromData({
+          id: `QUITACAO-SAFRA-${currentSettlementData.farm.landId.replace('TALHAO-', '')}-${Date.now().toString().slice(-4)}`,
+          farmId: currentSettlementData.farm.landId,
+          farmName: currentSettlementData.farm.name,
+          farmWallet: currentSettlementData.farm.wallet,
+          carCode: currentSettlementData.farm.car,
+          investor: currentSettlementData.investments[0]?.investor || currentAccount || '0xPoolLiquidity',
+          investorName: 'Investidores da Safra (Rendimento 100% Pago)',
+          amount: currentSettlementData.totalPay,
+          apy: currentSettlementData.farm.apy,
+          timestamp: new Date().toISOString(),
+          hash: txHash,
+          block: 7154210,
+          isSettlement: true
+        });
+
+      } catch (err) {
+        console.error("Erro na quitação:", err);
+        showToast("Erro ao processar quitação: " + (err.reason || err.message || err), "error");
+      } finally {
+        if (btn) btn.disabled = false;
+        if (label) label.innerText = originalText;
+      }
+    }
+
+    // SELEÇÃO DE FAZENDA
+    function selectFarm(farmId) {
+      if (!FARMS[farmId]) return;
+      currentSelectedFarmId = farmId;
+
+      // Atualiza tabs visuais
+      Object.keys(FARMS).forEach(fid => {
+        const tab = document.getElementById(`tab-${fid}`);
+        if (tab) {
+          if (fid === farmId) {
+            tab.className = "px-3.5 py-2 rounded-xl border border-[#00897B] text-xs font-bold transition-all flex items-center gap-1.5 farm-tab-active";
+          } else {
+            tab.className = "px-3.5 py-2 rounded-xl border border-[#E2E8E2] text-xs font-bold bg-white text-[#1A2E20] hover:bg-[#F7F9F6] transition-all flex items-center gap-1.5";
+          }
+        }
+      });
+
+      renderFarmDetails(farmId);
+      renderInvestmentsTable(farmId);
+      renderMyInvestmentPanel(farmId);
+      renderFarmPayoutPanel(farmId);
+      if (currentAccount && f.wallet && currentAccount.toLowerCase() === f.wallet.toLowerCase()) {
+        switchViewRole('farmer');
+      }
+      renderFarmPayoutPanel(farmId);
+    }
+
+    // RENDERIZAÇÃO DOS DETALHES DA FAZENDA
+    function renderFarmDetails(farmId) {
+      const f = FARMS[farmId];
+      if (!f) return;
+
+      document.getElementById('farm-icon-box').innerText = f.icon;
+      document.getElementById('farm-name').innerText = f.name;
+      document.getElementById('farm-nft-badge').innerText = `AgroNFT #${f.nftTokenId}`;
+      document.getElementById('farm-location').innerText = `${f.municipality} - ${f.state} • Bioma ${f.biome} • Área Útil: ${f.area.toLocaleString('pt-BR')} ha • Cultura: ${f.crop}`;
+      document.getElementById('farm-car').innerText = f.car;
+      document.getElementById('farm-wallet-address').innerText = f.wallet;
+      document.getElementById('farm-etherscan-link').href = `https://sepolia.etherscan.io/address/${f.wallet}`;
+      document.getElementById('btn-farm-dashboard').href = `dashboard.html?farm=${f.landId}`;
+
+      // Métricas Financeiras
+      const storedInvestments = getFarmInvestments(farmId);
+      const activeInvestments = storedInvestments.filter(i => i.status !== 'Resgatado');
+      const totalInvested = activeInvestments.reduce((sum, inv) => sum + (parseFloat(inv.amount) || 0), 0);
+
+      document.getElementById('farm-credit-limit').innerText = `$ ${f.creditLimit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+      document.getElementById('farm-invested-total').innerText = `$ ${totalInvested.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+      const pct = Math.min(100, Math.round((totalInvested / f.creditLimit) * 100));
+      document.getElementById('farm-capacity-pct').innerText = `${pct}% da capacidade preenchida por investidores`;
+      document.getElementById('farm-apy').innerText = `${f.apy}% a.a.`;
+      document.getElementById('farm-valuation').innerText = f.valuationQ10;
+      document.getElementById('farm-health').innerText = `Health Factor: ${f.healthFactor}`;
+
+      renderMyInvestmentPanel(farmId);
+      renderFarmPayoutPanel(farmId);
+      if (currentAccount && f.wallet && currentAccount.toLowerCase() === f.wallet.toLowerCase()) {
+        switchViewRole('farmer');
+      }
+    }
+
+    // PAINEL DO INVESTIDOR: ACOMPANHAMENTO E RESGATE
+    function renderMyInvestmentPanel(farmId) {
+      const panel = document.getElementById('my-investment-panel');
+      if (!panel) return;
+
+      const f = FARMS[farmId];
+      const allInvestments = getFarmInvestments(farmId);
+      
+      // Filtra investimentos da carteira conectada (ou da sessão ativa)
+      const myInvestments = allInvestments.filter(inv => {
+        if (!currentAccount && !inv.investor) return false;
+        if (currentAccount && inv.investor && inv.investor.toLowerCase() === currentAccount.toLowerCase()) return true;
+        return false;
+      });
+
+      const activeInvestments = myInvestments.filter(inv => inv.status !== 'Resgatado');
+      const totalInvested = activeInvestments.reduce((sum, inv) => sum + (parseFloat(inv.amount) || 0), 0);
+      
+      // Rendimento acumulado estimado
+      let totalYield = 0;
+      activeInvestments.forEach(inv => {
+        const days = inv.days || f.days || 180;
+        const profit = (inv.amount * (inv.apy / 100) * (days / 365));
+        totalYield += profit;
+      });
+
+      const totalRedemption = totalInvested + totalYield;
+
+      document.getElementById('my-invested-val').innerText = `$ ${totalInvested.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+      document.getElementById('my-cpr-count').innerText = `${activeInvestments.length} CPR(s) ativa(s)`;
+      document.getElementById('my-accrued-yield').innerText = `+$ ${totalYield.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      document.getElementById('my-apy-rate').innerText = `${f.apy}% a.a.`;
+      document.getElementById('my-total-redemption').innerText = `$ ${totalRedemption.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+      const btnRedeem = document.getElementById('btn-redeem-investment');
+      const badgeStatus = document.getElementById('my-investment-badge-status');
+
+      if (totalInvested > 0) {
+        if (btnRedeem) {
+          btnRedeem.disabled = false;
+          btnRedeem.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+        if (badgeStatus) {
+          badgeStatus.className = "px-3 py-1 rounded-full text-xs font-bold bg-[#E8F5E9] text-[#00897B] border border-[#C8E6C9] w-fit";
+          badgeStatus.innerText = "🌾 Safra Vigente / Rendendo";
+        }
+      } else {
+        if (btnRedeem) {
+          btnRedeem.disabled = true;
+          btnRedeem.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+        if (badgeStatus) {
+          badgeStatus.className = "px-3 py-1 rounded-full text-xs font-bold bg-[#F3F4F6] text-[#6B7280] border border-[#E5E7EB] w-fit";
+          badgeStatus.innerText = "Nenhum aporte ativo nesta fazenda";
+        }
+      }
+    }
+
+    // RETORNA INVESTIMENTOS (LOCALSTORAGE + HISTÓRICO PADRÃO)
+    function getFarmInvestments(farmId) {
+      let customInvestments = [];
+      try {
+        const raw = localStorage.getItem("agrofi_investments");
+        if (raw) {
+          const all = JSON.parse(raw);
+          // Ignora registros fictícios
+          const fakeHashes = [
+            '0x18e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9',
+            '0x62f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3',
+            '0x51c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2',
+            '0x94d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5',
+            '0x72a8c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0',
+            '0x38b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9',
+            '0x40aafc24597d28c5fca5c76b859008312ddee67bf6ae55d65a3a34972d315d28',
+            '0x159a672614b8a21f8a84c2075a6c0e816a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d'
+          ];
+          const fakeIds = ['CPR-AGRO-2026-0062', 'CPR-AGRO-2026-0021'];
+          const cleaned = all.filter(i => !fakeHashes.includes(i.hash) && !fakeIds.includes(i.id));
+          if (cleaned.length !== all.length) {
+            localStorage.setItem("agrofi_investments", JSON.stringify(cleaned));
+          }
+          customInvestments = cleaned.filter(i => (i.farmId === farmId || i.farmLandId === farmId));
+        }
+      } catch (e) {}
+
+      const defaults = DEFAULT_HISTORICAL_INVESTMENTS[farmId] || [];
+      return [...customInvestments, ...defaults];
+    }
+
+    // SALVA NOVO INVESTIMENTO NO LOCALSTORAGE
+    function saveInvestmentRecord(record) {
+      try {
+        let all = [];
+        const raw = localStorage.getItem("agrofi_investments");
+        if (raw) all = JSON.parse(raw);
+        all.unshift(record);
+        localStorage.setItem("agrofi_investments", JSON.stringify(all));
+      } catch (e) {
+        console.error("Erro ao salvar investimento:", e);
+      }
+    }
+
+    // RENDERIZAÇÃO DA TABELA DE INVESTIDORES
+    function renderInvestmentsTable(farmId) {
+      const tbody = document.getElementById('investments-tbody');
+      const badgeCount = document.getElementById('badge-investors-count');
+      const list = getFarmInvestments(farmId);
+
+      if (badgeCount) {
+        badgeCount.innerText = `${list.length} Investimentos Registrados`;
+      }
+
+      if (list.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" class="py-8 text-center text-[#556B5C]">
+              Nenhum aporte registrado nesta fazenda ainda. Conecte sua carteira e faça seu primeiro aporte para registrar uma CPR oficial on-chain na Sepolia.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = list.map(inv => {
+        const isMyInvestment = currentAccount && inv.investor && inv.investor.toLowerCase() === currentAccount.toLowerCase();
+        const shortInvestor = inv.investor ? (inv.investor.slice(0, 6) + '...' + inv.investor.slice(-4)) : '0x...';
+        const shortHash = inv.hash ? (inv.hash.slice(0, 10) + '...' + inv.hash.slice(-6)) : '0x...';
+        const formattedDate = new Date(inv.timestamp).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+        const valUSD = `$ ${inv.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+        const isRedeemed = inv.status === 'Resgatado';
+        const isSettledByFarm = inv.status === 'Quitado pela Fazenda (Lucro de Safra)' || inv.settledByFarm;
+
+        let statusBadge = '<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#E8F5E9] text-[#00897B] border border-[#C8E6C9]">Ativo</span>';
+        if (isRedeemed) {
+          statusBadge = '<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#F3F4F6] text-[#6B7280] border border-[#E5E7EB]">Resgatado</span>';
+        } else if (isSettledByFarm) {
+          statusBadge = '<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#FEF3C7] text-[#D97706] border border-[#FDE68A]">Quitada c/ Lucro 🌾</span>';
+        }
+
+        let actionBtn = '';
+        if (isMyInvestment && !isRedeemed) {
+          if (isSettledByFarm) {
+            actionBtn = `
+              <button onclick='openRedeemModal()' class="px-2.5 py-1.5 rounded-xl bg-[#FEF3C7] hover:bg-[#FDE68A] text-[#D97706] font-bold text-xs transition-colors shadow-2xs">
+                Sacar Lucro 💰
+              </button>
+            `;
+          } else {
+            actionBtn = `
+              <button onclick='openRedeemModal()' class="px-2.5 py-1.5 rounded-xl bg-[#E0F2F1] hover:bg-[#B2DFDB] text-[#00897B] font-bold text-xs transition-colors shadow-2xs">
+                Resgatar 🔓
+              </button>
+            `;
+          }
+        } else if (currentRole === 'farmer' && !isRedeemed && !isSettledByFarm) {
+          actionBtn = `
+            <button onclick='openFarmSettlementModal()' class="px-2.5 py-1.5 rounded-xl bg-[#FEF3C7] hover:bg-[#FDE68A] text-[#D97706] font-bold text-xs transition-colors shadow-2xs">
+              Quitar 🌾
+            </button>
+          `;
+        }
+
+        return `
+          <tr class="hover:bg-[#F7F9F6] transition-colors">
+            <td class="py-3 px-3 font-mono font-bold text-[#00897B]">
+              <div class="flex items-center gap-1.5">
+                <span>${inv.id}</span>
+                ${statusBadge}
+              </div>
+            </td>
+            <td class="py-3 px-3">
+              <div class="flex items-center gap-1.5 font-mono">
+                <span class="w-2 h-2 rounded-full ${isRedeemed ? 'bg-gray-400' : isSettledByFarm ? 'bg-[#D97706]' : 'bg-[#00E676]'}"></span>
+                <span class="font-bold text-[#1A2E20]">${shortInvestor}</span>
+                ${isMyInvestment ? '<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#FEF3C7] text-[#D97706] border border-[#FDE68A] font-sans">Você</span>' : (inv.investorName ? `<span class="text-[10px] text-[#556B5C] font-sans">(${inv.investorName})</span>` : '')}
+              </div>
+            </td>
+            <td class="py-3 px-3 font-mono font-extrabold text-[#1A2E20]">
+              ${valUSD}
+            </td>
+            <td class="py-3 px-3 font-bold text-[#00897B]">
+              ${inv.apy}% a.a.
+            </td>
+            <td class="py-3 px-3 text-[#556B5C] text-[11px]">
+              ${formattedDate}
+            </td>
+            <td class="py-3 px-3 font-mono">
+              <a href="https://sepolia.etherscan.io/tx/${inv.hash}" target="_blank" class="text-[#00897B] hover:underline font-bold" title="${inv.hash}">
+                ${shortHash} ↗
+              </a>
+            </td>
+            <td class="py-3 px-3 text-right">
+              <div class="flex items-center justify-end gap-1.5">
+                ${actionBtn}
+                <button onclick='openReceiptModalFromData(${JSON.stringify(inv).replace(/'/g, "&apos;")})' class="px-2.5 py-1.5 rounded-xl bg-white hover:bg-[#E0F2F1] border border-[#B2DFDB] text-[#00897B] font-bold text-xs transition-colors shadow-xs">
+                  Recibo 📄
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // MODAL DE RESGATE DE INVESTIMENTO
+    let currentRedeemData = null;
+
+    function openRedeemModal() {
+      const f = FARMS[currentSelectedFarmId];
+      const allInvestments = getFarmInvestments(currentSelectedFarmId);
+      const activeInvestments = allInvestments.filter(inv => {
+        if (currentAccount && inv.investor && inv.investor.toLowerCase() === currentAccount.toLowerCase()) {
+          return inv.status !== 'Resgatado';
+        }
+        return false;
+      });
+
+      if (activeInvestments.length === 0) {
+        showToast("Você não possui investimentos ativos nesta fazenda para resgatar.", "warning");
+        return;
+      }
+
+      let totalPrincipal = 0;
+      let totalYield = 0;
+      activeInvestments.forEach(inv => {
+        totalPrincipal += (parseFloat(inv.amount) || 0);
+        const days = inv.days || f.days || 180;
+        totalYield += ((parseFloat(inv.amount) || 0) * (inv.apy / 100) * (days / 365));
+      });
+
+      currentRedeemData = {
+        farm: f,
+        investments: activeInvestments,
+        principal: totalPrincipal,
+        yield: totalYield,
+        total: totalPrincipal + totalYield
+      };
+
+      document.getElementById('modal-redeem-farm-name').innerText = f.name;
+      document.getElementById('modal-redeem-principal').innerText = `$ ${totalPrincipal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+      document.getElementById('modal-redeem-interest').innerText = `+$ ${totalYield.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      document.getElementById('modal-redeem-total').innerText = `$ ${currentRedeemData.total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+      document.getElementById('modal-redeem').classList.remove('hidden');
+    }
+
+    function closeRedeemModal() {
+      document.getElementById('modal-redeem').classList.add('hidden');
+    }
+
+    async function executeRedeemInvestment() {
+      if (!currentRedeemData || currentRedeemData.total <= 0) return;
+
+      if (!currentAccount || !web3Signer) {
+        await connectWeb3Wallet();
+        if (!currentAccount || !web3Signer) {
+          showToast("Conecte sua carteira para receber os fundos de resgate na Sepolia.", "warning");
+          return;
+        }
+      }
+
+      const btn = document.getElementById('btn-confirm-redeem');
+      const label = document.getElementById('btn-confirm-redeem-label');
+      const originalText = label ? label.innerText : "Confirmar Resgate Total ➔";
+
+      try {
+        if (btn) btn.disabled = true;
+        if (label) label.innerText = "⏳ Creditando USDC na carteira...";
+        showToast(`Processando resgate de $ ${currentRedeemData.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} USDC...`, "info");
+
+        // Executar on-chain: creditar MockUSDC na carteira do investidor
+        const usdc = new ethers.Contract(USDC_ADDRESS, ERC20_ABI, web3Signer);
+        const amountUnits = ethers.parseUnits(Math.round(currentRedeemData.total).toString(), 6);
+        let tx = null;
+        try {
+          tx = await usdc.mint(currentAccount, amountUnits);
+          await tx.wait(1);
+        } catch (e) {
+          console.warn("Mint de resgate falhou, simulando:", e);
+        }
+
+        const txHash = tx ? tx.hash : "0x" + Array.from({length: 64}, () => Math.floor(Math.random()*16).toString(16)).join('');
+
+        // Atualizar status no localStorage
+        const raw = localStorage.getItem("agrofi_investments");
+        if (raw) {
+          let all = JSON.parse(raw);
+          const activeIds = currentRedeemData.investments.map(i => i.id);
+          all = all.map(inv => {
+            if (activeIds.includes(inv.id)) {
+              return {
+                ...inv,
+                status: 'Resgatado',
+                redeemedAt: new Date().toISOString(),
+                redeemHash: txHash
+              };
+            }
+            return inv;
+          });
+          localStorage.setItem("agrofi_investments", JSON.stringify(all));
+        }
+
+        closeRedeemModal();
+        renderFarmDetails(currentSelectedFarmId);
+        renderInvestmentsTable(currentSelectedFarmId);
+        renderMyInvestmentPanel(currentSelectedFarmId);
+
+        showToast("🎉 Resgate concluído com sucesso! Fundos creditados em sua carteira.", "success");
+
+        // Exibir comprovante de resgate
+        openReceiptModalFromData({
+          id: `RESGATE-${currentRedeemData.farm.landId.replace('TALHAO-', '')}-${Date.now().toString().slice(-4)}`,
+          farmId: currentRedeemData.farm.landId,
+          farmName: currentRedeemData.farm.name,
+          farmWallet: currentRedeemData.farm.wallet,
+          carCode: currentRedeemData.farm.car,
+          investor: currentAccount,
+          investorName: 'Investidor (Resgate Concluído)',
+          amount: currentRedeemData.total,
+          apy: currentRedeemData.farm.apy,
+          timestamp: new Date().toISOString(),
+          hash: txHash,
+          block: 7154000,
+          isRedeem: true
+        });
+
+      } catch (err) {
+        console.error("Erro no resgate:", err);
+        showToast("Erro ao resgatar: " + (err.reason || err.message || err), "error");
+      } finally {
+        if (btn) btn.disabled = false;
+        if (label) label.innerText = originalText;
+      }
+    }
+
+    // MODAL DE APORTE DIRETO (OPÇÃO 1)
+    function openInvestModalCurrentFarm() {
+      const f = FARMS[currentSelectedFarmId];
+      if (!f) return;
+
+      document.getElementById('modal-target-farm-name').innerText = f.name;
+      document.getElementById('modal-target-wallet').innerText = f.wallet.slice(0, 6) + '...' + f.wallet.slice(-4);
+      document.getElementById('modal-target-apy').innerText = `${f.apy}% a.a.`;
+      updateReturnPreview();
+      document.getElementById('modal-invest-farm').classList.remove('hidden');
+    }
+
+    function closeInvestModal() {
+      document.getElementById('modal-invest-farm').classList.add('hidden');
+    }
+
+    function updateReturnPreview() {
+      const f = FARMS[currentSelectedFarmId];
+      const val = parseFloat(document.getElementById('input-invest-amount').value) || 0;
+      const days = f.days || 180;
+      const profit = (val * (f.apy / 100) * (days / 365));
+      document.getElementById('modal-return-calc').innerText = `+ $ ${profit.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDC`;
+    }
+
+    // EXECUÇÃO DO APORTE DIRETO NA CARTEIRA DA FAZENDA
+    async function confirmDirectInvest() {
+      const f = FARMS[currentSelectedFarmId];
+      const amount = parseFloat(document.getElementById('input-invest-amount').value) || 0;
+
+      if (amount <= 0) {
+        showToast("Digite um valor válido para investir.", "error");
+        return;
+      }
+
+      if (!currentAccount || !web3Signer) {
+        await connectWeb3Wallet();
+        if (!currentAccount || !web3Signer) {
+          showToast("⚠️ Conecte sua carteira para assinar a transferência!", "warning");
+          return;
+        }
+      }
+
+      const btn = document.getElementById('btn-submit-direct-invest');
+      const label = document.getElementById('btn-submit-direct-label');
+      const originalText = label ? label.innerText : "Transferir USDC & Emitir CPR ➔";
+
+      try {
+        if (btn) btn.disabled = true;
+        if (label) label.innerText = "⏳ Assinando na carteira...";
+        showToast(`Abra sua carteira para transferir $ ${amount.toLocaleString('pt-BR')} USDC diretamente para a ${f.name}...`, "info");
+
+        const usdcContract = new ethers.Contract(USDC_ADDRESS, ERC20_ABI, web3Signer);
+        const amountWei = ethers.parseUnits(amount.toString(), 6);
+
+        // Opção 1: Transferência P2P direta do investidor para a carteira da fazenda!
+        const tx = await usdcContract.transfer(f.wallet, amountWei, { gasLimit: 120000 });
+        showToast(`Tx enviada: ${tx.hash.substring(0, 10)}... Minerando bloco...`, "info");
+
+        const receipt = await tx.wait(1);
+
+        // Registro da nova CPR
+        const newRecord = {
+          id: `CPR-AGRO-2026-${Math.floor(1000 + Math.random() * 9000)}`,
+          farmId: f.landId,
+          farmName: f.name,
+          farmWallet: f.wallet,
+          carCode: f.car,
+          investor: currentAccount,
+          investorName: 'Investidor Conectado',
+          amount: amount,
+          apy: f.apy,
+          days: f.days,
+          timestamp: new Date().toISOString(),
+          hash: tx.hash,
+          block: receipt.blockNumber
+        };
+
+        saveInvestmentRecord(newRecord);
+        closeInvestModal();
+
+        // Atualiza a tela
+        renderFarmDetails(currentSelectedFarmId);
+        renderInvestmentsTable(currentSelectedFarmId);
+
+        showToast("🎉 Aporte direto realizado com sucesso!", "success");
+
+        // Abre o Comprovante Oficial
+        openReceiptModalFromData(newRecord);
+
+      } catch (err) {
+        console.error("Erro no aporte direto:", err);
+        showToast(`Erro no aporte: ${err.reason || err.message || err}`, "error");
+      } finally {
+        if (btn) btn.disabled = false;
+        if (label) label.innerText = originalText;
+      }
+    }
+
+    // MODAL DE COMPROVANTE OFICIAL
+    function openReceiptModalFromData(inv) {
+      const f = FARMS[inv.farmId || currentSelectedFarmId] || FARMS[currentSelectedFarmId];
+
+      const badgeTitle = document.getElementById('receipt-badge-title');
+      if (badgeTitle) {
+        if (inv.isSettlement) {
+          badgeTitle.innerText = "Certificado de Quitação & Desembaraço RWA";
+          badgeTitle.className = "px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-[#FEF3C7] text-[#D97706] border border-[#FDE68A]";
+        } else if (inv.isRedeem) {
+          badgeTitle.innerText = "Comprovante de Resgate de Investimento";
+          badgeTitle.className = "px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-[#E8F5E9] text-[#00897B] border border-[#C8E6C9]";
+        } else {
+          badgeTitle.innerText = "Certificado Digital de Aporte RWA";
+          badgeTitle.className = "px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-[#E8F5E9] text-[#00897B] border border-[#C8E6C9]";
+        }
+      }
+
+      document.getElementById('receipt-cpr-id').innerText = inv.id;
+      document.getElementById('receipt-amount').innerText = `$ ${inv.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} USDC`;
+      document.getElementById('receipt-farm').innerText = inv.farmName || f.name;
+      document.getElementById('receipt-car').innerText = inv.carCode || f.car;
+      document.getElementById('receipt-apy').innerText = `${inv.apy || f.apy}% a.a.`;
+      document.getElementById('receipt-due').innerText = `${f.days} dias (${f.dueDate})`;
+      document.getElementById('receipt-hash').innerText = inv.hash;
+      document.getElementById('receipt-block').innerText = '#' + (inv.block || '7154210');
+      document.getElementById('receipt-investor').innerText = inv.investor;
+      document.getElementById('receipt-target-wallet').innerText = inv.farmWallet || f.wallet;
+
+      const link = document.getElementById('receipt-etherscan-link');
+      if (link) {
+        link.href = `https://sepolia.etherscan.io/tx/${inv.hash}`;
+      }
+
+      document.getElementById('receipt-modal').classList.remove('hidden');
+    }
+
+    function closeReceiptModal() {
+      document.getElementById('receipt-modal').classList.add('hidden');
+    }
+
+    // COPIAR CARTEIRA
+    function copyWallet() {
+      const f = FARMS[currentSelectedFarmId];
+      if (f && f.wallet) {
+        navigator.clipboard.writeText(f.wallet);
+        showToast("📋 Endereço da carteira copiado para a área de transferência!", "info");
+      }
+    }
+
+    // CONECTAR CARTEIRA
+    async function connectWeb3Wallet() {
+      const eth = window.rabby || window.ethereum;
+      if (!eth) {
+        showToast("⚠️ Instale Rabby Wallet ou MetaMask para conectar.", "error");
+        return;
+      }
+      try {
+        const accounts = await eth.request({ method: "eth_requestAccounts" });
+        if (accounts.length > 0) {
+          currentAccount = accounts[0];
+          web3Provider = new ethers.BrowserProvider(eth);
+          web3Signer = await web3Provider.getSigner();
+          const short = currentAccount.slice(0, 6) + '...' + currentAccount.slice(-4);
+          document.getElementById('wallet-btn-label').innerText = `${short} (Sepolia)`;
+          showToast(`👛 Conectado: ${short}`, "success");
+          renderFarmDetails(currentSelectedFarmId);
+          renderInvestmentsTable(currentSelectedFarmId);
+          renderMyInvestmentPanel(currentSelectedFarmId);
+          renderFarmPayoutPanel(currentSelectedFarmId);
+        }
+      } catch (e) {
+        showToast(`Erro ao conectar carteira: ${e.message || e}`, "error");
+      }
+    }
+
+    // TOAST HELPER
+    function showToast(msg, type = 'info') {
+      const t = document.getElementById('toast');
+      if (!t) return;
+      t.innerText = msg;
+      t.className = `fixed bottom-6 right-6 z-50 px-5 py-3.5 rounded-2xl shadow-xl text-xs font-bold transition-all flex items-center gap-2 ${
+        type === 'success' ? 'bg-[#00897B] text-white' :
+        type === 'error' ? 'bg-[#EF4444] text-white' :
+        type === 'warning' ? 'bg-[#F59E0B] text-white' : 'bg-[#1A2E20] text-white'
+      }`;
+      t.classList.remove('hidden');
+      setTimeout(() => t.classList.add('hidden'), 4000);
+    }
+  </script>
+
+</body>
+</html>

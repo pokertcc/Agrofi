@@ -109,6 +109,10 @@
             <span>📊</span>
             <span class="hidden sm:inline">Risco</span>
           </a>
+          <a href="detalhes-fazenda.html" class="px-3 py-2 rounded-xl bg-white hover:bg-[#F7F9F6] border border-[#B2DFDB] text-xs font-bold text-[#00897B] transition-colors flex items-center gap-1.5 shadow-xs">
+            <span>📜</span>
+            <span class="hidden sm:inline">Dossiê CPR</span>
+          </a>
           <button onclick="connectWeb3Wallet()" id="btn-wallet-connect" class="px-4 py-2 rounded-xl bg-[#00897B] hover:bg-[#00695C] text-white font-bold text-xs transition-all shadow-md shadow-[#00897B]/25 flex items-center gap-1.5">
             <span>👛</span>
             <span id="wallet-btn-label">Conectar Carteira</span>
@@ -259,11 +263,58 @@
         </div>
       </div>
 
+      <!-- BANNER DINÂMICO DE FILTRAGEM DE FAZENDA CONECTADA (MOSTRA APENAS AS OUTRAS 3) -->
+      <div id="active-farm-filter-banner" class="hidden p-4 rounded-2xl bg-[#E0F2F1]/80 border border-[#B2DFDB] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-xs">
+        <div class="flex items-center gap-3">
+          <span class="text-2xl">🌾</span>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-[#556B5C] font-semibold">Sessão Ativa:</span>
+              <span id="active-farm-filter-name" class="font-extrabold text-[#1A2E20]">Fazenda Santa Helena</span>
+              <span id="active-farm-filter-landid" class="font-mono text-[11px] bg-white px-2 py-0.5 rounded border border-[#B2DFDB] text-[#00897B] font-bold">TALHAO-MT-001</span>
+            </div>
+            <p class="text-[11px] text-[#556B5C] mt-0.5">
+              Sua fazenda foi ocultada desta lista. Exibindo apenas as outras <strong>3 fazendas</strong> disponíveis para você investir e diversificar seu capital de safra.
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <a href="detalhes-fazenda.html" id="active-farm-details-btn" class="px-3 py-1.5 rounded-xl bg-white hover:bg-[#F7F9F6] border border-[#B2DFDB] text-[#00897B] font-bold transition-colors shadow-xs flex items-center gap-1">
+            <span>📜</span> Ver Meu Dossiê ➔
+          </a>
+          <button onclick="toggleShowAllFarms()" id="btn-toggle-show-all" class="px-3 py-1.5 rounded-xl bg-[#00897B] hover:bg-[#00695C] text-white font-bold transition-colors shadow-xs">
+            Ver Todas as 4
+          </button>
+        </div>
+      </div>
+
+      <!-- BANNER DINÂMICO: MEUS APORTES & RESGATE -->
+      <div id="my-active-investments-banner" class="hidden p-4 rounded-2xl bg-gradient-to-r from-[#FEF3C7] to-[#FFFBEB] border border-[#FDE68A] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-xs">
+        <div class="flex items-center gap-3">
+          <span class="text-2xl">💼</span>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-extrabold text-[#92400E] text-sm">Meus Aportes Ativos em Safras:</span>
+              <span id="my-active-inv-count" class="font-mono text-[11px] bg-white px-2 py-0.5 rounded border border-[#FDE68A] text-[#B45309] font-bold">0 CPRs</span>
+              <span id="my-active-inv-total" class="font-mono text-sm font-extrabold text-[#B45309]">$ 0.00 USDC</span>
+            </div>
+            <p class="text-[11px] text-[#78350F] mt-0.5">
+              Você possui capital rentabilizando em safras de parceiros. Para acompanhar rendimentos e <strong>resgatar seu investimento</strong>, acesse o Dossiê das Fazendas.
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <a href="detalhes-fazenda.html" class="px-4 py-2 rounded-xl bg-[#D97706] hover:bg-[#B45309] text-white font-bold transition-all shadow-md shadow-[#D97706]/20 flex items-center gap-1.5">
+            <span>🔓</span> Acompanhar & Resgatar ➔
+          </a>
+        </div>
+      </div>
+
       <!-- GRID COM AS 4 FAZENDAS -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="farm-cards-grid">
 
         <!-- POOL 1: FAZENDA SANTA HELENA -->
-        <div class="agro-card agro-card-hover p-6 flex flex-col justify-between space-y-5">
+        <div id="card-farm-TALHAO-MT-001" data-land-id="TALHAO-MT-001" data-wallet="0xfdb2A29d047A8f10E0BC354b2E45C7Af386D112E" class="farm-pool-card agro-card agro-card-hover p-6 flex flex-col justify-between space-y-5">
           <div class="space-y-4">
             
             <!-- HEADER DO CARD -->
@@ -329,14 +380,19 @@
 
           </div>
 
-          <!-- BOTÃO APORTAR -->
-          <button onclick="openDepositModal('Fazenda Santa Helena', 13.8, 150000, 100000)" class="w-full py-3 rounded-xl bg-[#00897B] hover:bg-[#00695C] text-white font-bold text-xs transition-all shadow-md shadow-[#00897B]/20 flex items-center justify-center gap-2">
-            <span>💵</span> Aportar Dólares (USDC) nesta Pool
-          </button>
+          <!-- BOTÕES DE APORTE E DETALHES -->
+          <div class="space-y-2 pt-1">
+            <button onclick="openDepositModal('TALHAO-MT-001', 'Fazenda Santa Helena', 13.8, 150000, 100000)" class="w-full py-3 rounded-xl bg-[#00897B] hover:bg-[#00695C] text-white font-bold text-xs transition-all shadow-md shadow-[#00897B]/20 flex items-center justify-center gap-2">
+              <span>💵</span> Aportar Dólares (USDC) nesta Fazenda
+            </button>
+            <a href="detalhes-fazenda.html?farm=TALHAO-MT-001" class="w-full py-2.5 rounded-xl bg-[#F7F9F6] hover:bg-[#E0F2F1] border border-[#E2E8E2] hover:border-[#B2DFDB] text-[#00897B] font-bold text-xs transition-colors flex items-center justify-center gap-1.5 shadow-xs">
+              <span>📜</span> Ver Detalhes, Investidores & Comprovantes ➔
+            </a>
+          </div>
         </div>
 
         <!-- POOL 2: FAZENDA BOA ESPERANÇA -->
-        <div class="agro-card agro-card-hover p-6 flex flex-col justify-between space-y-5">
+        <div id="card-farm-TALHAO-GO-002" data-land-id="TALHAO-GO-002" data-wallet="0xC7C8931F662D9064ff495508AeA2AfA15E446D80" class="farm-pool-card agro-card agro-card-hover p-6 flex flex-col justify-between space-y-5">
           <div class="space-y-4">
             
             <!-- HEADER DO CARD -->
@@ -402,14 +458,19 @@
 
           </div>
 
-          <!-- BOTÃO APORTAR -->
-          <button onclick="openDepositModal('Fazenda Boa Esperança', 12.5, 80000, 100000)" class="w-full py-3 rounded-xl bg-[#00897B] hover:bg-[#00695C] text-white font-bold text-xs transition-all shadow-md shadow-[#00897B]/20 flex items-center justify-center gap-2">
-            <span>💵</span> Aportar Dólares (USDC) nesta Pool
-          </button>
+          <!-- BOTÕES DE APORTE E DETALHES -->
+          <div class="space-y-2 pt-1">
+            <button onclick="openDepositModal('TALHAO-GO-002', 'Fazenda Boa Esperança', 12.5, 80000, 100000)" class="w-full py-3 rounded-xl bg-[#00897B] hover:bg-[#00695C] text-white font-bold text-xs transition-all shadow-md shadow-[#00897B]/20 flex items-center justify-center gap-2">
+              <span>💵</span> Aportar Dólares (USDC) nesta Fazenda
+            </button>
+            <a href="detalhes-fazenda.html?farm=TALHAO-GO-002" class="w-full py-2.5 rounded-xl bg-[#F7F9F6] hover:bg-[#E0F2F1] border border-[#E2E8E2] hover:border-[#B2DFDB] text-[#00897B] font-bold text-xs transition-colors flex items-center justify-center gap-1.5 shadow-xs">
+              <span>📜</span> Ver Detalhes, Investidores & Comprovantes ➔
+            </a>
+          </div>
         </div>
 
         <!-- POOL 3: AGROPECUÁRIA CHAPADÃO -->
-        <div class="agro-card agro-card-hover p-6 flex flex-col justify-between space-y-5">
+        <div id="card-farm-TALHAO-MT-003" data-land-id="TALHAO-MT-003" data-wallet="0xFf3b53ca866BCfEC18F1DD3cDff0A03776ab49b5" class="farm-pool-card agro-card agro-card-hover p-6 flex flex-col justify-between space-y-5">
           <div class="space-y-4">
             
             <!-- HEADER DO CARD -->
@@ -475,14 +536,19 @@
 
           </div>
 
-          <!-- BOTÃO APORTAR -->
-          <button onclick="openDepositModal('Agropecuária Chapadão', 15.2, 200000, 120000)" class="w-full py-3 rounded-xl bg-[#00897B] hover:bg-[#00695C] text-white font-bold text-xs transition-all shadow-md shadow-[#00897B]/20 flex items-center justify-center gap-2">
-            <span>💵</span> Aportar Dólares (USDC) nesta Pool
-          </button>
+          <!-- BOTÕES DE APORTE E DETALHES -->
+          <div class="space-y-2 pt-1">
+            <button onclick="openDepositModal('TALHAO-MT-003', 'Agropecuária Chapadão', 15.2, 200000, 120000)" class="w-full py-3 rounded-xl bg-[#00897B] hover:bg-[#00695C] text-white font-bold text-xs transition-all shadow-md shadow-[#00897B]/20 flex items-center justify-center gap-2">
+              <span>💵</span> Aportar Dólares (USDC) nesta Fazenda
+            </button>
+            <a href="detalhes-fazenda.html?farm=TALHAO-MT-003" class="w-full py-2.5 rounded-xl bg-[#F7F9F6] hover:bg-[#E0F2F1] border border-[#E2E8E2] hover:border-[#B2DFDB] text-[#00897B] font-bold text-xs transition-colors flex items-center justify-center gap-1.5 shadow-xs">
+              <span>📜</span> Ver Detalhes, Investidores & Comprovantes ➔
+            </a>
+          </div>
         </div>
 
         <!-- POOL 4: FAZENDA OURO VERDE -->
-        <div class="agro-card agro-card-hover p-6 flex flex-col justify-between space-y-5">
+        <div id="card-farm-TALHAO-BA-004" data-land-id="TALHAO-BA-004" data-wallet="0x35474822f1A45c0D2C0ddeb4D8Ff53fD8BD29ef7" class="farm-pool-card agro-card agro-card-hover p-6 flex flex-col justify-between space-y-5">
           <div class="space-y-4">
             
             <!-- HEADER DO CARD -->
@@ -548,11 +614,18 @@
 
           </div>
 
-          <!-- BOTÃO APORTAR -->
-          <button onclick="openDepositModal('Fazenda Ouro Verde', 14.0, 95000, 115000)" class="w-full py-3 rounded-xl bg-[#00897B] hover:bg-[#00695C] text-white font-bold text-xs transition-all shadow-md shadow-[#00897B]/20 flex items-center justify-center gap-2">
-            <span>💵</span> Aportar Dólares (USDC) nesta Pool
-          </button>
+          <!-- BOTÕES DE APORTE E DETALHES -->
+          <div class="space-y-2 pt-1">
+            <button onclick="openDepositModal('TALHAO-BA-004', 'Fazenda Ouro Verde', 14.0, 95000, 115000)" class="w-full py-3 rounded-xl bg-[#00897B] hover:bg-[#00695C] text-white font-bold text-xs transition-all shadow-md shadow-[#00897B]/20 flex items-center justify-center gap-2">
+              <span>💵</span> Aportar Dólares (USDC) nesta Fazenda
+            </button>
+            <a href="detalhes-fazenda.html?farm=TALHAO-BA-004" class="w-full py-2.5 rounded-xl bg-[#F7F9F6] hover:bg-[#E0F2F1] border border-[#E2E8E2] hover:border-[#B2DFDB] text-[#00897B] font-bold text-xs transition-colors flex items-center justify-center gap-1.5 shadow-xs">
+              <span>📜</span> Ver Detalhes, Investidores & Comprovantes ➔
+            </a>
+          </div>
         </div>
+
+      </div>
 
       </div>
 
@@ -865,7 +938,7 @@
             💵
           </div>
           <div>
-            <h3 class="font-extrabold text-base text-[#1A2E20]">Aporte em Pool de Dólar</h3>
+            <h3 class="font-extrabold text-base text-[#1A2E20]">Aporte Direto em Safra</h3>
             <p class="text-xs text-[#556B5C]" id="modal-farm-name">Fazenda Santa Helena</p>
           </div>
         </div>
@@ -874,7 +947,11 @@
 
       <div class="space-y-4 text-xs">
         
-        <div class="bg-[#F7F9F6] p-3 rounded-xl border border-[#E2E8E2] space-y-1">
+        <div class="bg-[#F7F9F6] p-3 rounded-xl border border-[#E2E8E2] space-y-1.5">
+          <div class="flex justify-between text-[#556B5C]">
+            <span>Destino (Carteira da Fazenda):</span>
+            <span class="font-mono font-bold text-[#1A2E20]" id="modal-farm-wallet">0x...</span>
+          </div>
           <div class="flex justify-between text-[#556B5C]">
             <span>Rendimento Projetado:</span>
             <span class="font-bold text-[#00897B]" id="modal-apy">13.8% APY</span>
@@ -903,7 +980,7 @@
             Cancelar
           </button>
           <button id="btn-confirm-deposit" onclick="executeDeposit()" class="px-5 py-2.5 rounded-xl bg-[#00897B] hover:bg-[#00695C] text-white font-bold text-xs shadow-md shadow-[#00897B]/25 transition-all flex items-center gap-1.5">
-            <span id="btn-confirm-deposit-label">Confirmar Aporte ➔</span>
+            <span id="btn-confirm-deposit-label">Transferir USDC & Investir ➔</span>
           </button>
         </div>
 
@@ -966,7 +1043,7 @@
         </div>
 
         <div class="flex flex-col sm:flex-row justify-between py-1.5 border-b border-[#E2E8E2] gap-1">
-          <span class="text-[#556B5C] font-sans">Contrato AgroFi (To):</span>
+          <span class="text-[#556B5C] font-sans">Destino / Contrato:</span>
           <span class="text-[#D97706] break-all text-[11px] font-bold" id="receipt-contract">0x...</span>
         </div>
 
@@ -984,14 +1061,20 @@
         </button>
 
         <div class="flex items-center gap-2">
-          <a id="receipt-etherscan-link" href="#" target="_blank" class="px-4 py-2.5 rounded-xl bg-[#E0F2F1] hover:bg-[#B2DFDB] text-[#00897B] font-bold text-xs flex items-center gap-1.5 transition-all">
+          <a id="receipt-etherscan-link" href="#" target="_blank" class="px-3.5 py-2 rounded-xl bg-[#E0F2F1] hover:bg-[#B2DFDB] text-[#00897B] font-bold text-xs flex items-center gap-1.5 transition-all">
             <span>🔍</span> Sepolia Etherscan ↗
           </a>
-          <button onclick="closeReceiptModal()" class="px-5 py-2.5 rounded-xl bg-[#00897B] hover:bg-[#00695C] text-white font-bold text-xs transition-all shadow-md shadow-[#00897B]/25">
+          <a id="receipt-dossie-link" href="detalhes-fazenda.html" class="px-3.5 py-2 rounded-xl bg-[#FEF3C7] hover:bg-[#FDE68A] text-[#D97706] font-bold text-xs flex items-center gap-1.5 transition-all">
+            <span>📜</span> Ver Dossiê da Fazenda ➔
+          </a>
+          <button onclick="closeReceiptModal()" class="px-4 py-2 rounded-xl bg-[#00897B] hover:bg-[#00695C] text-white font-bold text-xs transition-all shadow-md shadow-[#00897B]/25">
             Concluir
           </button>
         </div>
       </div>
+
+    </div>
+  </div>
 
     </div>
   </div>
@@ -1129,16 +1212,229 @@
       document.getElementById('sim-res-effective-rate').innerText = `${((interest / amountInput) * 100).toFixed(2)}% (${effectiveApy.toFixed(1)}% a.a.)`;
     }
 
-    // Modal de Depósito
-    function openDepositModal(farmName, apy, currentLoan, availableCap) {
-      document.getElementById('modal-farm-name').innerText = farmName;
+    // ==========================================
+    // METADADOS DAS FAZENDAS & FILTRAGEM DINÂMICA
+    // ==========================================
+    const FARMS_CONFIG = {
+      'TALHAO-MT-001': {
+        landId: 'TALHAO-MT-001',
+        name: 'Fazenda Santa Helena',
+        wallet: '0xfdb2A29d047A8f10E0BC354b2E45C7Af386D112E',
+        car: 'MT-5107925-8A4F1D9C3E2B4A1F8C2D3E4F5A6B7C8D',
+        apy: 13.8,
+        cardId: 'card-farm-TALHAO-MT-001'
+      },
+      'TALHAO-GO-002': {
+        landId: 'TALHAO-GO-002',
+        name: 'Fazenda Boa Esperança',
+        wallet: '0xC7C8931F662D9064ff495508AeA2AfA15E446D80',
+        car: 'GO-5218805-4B8C1D2E3F4A5B6C7D8E9F0A1B2C3D4E',
+        apy: 12.5,
+        cardId: 'card-farm-TALHAO-GO-002'
+      },
+      'TALHAO-MT-003': {
+        landId: 'TALHAO-MT-003',
+        name: 'Agropecuária Chapadão',
+        wallet: '0xFf3b53ca866BCfEC18F1DD3cDff0A03776ab49b5',
+        car: 'MT-5107875-9C0D1E2F3A4B5C6D7E8F9A0B1C2D3E4F',
+        apy: 15.2,
+        cardId: 'card-farm-TALHAO-MT-003'
+      },
+      'TALHAO-BA-004': {
+        landId: 'TALHAO-BA-004',
+        name: 'Fazenda Ouro Verde',
+        wallet: '0x35474822f1A45c0D2C0ddeb4D8Ff53fD8BD29ef7',
+        car: 'BA-2919553-7A1B2C3D4E5F6A7B8C9D0E1F2A3B4C5D',
+        apy: 14.0,
+        cardId: 'card-farm-TALHAO-BA-004'
+      }
+    };
+
+    let currentDepositLandId = 'TALHAO-MT-001';
+    let isForcingShowAll = false;
+
+    // Detecta a fazenda ativa conectada (via URL param, localStorage ou carteira Web3)
+    function getActiveConnectedFarm() {
+      // 1. URL param (?farm=TALHAO-... ou ?land_id=TALHAO-...)
+      const urlParams = new URLSearchParams(window.location.search);
+      const farmParam = urlParams.get('farm') || urlParams.get('land_id');
+      if (farmParam && FARMS_CONFIG[farmParam]) return FARMS_CONFIG[farmParam];
+
+      // 2. Sessão salva no localStorage
+      try {
+        const raw = localStorage.getItem("agrofi_active_session");
+        if (raw) {
+          const s = JSON.parse(raw);
+          if (s && s.landId && FARMS_CONFIG[s.landId]) return FARMS_CONFIG[s.landId];
+          if (s && s.wallet) {
+            const match = Object.values(FARMS_CONFIG).find(f => f.wallet.toLowerCase() === s.wallet.toLowerCase());
+            if (match) return match;
+          }
+        }
+      } catch (e) {}
+
+      // 3. Carteira Web3 conectada atualmente
+      if (currentAccount) {
+        const match = Object.values(FARMS_CONFIG).find(f => f.wallet.toLowerCase() === currentAccount.toLowerCase());
+        if (match) return match;
+      }
+
+      return null;
+    }
+
+    // Filtra as fazendas para mostrar apenas 3 (ocultando a fazenda logada)
+    function filterFarmCards(forceShowAll) {
+      if (forceShowAll !== undefined && typeof forceShowAll === 'boolean') {
+        isForcingShowAll = forceShowAll;
+      }
+      const activeFarm = getActiveConnectedFarm();
+      const banner = document.getElementById('active-farm-filter-banner');
+      const allCards = document.querySelectorAll('.farm-pool-card');
+
+      if (activeFarm && !isForcingShowAll) {
+        allCards.forEach(card => {
+          const cardLandId = card.getAttribute('data-land-id');
+          if (cardLandId === activeFarm.landId) {
+            card.classList.add('hidden');
+          } else {
+            card.classList.remove('hidden');
+          }
+        });
+
+        if (banner) {
+          const nameEl = document.getElementById('active-farm-filter-name');
+          const landEl = document.getElementById('active-farm-filter-landid');
+          const detailsBtn = document.getElementById('active-farm-details-btn');
+          const toggleBtn = document.getElementById('btn-toggle-show-all');
+          if (nameEl) nameEl.innerText = activeFarm.name;
+          if (landEl) landEl.innerText = activeFarm.landId;
+          if (detailsBtn) detailsBtn.href = `detalhes-fazenda.html?farm=${activeFarm.landId}`;
+          if (toggleBtn) toggleBtn.innerText = "Ver Todas as 4";
+          banner.classList.remove('hidden');
+        }
+      } else {
+        allCards.forEach(card => card.classList.remove('hidden'));
+        if (activeFarm && isForcingShowAll) {
+          if (banner) {
+            const toggleBtn = document.getElementById('btn-toggle-show-all');
+            if (toggleBtn) toggleBtn.innerText = "Ocultar Minha Fazenda (Ver 3)";
+            banner.classList.remove('hidden');
+          }
+        } else {
+          if (banner) banner.classList.add('hidden');
+        }
+      }
+    }
+
+    function toggleShowAllFarms() {
+      isForcingShowAll = !isForcingShowAll;
+      filterFarmCards(isForcingShowAll);
+    }
+
+    // Modal de Depósito (Suporta assinatura com landId ou nome direto)
+    function openDepositModal(arg1, arg2, arg3, arg4, arg5) {
+      let landId = 'TALHAO-MT-001';
+      let farmName = 'Fazenda Santa Helena';
+      let apy = 13.8;
+      let availableCap = 100000;
+
+      if (FARMS_CONFIG[arg1]) {
+        landId = arg1;
+        farmName = arg2;
+        apy = arg3;
+        availableCap = arg5 || 100000;
+      } else {
+        farmName = arg1;
+        apy = arg2;
+        availableCap = arg4 || 100000;
+        const match = Object.values(FARMS_CONFIG).find(f => f.name === farmName);
+        if (match) landId = match.landId;
+      }
+
+      currentDepositLandId = landId;
+      const targetFarm = FARMS_CONFIG[landId] || FARMS_CONFIG['TALHAO-MT-001'];
+
+      document.getElementById('modal-farm-name').innerText = targetFarm.name;
+      const walletEl = document.getElementById('modal-farm-wallet');
+      if (walletEl) walletEl.innerText = `${targetFarm.wallet.substring(0, 6)}...${targetFarm.wallet.substring(targetFarm.wallet.length - 4)}`;
       document.getElementById('modal-apy').innerText = apy + '% APY';
       document.getElementById('modal-cap').innerText = '$ ' + availableCap.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) + ' USDC';
+      
+      const amt = parseFloat(document.getElementById('deposit-amount').value) || 5000;
+      const previewEl = document.getElementById('modal-return-preview');
+      if (previewEl) {
+        const profit = amt * (apy / 100) * (180 / 365);
+        previewEl.innerText = `+ $ ${profit.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDC`;
+      }
+
       document.getElementById('deposit-modal').classList.remove('hidden');
     }
 
     function closeDepositModal() {
       document.getElementById('deposit-modal').classList.add('hidden');
+    }
+
+    function saveInvestmentRecord(record) {
+      try {
+        let all = [];
+        const raw = localStorage.getItem("agrofi_investments");
+        if (raw) all = JSON.parse(raw);
+        all.unshift(record);
+        localStorage.setItem("agrofi_investments", JSON.stringify(all));
+        updateInvestorBanner();
+      } catch (e) {
+        console.error("Erro ao salvar investimento:", e);
+      }
+    }
+
+    function updateInvestorBanner() {
+      const banner = document.getElementById('my-active-investments-banner');
+      if (!banner) return;
+      try {
+        const raw = localStorage.getItem("agrofi_investments");
+        if (!raw) {
+          banner.classList.add('hidden');
+          return;
+        }
+        const fakeHashes = [
+          '0x18e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9',
+          '0x62f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3',
+          '0x51c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2',
+          '0x94d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5',
+          '0x72a8c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0',
+          '0x38b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9',
+          '0x40aafc24597d28c5fca5c76b859008312ddee67bf6ae55d65a3a34972d315d28',
+          '0x159a672614b8a21f8a84c2075a6c0e816a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d'
+        ];
+        const fakeIds = ['CPR-AGRO-2026-0062', 'CPR-AGRO-2026-0021'];
+        const all = JSON.parse(raw);
+        const cleaned = all.filter(i => !fakeHashes.includes(i.hash) && !fakeIds.includes(i.id));
+        if (cleaned.length !== all.length) {
+          localStorage.setItem("agrofi_investments", JSON.stringify(cleaned));
+        }
+
+        const active = cleaned.filter(i => {
+          if (i.status === 'Resgatado') return false;
+          if (currentAccount && i.investor && i.investor.toLowerCase() === currentAccount.toLowerCase()) return true;
+          // Se nenhuma carteira conectada ainda, exibe qualquer aporte local para lembrar o usuário
+          if (!currentAccount) return true;
+          return false;
+        });
+
+        if (active.length === 0) {
+          banner.classList.add('hidden');
+          return;
+        }
+
+        const total = active.reduce((acc, curr) => acc + (parseFloat(curr.amount) || 0), 0);
+        const countEl = document.getElementById('my-active-inv-count');
+        const totalEl = document.getElementById('my-active-inv-total');
+        if (countEl) countEl.innerText = `${active.length} CPR(s) ativa(s)`;
+        if (totalEl) totalEl.innerText = `$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} USDC`;
+        banner.classList.remove('hidden');
+      } catch (e) {
+        banner.classList.add('hidden');
+      }
     }
 
     // ==========================================
@@ -1153,6 +1449,7 @@
 
     const ERC20_ABI = [
       "function balanceOf(address account) view returns (uint256)",
+      "function transfer(address to, uint256 amount) returns (bool)",
       "function mint(address to, uint256 value) external",
       "function decimals() view returns (uint8)",
       "function approve(address spender, uint256 amount) returns (bool)",
@@ -1196,6 +1493,16 @@
       const link = document.getElementById('receipt-etherscan-link');
       if (link) {
         link.href = `https://sepolia.etherscan.io/tx/${data.hash}`;
+      }
+
+      const dossieLink = document.getElementById('receipt-dossie-link');
+      if (dossieLink) {
+        if (data.farmId) {
+          dossieLink.href = `detalhes-fazenda.html?farm=${data.farmId}`;
+          dossieLink.classList.remove('hidden');
+        } else {
+          dossieLink.classList.add('hidden');
+        }
       }
 
       document.getElementById('receipt-modal').classList.remove('hidden');
@@ -1252,7 +1559,9 @@
         document.getElementById('wallet-btn-label').innerText = `${shortAddr} (Sepolia)`;
         showToast(`👛 Conectado na Sepolia: ${shortAddr}`, "success");
 
+        filterFarmCards();
         await updateWeb3Balances();
+        updateInvestorBanner();
 
         // Ticker de recompensas
         setInterval(pollRewardsAccrual, 4000);
@@ -1263,9 +1572,13 @@
               currentAccount = accs[0];
               const s = `${currentAccount.substring(0, 6)}...${currentAccount.substring(currentAccount.length - 4)}`;
               document.getElementById('wallet-btn-label').innerText = `${s} (Sepolia)`;
+              filterFarmCards();
               updateWeb3Balances();
+              updateInvestorBanner();
             } else {
               document.getElementById('wallet-btn-label').innerText = "Conectar Carteira";
+              filterFarmCards();
+              updateInvestorBanner();
             }
           });
         }
@@ -1325,9 +1638,10 @@
       } catch (err) {}
     }
 
+    // Execução do Aporte Direto (Opção 1: Envia MockUSDC direto para a outra fazenda)
     async function executeDeposit() {
       const amount = parseFloat(document.getElementById('deposit-amount').value) || 0;
-      const farm = document.getElementById('modal-farm-name').innerText;
+      const targetFarm = FARMS_CONFIG[currentDepositLandId] || FARMS_CONFIG['TALHAO-MT-001'];
       
       if (amount <= 0) {
         showToast("Digite um valor válido para aporte.", "error");
@@ -1337,55 +1651,63 @@
       if (!currentAccount || !web3Signer) {
         await connectWeb3Wallet();
         if (!currentAccount || !web3Signer) {
-          showToast("⚠️ Conecte sua carteira para assinar a transação na Sepolia!", "warning");
+          showToast("⚠️ Conecte sua carteira para assinar a transferência direta!", "warning");
           return;
         }
       }
 
       const btn = document.getElementById('btn-confirm-deposit');
       const label = document.getElementById('btn-confirm-deposit-label');
-      const originalText = label ? label.innerText : "Confirmar Aporte";
+      const originalText = label ? label.innerText : "Transferir USDC & Investir ➔";
 
       try {
         if (btn) btn.disabled = true;
-        if (label) label.innerText = "⏳ [1/2] Aprovando na Rabby...";
-        showToast(`Abra sua carteira para aprovar $ ${amount.toLocaleString('pt-BR')} USDC...`, "info");
+        if (label) label.innerText = "⏳ Assinando transferência...";
+        showToast(`Abra sua carteira para transferir $ ${amount.toLocaleString('pt-BR')} USDC diretamente para a ${targetFarm.name}...`, "info");
 
         const usdcContract = new ethers.Contract(USDC_ADDRESS, ERC20_ABI, web3Signer);
-        const lendingContract = new ethers.Contract(LENDING_POOL_ADDRESS, LENDING_POOL_ABI, web3Signer);
         const amountWei = ethers.parseUnits(amount.toString(), 6);
 
-        // 1. Checar allowance
-        const allowance = await usdcContract.allowance(currentAccount, LENDING_POOL_ADDRESS);
-        if (allowance < amountWei) {
-          const approveTx = await usdcContract.approve(LENDING_POOL_ADDRESS, amountWei);
-          showToast("Aprovação enviada! Aguardando confirmação...", "info");
-          await approveTx.wait(1);
-        }
-
-        // 2. Depositar liquidez
-        if (label) label.innerText = "⏳ [2/2] Assinando Depósito...";
-        showToast("Abra sua carteira para assinar o depósito no LendingPool...", "info");
-        const depositTx = await lendingContract.depositLiquidity(amountWei);
-        showToast(`Tx enviada: ${depositTx.hash.substring(0, 10)}... Minerando bloco...`, "info");
+        // Opção 1: Transferência P2P direta do investidor para a carteira da fazenda financiada
+        const tx = await usdcContract.transfer(targetFarm.wallet, amountWei, { gasLimit: 120000 });
+        showToast(`Tx enviada: ${tx.hash.substring(0, 10)}... Minerando bloco...`, "info");
         
-        const receipt = await depositTx.wait(1);
+        const receipt = await tx.wait(1);
         closeDepositModal();
         await updateWeb3Balances();
 
-        // 3. Exibir Comprovante Oficial
+        // Salvar registro de investimento no localStorage para alimentar detalhes-fazenda.html
+        const newRecord = {
+          id: `CPR-AGRO-2027-${Math.floor(1000 + Math.random() * 9000)}`,
+          farmId: targetFarm.landId,
+          farmName: targetFarm.name,
+          farmWallet: targetFarm.wallet,
+          carCode: targetFarm.car,
+          investor: currentAccount,
+          investorName: 'Investidor Conectado Web3',
+          amount: amount,
+          apy: targetFarm.apy,
+          days: 180,
+          timestamp: new Date().toISOString(),
+          hash: tx.hash,
+          block: receipt.blockNumber
+        };
+        saveInvestmentRecord(newRecord);
+
+        // Exibir Comprovante Oficial com link para o Dossiê
         showTransactionReceipt({
-          title: `Aporte em Pool - ${farm}`,
+          title: `Aporte Direto de Safra - ${targetFarm.name}`,
           amount: `$ ${amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} USDC`,
-          hash: depositTx.hash,
+          hash: tx.hash,
           block: receipt.blockNumber,
           from: currentAccount,
-          contract: LENDING_POOL_ADDRESS,
-          gasUsed: receipt.gasUsed ? receipt.gasUsed.toString() : "145000"
+          contract: targetFarm.wallet,
+          gasUsed: receipt.gasUsed ? receipt.gasUsed.toString() : "65000",
+          farmId: targetFarm.landId
         });
 
       } catch (err) {
-        console.error("Erro no aporte Web3:", err);
+        console.error("Erro no aporte direto:", err);
         showToast(`Falha no aporte: ${err.reason || err.message || err}`, "error");
       } finally {
         if (btn) btn.disabled = false;
@@ -1430,7 +1752,7 @@
 
         if (label) label.innerText = "⏳ [2/2] Depositando...";
         showToast("Abra sua carteira para confirmar o Stake...", "info");
-        const stakeTx = await stakingContract.stake(amountWei);
+        const stakeTx = await stakingContract.stake(amountWei, { gasLimit: 250000 });
         showToast(`Stake enviado: ${stakeTx.hash.substring(0, 10)}... Aguardando mineração...`, "info");
         
         const receipt = await stakeTx.wait(1);
@@ -1464,7 +1786,7 @@
 
       const btn = document.getElementById('btn-claim-rewards');
       const label = document.getElementById('btn-claim-label');
-      const originalText = label ? label.innerText : "Colher $AGRO";
+      const originalText = label ? label.innerText : "Colher $AGRO (Claim)";
 
       try {
         if (btn) btn.disabled = true;
@@ -1472,7 +1794,20 @@
         showToast("Abra sua carteira para assinar a colheita de $AGRO...", "info");
 
         const stakingContract = new ethers.Contract(STAKING_REWARDS_ADDRESS, STAKING_REWARDS_ABI, web3Signer);
-        const tx = await stakingContract.claimRewards();
+
+        // Obter recompensas acumuladas para exibir no comprovante
+        let earnedFormatted = "Tokens $AGRO";
+        try {
+          const earnedWei = await stakingContract.earned(currentAccount);
+          if (earnedWei === 0n) {
+            showToast("Você ainda não possui recompensas em $AGRO acumuladas para colher.", "warning");
+            return;
+          }
+          earnedFormatted = `+${parseFloat(ethers.formatUnits(earnedWei, 18)).toFixed(4)} $AGRO`;
+        } catch (_) {}
+
+        // Envia a transação de claimRewards com gasLimit seguro
+        const tx = await stakingContract.claimRewards({ gasLimit: 250000 });
         showToast(`Tx enviada: ${tx.hash.substring(0, 10)}... Minerando bloco...`, "info");
         
         const receipt = await tx.wait(1);
@@ -1480,12 +1815,12 @@
 
         showTransactionReceipt({
           title: "Colheita de Recompensas ($AGRO Mint)",
-          amount: "Tokens $AGRO creditados",
+          amount: earnedFormatted,
           hash: tx.hash,
           block: receipt.blockNumber,
           from: currentAccount,
           contract: STAKING_REWARDS_ADDRESS,
-          gasUsed: receipt.gasUsed ? receipt.gasUsed.toString() : "85000"
+          gasUsed: receipt.gasUsed ? receipt.gasUsed.toString() : "120000"
         });
 
       } catch (err) {
@@ -1513,7 +1848,7 @@
 
         const valUSDC = parseFloat(ethers.formatUnits(stakedWei, 6)).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
         showToast(`Abra sua carteira para assinar a retirada de $ ${valUSDC} USDC...`, "info");
-        const tx = await stakingContract.withdraw(stakedWei);
+        const tx = await stakingContract.withdraw(stakedWei, { gasLimit: 250000 });
         const receipt = await tx.wait(1);
 
         await updateWeb3Balances();
@@ -1649,6 +1984,8 @@
 
     // Inicialização ao carregar
     window.addEventListener('DOMContentLoaded', async () => {
+      filterFarmCards();
+      updateInvestorBanner();
       runSimulation();
       // Auto-conexão se a carteira já estiver autorizada
       const eth = window.rabby || window.ethereum;
